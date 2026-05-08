@@ -2,7 +2,7 @@ import { BeVietnamPro_400Regular } from '@expo-google-fonts/be-vietnam-pro/400Re
 import { BeVietnamPro_600SemiBold } from '@expo-google-fonts/be-vietnam-pro/600SemiBold';
 import { Newsreader_700Bold } from '@expo-google-fonts/newsreader/700Bold';
 import { SplineSans_500Medium } from '@expo-google-fonts/spline-sans/500Medium';
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
+import { DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { useFonts } from 'expo-font';
 
 
@@ -10,8 +10,6 @@ import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
 import 'react-native-reanimated';
-
-import { useColorScheme } from '@/components/useColorScheme';
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -54,10 +52,8 @@ export default function RootLayout() {
 }
 
 function RootLayoutNav() {
-  const colorScheme = useColorScheme();
-
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+    <ThemeProvider value={DefaultTheme}>
       <Stack>
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen name="modal" options={{ presentation: 'modal' }} />
