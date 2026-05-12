@@ -2,6 +2,7 @@ import { ScrollView, StyleSheet, useWindowDimensions } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Text, View } from '@/components/Themed';
+import { logEntries, NightLogEntry } from '@/data/logEntries';
 
 const contentPadding = 20;
 const monthSectionPadding = 16;
@@ -12,27 +13,51 @@ const bodyFontFamily = 'BeVietnamPro_400Regular';
 const bodyStrongFontFamily = 'BeVietnamPro_600SemiBold';
 const labelFontFamily = 'SplineSans_500Medium';
 
-const monthSections = [
-  {
-    id: 'jan-2026',
-    title: 'Jan 2026',
-    logs: [
-      { id: 'jan-1', day: '03', weekday: 'Sat', title: 'Pub Night', time: '8:15 PM' },
-      { id: 'jan-2', day: '06', weekday: 'Tue', title: 'Club 601', time: '11:40 PM' },
-      { id: 'jan-3', day: '11', weekday: 'Sun', title: 'Birthday Drinks', time: '9:10 PM' },
-      { id: 'jan-4', day: '18', weekday: 'Sun', title: 'Karaoke Night', time: '10:45 PM' },
-    ],
-  },
-  {
-    id: 'feb-2026',
-    title: 'Feb 2026',
-    logs: [
-      { id: 'feb-1', day: '02', weekday: 'Mon', title: 'Post-Work Drinks', time: '7:50 PM' },
-      { id: 'feb-2', day: '09', weekday: 'Mon', title: 'The George', time: '8:20 PM' },
-      { id: 'feb-3', day: '14', weekday: 'Sat', title: 'Valentines Out', time: '8:30 PM' },
-    ],
-  },
-];
+
+// Turns the stored date string into the display pieces each log card needs.
+const formatLogDate = (date: string) => {
+  const [year, month, day] = date.split('-').map(Number);
+  const localDate = new Date(year, month - 1, day);
+
+  return {
+    day: String(day).padStart(2, '0'),
+    weekday: localDate.toLocaleDateString('en-US', { weekday: 'short' }),
+    monthTitle: localDate.toLocaleDateString('en-US', { 
+      month: 'short',
+      year: 'numeric',
+    })
+  };
+};
+
+// Takes the raw log entries, sorts newest first, formats their dates,
+// then groups them into month sections for the screen to render.
+const monthSections = Object.values(
+  [...logEntries]
+  .sort((a, b) => b.date.localeCompare(a.date))
+  .reduce<Record<string, {
+    id: string;
+    title: string;
+    logs: Array<NightLogEntry & ReturnType<typeof formatLogDate>>;
+  }>>((sections, log) => {
+    const formattedDate = formatLogDate(log.date);
+    const sectionId = formattedDate.monthTitle.toLowerCase().replace(' ', '-');
+
+    if (!sections[sectionId]) {
+      sections[sectionId] = {
+        id: sectionId,
+        title: formattedDate.monthTitle,
+        logs: [],
+      };
+    }
+
+    sections[sectionId].logs.push({
+      ...log,
+      ...formattedDate,
+    });
+
+    return sections;
+  }, {})
+);
 
 export default function TabOneScreen() {
   const insets = useSafeAreaInsets();
