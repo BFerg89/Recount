@@ -58,6 +58,13 @@ const monthSections = Object.values(
   }, {})
 );
 
+const getCardRotation = (title: string) => {
+  const rotations = ['-2deg', '-1deg', '-0.5deg', '0.5deg', '1deg', '2deg'];
+  const charTotal = title.split('').reduce((total, char) => total + char.charCodeAt(0), 0);
+
+  return rotations[charTotal % rotations.length];
+};
+
 export default function TabOneScreen() {
   const insets = useSafeAreaInsets();
   const { width } = useWindowDimensions();
@@ -72,7 +79,13 @@ export default function TabOneScreen() {
             <Text style={styles.monthTitle}>{month.title}</Text>
             <View style={styles.logGrid}>
               {month.logs.map((log) => (
-                <View key={log.id} style={[styles.logCard, { width: logCardWidth }]}>
+                <View 
+                  key={log.id} 
+                  style={[
+                    styles.logCard,
+                    { width: logCardWidth },
+                    { transform: [{ rotate: getCardRotation(log.title) }] }
+                  ]}>
                   <View style={styles.cardDate}>
                     <Text style={styles.cardDay}>{log.day}</Text>
                     <Text style={styles.cardWeekday}>{log.weekday}</Text>
@@ -109,7 +122,6 @@ const styles = StyleSheet.create({
   content: {
     padding: contentPadding,
     gap: 16,
-    backgroundColor: "green",
   },
   monthSection: {
     gap: 16,
@@ -118,7 +130,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'transparent',
   },
   monthTitle: {
-    fontFamily: headlineFontFamily,
+    fontFamily: bodyStrongFontFamily,
     fontSize: 22,
   },
   logGrid: {
@@ -130,9 +142,10 @@ const styles = StyleSheet.create({
   logCard: {
     aspectRatio: 0.85,
     justifyContent: 'space-between',
-    borderRadius: 8,
+    borderRadius: 6,
     padding: 16,
     backgroundColor: '#fff',
+    boxShadow: '0 6px 18px rgba(0, 0, 0, 0.3)',
   },
   cardDate: {
     gap: 2,
