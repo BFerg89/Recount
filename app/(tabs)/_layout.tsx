@@ -47,9 +47,9 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="two"
+        name="create"
         options={{
-          title: 'Tab Two',
+          title: 'Create Log',
           tabBarIcon: ({ color }) => (
             <SymbolView
               name={{
@@ -66,7 +66,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="profile"
         options={{
-          title: 'Profile Tab',
+          title: 'Profile',
           tabBarIcon: ({ color }) => (
             <SymbolView
               name={{

@@ -1,12 +1,11 @@
-import { ScrollView, StyleSheet, useWindowDimensions } from 'react-native';
+import { ScrollView, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { Text, View } from '@/components/Themed';
 import { logEntries, NightLogEntry } from '@/data/logEntries';
 
-const contentPadding = 20;
+const contentPadding = 16;
 const monthSectionPadding = 16;
-const gridGap = 12;
+const gridGap = 16;
 const screenBackgroundColor = '#F5F2EA';
 const headlineFontFamily = 'Newsreader_700Bold';
 const bodyFontFamily = 'BeVietnamPro_400Regular';
@@ -67,9 +66,7 @@ export default function TabOneScreen() {
   return (
     <View style={[styles.screen, { paddingTop: insets.top + 12 }]}>
       <Text style={styles.title}>Logs</Text>
-      <ScrollView
-        style={styles.contentContainer}
-        contentContainerStyle={styles.content}>
+      <ScrollView style={styles.contentContainer} contentContainerStyle={styles.content}>
         {monthSections.map((month) => (
           <View key={month.id} style={styles.monthSection}>
             <Text style={styles.monthTitle}>{month.title}</Text>
@@ -82,7 +79,7 @@ export default function TabOneScreen() {
                   </View>
                   <View style={styles.cardDetails}>
                     <Text style={styles.cardTitle}>{log.title}</Text>
-                    <Text style={styles.cardTime}>{log.time}</Text>
+                    <Text style={styles.cardLocation}>{log.location}</Text>
                   </View>
                 </View>
               ))}
@@ -97,11 +94,11 @@ export default function TabOneScreen() {
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    gap: 20,
+    gap: 8,
     backgroundColor: screenBackgroundColor,
   },
   title: {
-    paddingHorizontal: 20,
+    paddingHorizontal: 24,
     fontFamily: headlineFontFamily,
     fontSize: 32,
   },
@@ -110,12 +107,12 @@ const styles = StyleSheet.create({
     backgroundColor: screenBackgroundColor,
   },
   content: {
-    paddingHorizontal: contentPadding,
-    paddingVertical: 20,
-    gap: 20,
+    padding: contentPadding,
+    gap: 16,
+    backgroundColor: "green",
   },
   monthSection: {
-    gap: 14,
+    gap: 16,
     borderRadius: 8,
     padding: monthSectionPadding,
     backgroundColor: 'transparent',
@@ -134,7 +131,7 @@ const styles = StyleSheet.create({
     aspectRatio: 0.85,
     justifyContent: 'space-between',
     borderRadius: 8,
-    padding: 14,
+    padding: 16,
     backgroundColor: '#fff',
   },
   cardDate: {
@@ -158,7 +155,7 @@ const styles = StyleSheet.create({
     fontFamily: bodyStrongFontFamily,
     fontSize: 16,
   },
-  cardTime: {
+  cardLocation: {
     fontFamily: labelFontFamily,
     fontSize: 14,
     color: '#4b5563',
