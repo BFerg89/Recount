@@ -1,7 +1,10 @@
 import DateTimePicker from '@expo/ui/datetimepicker';
+import { SymbolView } from 'expo-symbols';
 import { useState } from 'react';
 import { ScrollView, StyleSheet, Text, TextInput, useWindowDimensions, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+
+import { placeholderPeople } from '@/data/people';
 
 const gridGap = 16;
 const contentPadding = 16;
@@ -70,7 +73,21 @@ export default function CreateScreen() {
           </ScrollView>
         </View>
         <View style={[styles.section, styles.peopleSection]}>
-          <Text style={styles.sectionLabel}>People</Text>
+          <Text style={styles.sectionLabel}>{placeholderPeople.length} People:</Text>
+            <View style={styles.peopleGrid}>
+              {placeholderPeople.map((person) => (
+                <View
+                  key={person.id}
+                  style={styles.person}
+                >
+                  <SymbolView name={{
+                    ios: 'person.circle',
+                    android: 'person',
+                  }}/>
+                  <Text style={styles.personText}>{person.displayName}</Text>
+                </View>
+              ))}
+            </View>
         </View>
       </ScrollView>
     </View>
@@ -128,20 +145,17 @@ const styles = StyleSheet.create({
     width: 140,
   },
   section: {
-    flex: 1,
     padding: sectionPadding,
     justifyContent: 'center',
     alignItems: 'center',
-  },
-  timelineSection: {
     borderWidth: 1,
     borderColor: 'black',
+  },
+  timelineSection: {
   },
   notesSection: {
     alignItems: 'stretch',
     justifyContent: 'flex-start',
-    borderWidth: 1,
-    borderColor: 'black',
   },
   noteCardsScroll: {
     flex: 1,
@@ -157,11 +171,32 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
   },
   peopleSection: {
-    borderWidth: 1,
-    borderColor: 'black',
+    justifyContent: 'flex-start',
+    alignItems: 'flex-start',
+  },
+  peopleGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-evenly',
+    gap: 8,
+    rowGap: 12,
+    paddingVertical: 8,
+  },
+  person: {
+    flexDirection: 'row',
+    backgroundColor: 'rgba(80, 74, 69, 0.25)',
+    borderRadius: 6,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: 2,
+    paddingHorizontal: 8,
+  },
+  personText: {
+    fontFamily: labelFontFamily,
+    fontSize: 16,
   },
   sectionLabel: {
-    fontFamily: labelFontFamily,
+    fontFamily: bodyFontFamily,
     fontSize: 16,
     color: '#111827',
   },
