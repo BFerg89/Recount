@@ -1,10 +1,12 @@
 import DateTimePicker from '@expo/ui/datetimepicker';
 import { SymbolView } from 'expo-symbols';
-import { useState } from 'react';
-import { ScrollView, StyleSheet, Text, TextInput, useWindowDimensions, View } from 'react-native';
+import { useMemo, useRef, useState } from 'react';
+import { Pressable, ScrollView, StyleSheet, Text, TextInput, useWindowDimensions, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import BottomSheet, { BottomSheetView } from '@gorhom/bottom-sheet';
 
 import { placeholderPeople } from '@/data/people';
+import { promptAnswers } from '@/data/promptedNotes';
 
 const gridGap = 16;
 const contentPadding = 16;
@@ -12,11 +14,9 @@ const sectionPadding = 16;
 const visibleNoteCards = 2.5;
 const screenBackgroundColor = '#F5F2EA';
 const headlineFontFamily = 'Newsreader_700Bold';
-const bodyFontFamily = 'BeVietnamPro_600SemiBold';
+const bodyFontFamily = 'BeVietnamPro_400Regular';
 const bodyStrongFontFamily = 'BeVietnamPro_600SemiBold';
 const labelFontFamily = 'SplineSans_500Medium';
-
-const testNums: number[] = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 
 export default function CreateScreen() {
   const insets = useSafeAreaInsets();
@@ -26,6 +26,10 @@ export default function CreateScreen() {
   const [date, setDate] = useState(new Date());
   const [title, setTitle] = useState('');
   const [location, setLocation] = useState('');
+  const [noteAnswers, setNoteAnswers] = useState(() => new Map(promptAnswers));
+
+  const addPeopleSheetRef = useRef<BottomSheet>(null);
+  const addPeopleSheetSnapPoints = useMemo(() => ['65'], []);
 
   return (
     <View style={[styles.screen, { paddingTop: insets.top + 12 }]}>
@@ -65,9 +69,22 @@ export default function CreateScreen() {
             showsHorizontalScrollIndicator={false}
             style={styles.noteCardsScroll}
             contentContainerStyle={styles.noteCardsContent}>
-            {testNums.map((num) => (
-              <View key={num} style={[styles.noteCard, { width: noteCardWidth }]}>
-                <Text>{num}</Text>
+            {Array.from(noteAnswers.entries()).map(([prompt, answer]) => (
+              <View key={prompt} style={[styles.noteCard, { width: noteCardWidth }]}>
+                <Text style={styles.notePrompt}>{prompt}</Text>
+
+                <TextInput
+                  value={answer}
+                  onChangeText={(text) => {
+                    setNoteAnswers((previousAnswers) => {
+                      const updatedAnswers = new Map(previousAnswers);
+                      updatedAnswers.set(prompt, text);
+                      return updatedAnswers;
+                    });
+                  }}
+                  placeholder="Enter note..."
+                  multiline
+                  style={styles.noteAnswer}/>
               </View>
             ))}
           </ScrollView>
@@ -88,8 +105,33 @@ export default function CreateScreen() {
                 </View>
               ))}
             </View>
+            <Pressable
+              style={({ pressed }) => [
+                styles.addPersonButton,
+                pressed && styles.addPersonButtonPressed,
+              ]}
+              onPress={() => addPeopleSheetRef.current?.expand()}>
+              <SymbolView name={{
+                ios: 'plus.circle',
+                android: 'add',
+              }}/>
+              <Text style={styles.addPersonText}>Add person</Text>
+            </Pressable>
         </View>
       </ScrollView>
+
+      <BottomSheet
+        ref={addPeopleSheetRef}
+        index={-1}
+        snapPoints={addPeopleSheetSnapPoints}
+        enablePanDownToClose
+        backgroundStyle={styles.addPeopleSheetBackground}
+      >
+        <BottomSheetView
+          style={styles.addPeopleSheetContent}>
+          <Text>Add Person Sheet</Text>
+        </BottomSheetView>
+      </BottomSheet>
     </View>
   );
 }
@@ -149,13 +191,15 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: 'black',
+    borderColor: 'grey',
+    borderRadius: 8,
   },
   timelineSection: {
   },
   notesSection: {
     alignItems: 'stretch',
     justifyContent: 'flex-start',
+    minHeight: 172,
   },
   noteCardsScroll: {
     flex: 1,
@@ -165,10 +209,15 @@ const styles = StyleSheet.create({
   },
   noteCard: {
     height: '100%',
-    justifyContent: 'space-between',
     borderRadius: 8,
     padding: 16,
     backgroundColor: '#fff',
+  },
+  notePrompt: {
+    fontFamily: bodyStrongFontFamily,
+  },
+  noteAnswer: {
+    fontFamily: bodyFontFamily,
   },
   peopleSection: {
     justifyContent: 'flex-start',
@@ -195,9 +244,37 @@ const styles = StyleSheet.create({
     fontFamily: labelFontFamily,
     fontSize: 16,
   },
-  sectionLabel: {
-    fontFamily: bodyFontFamily,
+  addPersonButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    alignSelf: 'stretch',
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: 'rgba(17, 24, 39, 0.35)',
+    paddingVertical: 2,
+    paddingHorizontal: 8,
+  },
+  addPersonButtonPressed: {
+    backgroundColor: 'rgba(80, 74, 69, 0.16)',
+    borderColor: 'rgba(17, 24, 39, 0.55)',
+    transform: [{ scale: 0.98 }],
+  },
+  addPersonText: {
+    fontFamily: labelFontFamily,
     fontSize: 16,
     color: '#111827',
   },
+  sectionLabel: {
+    fontFamily: bodyStrongFontFamily,
+    fontSize: 16,
+    color: '#111827',
+  },
+  addPeopleSheetContent: {
+    padding: 24,
+    alignItems: 'center',
+  },
+  addPeopleSheetBackground: {
+    backgroundColor: '#ddd6c4',
+  }
 });
