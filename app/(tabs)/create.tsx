@@ -28,7 +28,8 @@ export default function CreateScreen() {
   const [noteAnswers, setNoteAnswers] = useState(() => new Map(promptAnswers));
 
   const addPeopleSheetRef = useRef<BottomSheet>(null);
-  const addPeopleSheetSnapPoints = useMemo(() => ['55'], []);
+  const bottomSheetSnapPoints = useMemo(() => ['55'], []);
+  const addMomentSheetRef = useRef<BottomSheet>(null);
 
   return (
     <View style={[styles.screen, { paddingTop: insets.top + 12 }]}>
@@ -105,7 +106,8 @@ export default function CreateScreen() {
               </View>
             ))}
             <Pressable
-              style={styles.addMomentButton}>
+              style={styles.addMomentButton}
+              onPress={() => addMomentSheetRef.current?.expand()}>
               {({ pressed }) => (
                 <>
                   <SymbolView name={{
@@ -154,13 +156,26 @@ export default function CreateScreen() {
       <BottomSheet
         ref={addPeopleSheetRef}
         index={-1}
-        snapPoints={addPeopleSheetSnapPoints}
+        snapPoints={bottomSheetSnapPoints}
         enablePanDownToClose
         backgroundStyle={styles.addPeopleSheetBackground}
       >
         <BottomSheetView
           style={styles.addPeopleSheetContent}>
           <Text>Add Person Sheet</Text>
+        </BottomSheetView>
+      </BottomSheet>
+
+      <BottomSheet
+        ref={addMomentSheetRef}
+        index={-1}
+        snapPoints={bottomSheetSnapPoints}
+        enablePanDownToClose
+        backgroundStyle={styles.addMomentSheetBackground}
+      >
+        <BottomSheetView
+          style={styles.addMomentSheetContent}>
+          <Text>Add Moment Sheet</Text>
         </BottomSheetView>
       </BottomSheet>
     </View>
@@ -397,6 +412,14 @@ const styles = StyleSheet.create({
     backgroundColor: colors.paperDeep,
   },
   addPeopleSheetBackground: {
+    backgroundColor: colors.paperDeep,
+  },
+  addMomentSheetContent: {
+    padding: spacing.s5,
+    alignItems: 'center',
+    backgroundColor: colors.paperDeep,
+  },
+  addMomentSheetBackground: {
     backgroundColor: colors.paperDeep,
   },
 });
