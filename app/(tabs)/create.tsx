@@ -6,15 +6,21 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import BottomSheet, { BottomSheetTextInput, BottomSheetView } from '@gorhom/bottom-sheet';
 
 import { nightLogTheme } from '@/constants/NightLogTheme';
-import { placeholderPeople } from '@/data/people';
-import { promptAnswers } from '@/data/promptedNotes';
-import { placeholderMoments } from '@/data/timelineMoments';
+
+import type { DraftPerson } from '@/data/people';
+
+import { createEmptyPromptedNoteAnswers, promptedNoteDefinitions } from '@/data/promptedNotes';
+
+import type { DraftTimelineMoment } from '@/data/timelineMoments';
+import { useNightLogs } from '@/context/NightLogsContext';
+import type { NightLogEntry, NightLogPromptedNote } from '@/data/logEntries';
 
 const { colors, fonts, layout, radius, shadows, spacing, type } = nightLogTheme;
 
 const gridGap = spacing.s4;
 
 export default function CreateScreen() {
+  const { addNightLog } = useNightLogs();
   const insets = useSafeAreaInsets();
   const { width } = useWindowDimensions();
   const noteCardWidth = Math.min(
@@ -25,10 +31,68 @@ export default function CreateScreen() {
   const [date, setDate] = useState(new Date());
   const [title, setTitle] = useState('');
   const [location, setLocation] = useState('');
-  const [noteAnswers, setNoteAnswers] = useState(() => new Map(promptAnswers));
+  const [noteAnswers, setNoteAnswers] = useState(createEmptyPromptedNoteAnswers);
+
+  const [people, setPeople] = useState<DraftPerson[]>([]);
+  const [newPersonName, setNewPersonName] = useState('');
+
+  const [moments, setMoments] = useState<DraftTimelineMoment[]>([]);
+  const [newMomentTitle, setNewMomentTitle] = useState('');
+  const [newMomentTime, setNewMomentTime] = useState('');
 
   const addPeopleSheetRef = useRef<BottomSheet>(null);
   const addMomentSheetRef = useRef<BottomSheet>(null);
+
+  const canSaveDraft = title.trim().length > 0 && location.trim().length > 0;
+
+  const resetCreateForm = () => {
+    setDate(new Date());
+    setTitle('');
+    setLocation('');
+    setNoteAnswers(createEmptyPromptedNoteAnswers());
+    setPeople([]);
+    setNewPersonName('');
+    setMoments([]);
+    setNewMomentTitle('');
+    setNewMomentTime('');
+  };
+
+  //TODO: Think about handling prompted notes better.
+  const handleSaveDraft = () => {
+    if (!canSaveDraft) {
+      return;
+    }
+
+    const createdAt = Date.now();
+    const promptedNotes: NightLogPromptedNote[] = promptedNoteDefinitions
+      .map((prompt) => {
+        const text = noteAnswers[prompt.promptType].trim();
+
+        if (!text) {
+          return null;
+        }
+
+        return {
+          id: `draft-note-${createdAt}-${prompt.promptType}`,
+          promptType: prompt.promptType,
+          text,
+        };
+      })
+      .filter((note): note is NightLogPromptedNote => note !== null);
+
+    const draftNightLog: NightLogEntry = {
+      id: `draft-night-log-${createdAt}`,
+      title: title.trim(),
+      date,
+      generalLocation: location.trim(),
+      people,
+      timelineMoments: moments,
+      promptedNotes,
+    };
+
+    addNightLog(draftNightLog);
+    resetCreateForm();
+  };
 
   return (
     <View style={[styles.screen, { paddingTop: insets.top + 12 }]}>
@@ -60,9 +124,9 @@ export default function CreateScreen() {
           </View>
         </View>
         <View style={styles.peopleSection}>
-          <Text style={styles.sectionLabel}>Who was there · {placeholderPeople.length}</Text>
+          <Text style={styles.sectionLabel}>Who was there · {people.length}</Text>
             <View style={styles.peopleGrid}>
-              {placeholderPeople.map((person) => (
+              {people.map((person) => (
                 <View
                   key={person.id}
                   style={styles.person}
@@ -93,10 +157,10 @@ export default function CreateScreen() {
         <View style={styles.timelineSection}>
           <View style={styles.timelineHeader}>
             <Text style={styles.sectionLabel}>Moments</Text>
-            <Text style={styles.sectionLabel}>{placeholderMoments.length} added</Text>
+            <Text style={styles.sectionLabel}>{moments.length} added</Text>
           </View>
           <View style={styles.momentListCard}>
-            {placeholderMoments.map((moment) => (
+            {moments.map((moment) => (
               <View
                 key={moment.id}
                 style={styles.momentRow}>
@@ -129,17 +193,18 @@ export default function CreateScreen() {
             showsHorizontalScrollIndicator={false}
             style={styles.noteCardsScroll}
             contentContainerStyle={styles.noteCardsContent}>
-            {Array.from(noteAnswers.entries()).map(([prompt, answer]) => (
-              <View key={prompt} style={[styles.noteCard, { width: noteCardWidth }]}>
-                <Text style={styles.notePrompt}>{prompt}</Text>
+            {promptedNoteDefinitions.map((prompt) => (
+              <View key={prompt.promptType} style={[styles.noteCard, { width: noteCardWidth }]}>
+                <Text style={styles.notePrompt}>{prompt.label}</Text>
 
                 <TextInput
-                  value={answer}
+                  value={noteAnswers[prompt.promptType]}
                   onChangeText={(text) => {
                     setNoteAnswers((previousAnswers) => {
-                      const updatedAnswers = new Map(previousAnswers);
-                      updatedAnswers.set(prompt, text);
-                      return updatedAnswers;
+                      return {
+                        ...previousAnswers,
+                        [prompt.promptType]: text,
+                      };
                     });
                   }}
                   placeholder="Enter note..."
@@ -151,6 +216,28 @@ export default function CreateScreen() {
         </View>
 
       </ScrollView>
+
+      <View style={styles.saveBar}>
+        <Pressable
+          disabled={!canSaveDraft}
+          accessibilityState={{ disabled: !canSaveDraft }}
+          style={({ pressed }) => [
+            styles.saveButton,
+            pressed && canSaveDraft && styles.saveButtonPressed,
+            !canSaveDraft && styles.saveButtonDisabled,
+          ]} 
+          onPress={handleSaveDraft}>
+          <SymbolView
+            name={{
+              ios: 'square.and.arrow.down',
+              android: 'save',
+            }}
+            tintColor={colors.paperCard}
+            size={18}
+          />
+          <Text style={styles.saveButtonText}>Save draft</Text>
+        </Pressable>
+      </View>
 
       <BottomSheet
         ref={addPeopleSheetRef}
@@ -171,6 +258,8 @@ export default function CreateScreen() {
             <View style={styles.sheetField}>
               <Text style={styles.sheetFieldLabel}>Name</Text>
               <BottomSheetTextInput
+                value={newPersonName}
+                onChangeText={setNewPersonName}
                 placeholder="Name..."
                 placeholderTextColor={colors.inkSoft}
                 autoCapitalize="words"
@@ -186,7 +275,22 @@ export default function CreateScreen() {
               styles.sheetPrimaryButton,
               pressed && styles.sheetPrimaryButtonPressed,
             ]}
-            onPress={() => {}}>
+            onPress={() => {
+              const trimmedName = newPersonName.trim();
+
+              if (!trimmedName) {
+                return;
+              }
+
+              const newPerson: DraftPerson = {
+                id: `draft-person-${Date.now()}`,
+                displayName: trimmedName,
+              };
+
+              setPeople((currentPeople) => [...currentPeople, newPerson]);
+              setNewPersonName('');
+              addPeopleSheetRef.current?.close();
+            }}>
             <SymbolView
               name={{
                 ios: 'plus.circle.fill',
@@ -219,6 +323,8 @@ export default function CreateScreen() {
             <View style={styles.sheetField}>
               <Text style={styles.sheetFieldLabel}>Title</Text>
               <BottomSheetTextInput
+                value={newMomentTitle}
+                onChangeText={setNewMomentTitle}
                 placeholder="Where did the night go next?"
                 placeholderTextColor={colors.inkSoft}
                 autoCapitalize="sentences"
@@ -231,6 +337,8 @@ export default function CreateScreen() {
             <View style={styles.sheetField}>
               <Text style={styles.sheetFieldLabel}>Approx time</Text>
               <BottomSheetTextInput
+                value={newMomentTime}
+                onChangeText={setNewMomentTime}
                 placeholder="10:45 PM"
                 placeholderTextColor={colors.inkSoft}
                 keyboardType="numbers-and-punctuation"
@@ -246,7 +354,26 @@ export default function CreateScreen() {
               styles.sheetPrimaryButton,
               pressed && styles.sheetPrimaryButtonPressed,
             ]}
-            onPress={() => {}}>
+            onPress={() => {
+              const trimmedTitle = newMomentTitle.trim();
+              const trimmedTime = newMomentTime.trim();
+
+              // Only ignore empty titles as a time is not required.
+              if (!trimmedTitle) {
+                return;
+              }
+
+              const newMoment: DraftTimelineMoment = {
+                id: `draft-moment-${Date.now()}`,
+                title: trimmedTitle,
+                approxTime: trimmedTime || null,
+              };
+
+              setMoments((currentMoments) => [...currentMoments, newMoment]);
+              setNewMomentTitle('');
+              setNewMomentTime('');
+              addMomentSheetRef.current?.close();
+            }}>
             <SymbolView
               name={{
                 ios: 'plus.circle.fill',
@@ -266,11 +393,11 @@ export default function CreateScreen() {
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    gap: spacing.s3,
     backgroundColor: colors.paper,
   },
   contentContainer: {
     flex: 1,
+    marginTop: spacing.s3,
   },
   title: {
     paddingHorizontal: layout.mobileGutter,
@@ -566,6 +693,36 @@ const styles = StyleSheet.create({
     transform: [{ scale: 0.98 }],
   },
   sheetPrimaryButtonText: {
+    fontFamily: fonts.bodyStrong,
+    fontSize: type.body.fontSize,
+    lineHeight: type.body.lineHeight,
+    color: colors.paperCard,
+  },
+  saveBar: {
+    paddingVertical: layout.verticalCardGap,
+    paddingHorizontal: layout.mobileGutter,
+    borderTopWidth: 1,
+    borderTopColor: colors.paperEdge,
+  },
+  saveButton: {
+    minHeight: 40,
+    borderRadius: radius.pill,
+    backgroundColor: colors.terracotta,
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexDirection: 'row',
+    gap: spacing.s2,
+    boxShadow: shadows.card,
+  },
+  saveButtonPressed: {
+    backgroundColor: colors.terracottaDeep,
+    boxShadow: shadows.press,
+    transform: [{ scale: 0.98 }],
+  },
+  saveButtonDisabled: {
+    opacity: 0.5,
+  },
+  saveButtonText: {
     fontFamily: fonts.bodyStrong,
     fontSize: type.body.fontSize,
     lineHeight: type.body.lineHeight,

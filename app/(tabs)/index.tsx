@@ -2,57 +2,25 @@ import { ScrollView, StyleSheet, Text, useWindowDimensions, View } from 'react-n
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { nightLogTheme } from '@/constants/NightLogTheme';
-import { logEntries, NightLogEntry } from '@/data/logEntries';
+import { useNightLogs } from '@/context/NightLogsContext';
+import type { NightLogEntry } from '@/data/logEntries';
 
 const { colors, fonts, layout, radius, shadows, spacing, type } = nightLogTheme;
 
 const contentPadding = layout.mobileGutter;
 const gridGap = layout.verticalCardGap;
 
-// Turns the stored date string into the display pieces each log card needs.
-const formatLogDate = (date: string) => {
-  const [year, month, day] = date.split('-').map(Number);
-  const localDate = new Date(year, month - 1, day);
-
+// Turns the stored date into the display pieces each log card needs.
+const formatLogDate = (date: Date) => {
   return {
-    day: String(day).padStart(2, '0'),
-    weekday: localDate.toLocaleDateString('en-US', { weekday: 'short' }),
-    monthTitle: localDate.toLocaleDateString('en-US', { 
+    day: String(date.getDate()).padStart(2, '0'),
+    weekday: date.toLocaleDateString('en-US', { weekday: 'short' }),
+    monthTitle: date.toLocaleDateString('en-US', { 
       month: 'short',
       year: 'numeric',
     })
   };
 };
-
-// Takes the raw log entries, sorts newest first, formats their dates,
-// then groups them into month sections for the screen to render.
-const monthSections = Object.values(
-  [...logEntries]
-  .sort((a, b) => b.date.localeCompare(a.date))
-  .reduce<Record<string, {
-    id: string;
-    title: string;
-    logs: Array<NightLogEntry & ReturnType<typeof formatLogDate>>;
-  }>>((sections, log) => {
-    const formattedDate = formatLogDate(log.date);
-    const sectionId = formattedDate.monthTitle.toLowerCase().replace(' ', '-');
-
-    if (!sections[sectionId]) {
-      sections[sectionId] = {
-        id: sectionId,
-        title: formattedDate.monthTitle,
-        logs: [],
-      };
-    }
-
-    sections[sectionId].logs.push({
-      ...log,
-      ...formattedDate,
-    });
-
-    return sections;
-  }, {})
-);
 
 const getCardRotation = (title: string) => {
   const rotations = ['-2deg', '-1deg', '-0.5deg', '0.5deg', '1deg', '2deg'];
@@ -62,9 +30,37 @@ const getCardRotation = (title: string) => {
 };
 
 export default function TabOneScreen() {
+  const { nightLogs } = useNightLogs();
   const insets = useSafeAreaInsets();
   const { width } = useWindowDimensions();
   const logCardWidth = (width - contentPadding * 2 - gridGap) / 2;
+  const monthSections = Object.values(
+    [...nightLogs]
+    .sort((a, b) => b.date.getTime() - a.date.getTime())
+    .reduce<Record<string, {
+      id: string;
+      title: string;
+      logs: Array<NightLogEntry & ReturnType<typeof formatLogDate>>;
+    }>>((sections, log) => {
+      const formattedDate = formatLogDate(log.date);
+      const sectionId = formattedDate.monthTitle.toLowerCase().replace(' ', '-');
+
+      if (!sections[sectionId]) {
+        sections[sectionId] = {
+          id: sectionId,
+          title: formattedDate.monthTitle,
+          logs: [],
+        };
+      }
+
+      sections[sectionId].logs.push({
+        ...log,
+        ...formattedDate,
+      });
+
+      return sections;
+    }, {})
+  );
 
   return (
     <View style={[styles.screen, { paddingTop: insets.top + 12 }]}>
@@ -88,7 +84,7 @@ export default function TabOneScreen() {
                   </View>
                   <View style={styles.cardDetails}>
                     <Text style={styles.cardTitle}>{log.title}</Text>
-                    <Text style={styles.cardLocation}>{log.location}</Text>
+                    <Text style={styles.cardLocation}>{log.generalLocation}</Text>
                   </View>
                 </View>
               ))}
