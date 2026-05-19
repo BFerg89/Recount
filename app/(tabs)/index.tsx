@@ -1,17 +1,13 @@
 import { ScrollView, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { nightLogTheme } from '@/constants/NightLogTheme';
 import { logEntries, NightLogEntry } from '@/data/logEntries';
 
-const contentPadding = 16;
-const monthSectionPadding = 16;
-const gridGap = 16;
-const screenBackgroundColor = '#F5F2EA';
-const headlineFontFamily = 'Newsreader_400Regular';
-const bodyFontFamily = 'Geist_400Regular';
-const bodyStrongFontFamily = 'Geist_600SemiBold';
-const labelFontFamily = 'Geist_500Medium';
+const { colors, fonts, layout, radius, shadows, spacing, type } = nightLogTheme;
 
+const contentPadding = layout.mobileGutter;
+const gridGap = layout.verticalCardGap;
 
 // Turns the stored date string into the display pieces each log card needs.
 const formatLogDate = (date: string) => {
@@ -68,7 +64,7 @@ const getCardRotation = (title: string) => {
 export default function TabOneScreen() {
   const insets = useSafeAreaInsets();
   const { width } = useWindowDimensions();
-  const logCardWidth = (width - contentPadding * 2 - monthSectionPadding * 2 - gridGap) / 2;
+  const logCardWidth = (width - contentPadding * 2 - gridGap) / 2;
 
   return (
     <View style={[styles.screen, { paddingTop: insets.top + 12 }]}>
@@ -107,31 +103,36 @@ export default function TabOneScreen() {
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    gap: 8,
-    backgroundColor: screenBackgroundColor,
+    gap: spacing.s3,
+    backgroundColor: colors.paper,
   },
   title: {
-    paddingHorizontal: 24,
-    fontFamily: headlineFontFamily,
-    fontSize: 32,
+    paddingHorizontal: layout.mobileGutter,
+    fontFamily: fonts.display,
+    fontSize: type.displayM.fontSize,
+    lineHeight: type.displayM.lineHeight,
+    letterSpacing: type.displayM.letterSpacing,
+    color: colors.terracotta,
   },
   contentContainer: {
     flex: 1,
-    backgroundColor: screenBackgroundColor,
+    backgroundColor: colors.paper,
   },
   content: {
-    padding: contentPadding,
-    gap: 16,
+    flexGrow: 1,
+    paddingHorizontal: contentPadding,
+    paddingBottom: spacing.s7,
+    gap: layout.sectionSpacing,
   },
   monthSection: {
-    gap: 16,
-    borderRadius: 8,
-    padding: monthSectionPadding,
-    backgroundColor: 'transparent',
+    gap: layout.verticalCardGap,
   },
   monthTitle: {
-    fontFamily: bodyStrongFontFamily,
-    fontSize: 22,
+    fontFamily: fonts.display,
+    fontSize: type.displayS.fontSize,
+    lineHeight: type.displayS.lineHeight,
+    letterSpacing: type.displayS.letterSpacing,
+    color: colors.ink,
   },
   logGrid: {
     flexDirection: 'row',
@@ -142,35 +143,47 @@ const styles = StyleSheet.create({
   logCard: {
     aspectRatio: 0.85,
     justifyContent: 'space-between',
-    borderRadius: 6,
-    padding: 16,
-    backgroundColor: '#fff',
-    boxShadow: '0 6px 18px rgba(0, 0, 0, 0.3)',
+    borderRadius: radius.l,
+    borderWidth: 1,
+    borderColor: colors.paperEdge,
+    padding: layout.cardPadding,
+    backgroundColor: colors.paperCard,
+    boxShadow: shadows.card,
   },
   cardDate: {
-    gap: 2,
+    gap: spacing.s1,
     backgroundColor: 'transparent',
   },
   cardDay: {
-    fontFamily: labelFontFamily,
-    fontSize: 34,
+    fontFamily: fonts.display,
+    fontSize: type.numeral.fontSize,
+    lineHeight: type.numeral.lineHeight,
+    fontVariant: ['tabular-nums'],
+    color: colors.ink,
   },
   cardWeekday: {
-    fontFamily: labelFontFamily,
-    fontSize: 14,
-    color: '#6b7280',
+    fontFamily: fonts.label,
+    fontSize: type.label.fontSize,
+    lineHeight: type.label.lineHeight,
+    letterSpacing: type.label.letterSpacing,
+    textTransform: type.label.textTransform,
+    color: colors.inkSoft,
   },
   cardDetails: {
-    gap: 4,
+    gap: spacing.s1,
     backgroundColor: 'transparent',
   },
   cardTitle: {
-    fontFamily: bodyStrongFontFamily,
-    fontSize: 16,
+    fontFamily: fonts.display,
+    fontSize: type.displayS.fontSize,
+    lineHeight: type.displayS.lineHeight,
+    letterSpacing: type.displayS.letterSpacing,
+    color: colors.ink,
   },
   cardLocation: {
-    fontFamily: labelFontFamily,
-    fontSize: 14,
-    color: '#4b5563',
+    fontFamily: fonts.body,
+    fontSize: type.bodyS.fontSize,
+    lineHeight: type.bodyS.lineHeight,
+    color: colors.inkMid,
   },
 });
