@@ -13,14 +13,14 @@ import { placeholderMoments } from '@/data/timelineMoments';
 const { colors, fonts, layout, radius, shadows, spacing, type } = nightLogTheme;
 
 const gridGap = spacing.s4;
-const contentPadding = layout.mobileGutter;
-const sectionPadding = layout.cardPadding;
-const visibleNoteCards = 2.5;
 
 export default function CreateScreen() {
   const insets = useSafeAreaInsets();
   const { width } = useWindowDimensions();
-  const noteCardWidth = (width - contentPadding * 2 - sectionPadding * 2 - gridGap * 2) / visibleNoteCards;
+  const noteCardWidth = Math.min(
+    336,
+    Math.max(292, width - layout.mobileGutter * 2 - spacing.s6)
+  ) / 2.2;
 
   const [date, setDate] = useState(new Date());
   const [title, setTitle] = useState('');
@@ -28,7 +28,7 @@ export default function CreateScreen() {
   const [noteAnswers, setNoteAnswers] = useState(() => new Map(promptAnswers));
 
   const addPeopleSheetRef = useRef<BottomSheet>(null);
-  const addPeopleSheetSnapPoints = useMemo(() => ['65'], []);
+  const addPeopleSheetSnapPoints = useMemo(() => ['55'], []);
 
   return (
     <View style={[styles.screen, { paddingTop: insets.top + 12 }]}>
@@ -106,13 +106,19 @@ export default function CreateScreen() {
             ))}
             <Pressable
               style={styles.addMomentButton}>
-              <SymbolView name={{
-                ios: 'plus.circle',
-                android: 'add_circle',
-              }}
-              tintColor={colors.terracotta}
-              size={18}/>
-              <Text style={styles.addMomentText}>Add moment</Text>
+              {({ pressed }) => (
+                <>
+                  <SymbolView name={{
+                    ios: 'plus.circle',
+                    android: 'add_circle',
+                  }}
+                  tintColor={pressed ? colors.terracottaSoft : colors.terracotta}
+                  size={18}/>
+                  <Text style={[styles.addMomentText, pressed && styles.addMomentTextPressed]}>
+                    Add moment
+                  </Text>
+                </>
+              )}
             </Pressable>
           </View>
         </View>
@@ -171,7 +177,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   title: {
-    paddingHorizontal: contentPadding,
+    paddingHorizontal: layout.mobileGutter,
     fontFamily: fonts.display,
     fontSize: type.displayM.fontSize,
     lineHeight: type.displayM.lineHeight,
@@ -180,7 +186,7 @@ const styles = StyleSheet.create({
   },
   content: {
     flexGrow: 1,
-    paddingHorizontal: contentPadding,
+    paddingHorizontal: layout.mobileGutter,
     gap: layout.sectionSpacing,
   },
   titleSection: {
@@ -289,6 +295,9 @@ const styles = StyleSheet.create({
     fontSize: type.body.fontSize,
     color: colors.terracotta,
   },
+  addMomentTextPressed: {
+    color: colors.terracottaSoft,
+  },
   notesSection: {
     alignItems: 'stretch',
     justifyContent: 'flex-start',
@@ -301,20 +310,16 @@ const styles = StyleSheet.create({
     gap: gridGap,
   },
   noteCard: {
-    height: '100%',
     borderRadius: radius.l,
     borderWidth: 1,
     borderColor: colors.paperEdge,
-    padding: spacing.s4,
-    backgroundColor: colors.paper,
+    padding: layout.cardPadding,
+    backgroundColor: colors.paperCard,
   },
   notePrompt: {
-    fontFamily: fonts.label,
-    fontSize: type.label.fontSize,
-    lineHeight: type.label.lineHeight,
-    letterSpacing: type.label.letterSpacing,
-    textTransform: type.label.textTransform,
-    color: colors.terracottaDeep,
+    fontFamily: fonts.bodyStrong,
+    fontSize: type.bodyL.fontSize,
+    color: colors.inkMid,
   },
   noteAnswer: {
     fontFamily: fonts.body,
@@ -389,9 +394,9 @@ const styles = StyleSheet.create({
   addPeopleSheetContent: {
     padding: spacing.s5,
     alignItems: 'center',
-    backgroundColor: colors.paperCard,
+    backgroundColor: colors.paperDeep,
   },
   addPeopleSheetBackground: {
-    backgroundColor: colors.paperCard,
+    backgroundColor: colors.paperDeep,
   },
 });

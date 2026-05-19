@@ -157,7 +157,6 @@ export const nightLogLayout = {
   verticalCardGap: 14,
   sectionSpacing: nightLogSpacing.s6,
   statusBarSpace: 60,
-  tabBarHeight: 86,
   cardPadding: nightLogSpacing.s4,
   cardTiltMax: 0.4,
 } as const;
