@@ -1,6 +1,6 @@
 import DateTimePicker from '@expo/ui/datetimepicker';
 import { SymbolView } from 'expo-symbols';
-import { useMemo, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, TextInput, useWindowDimensions, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import BottomSheet, { BottomSheetTextInput, BottomSheetView } from '@gorhom/bottom-sheet';
@@ -28,7 +28,6 @@ export default function CreateScreen() {
   const [noteAnswers, setNoteAnswers] = useState(() => new Map(promptAnswers));
 
   const addPeopleSheetRef = useRef<BottomSheet>(null);
-  const addMomentSheetSnapPoints = useMemo(() => ['32'], []);
   const addMomentSheetRef = useRef<BottomSheet>(null);
 
   return (
@@ -162,28 +161,30 @@ export default function CreateScreen() {
         handleIndicatorStyle={styles.sheetHandle}
       >
         <BottomSheetView
-          style={[styles.addPeopleSheetContent, { paddingBottom: insets.bottom + spacing.s6 }]}>
-          <View style={styles.addPeopleSheetHeader}>
-            <Text style={styles.addPeopleSheetEyebrow}>People</Text>
-            <Text style={styles.addPeopleSheetTitle}>Add person</Text>
+          style={[styles.sheetContent, { paddingBottom: insets.bottom + spacing.s6 }]}>
+          <View style={styles.sheetHeader}>
+            <Text style={styles.sheetEyebrow}>People</Text>
+            <Text style={styles.sheetTitle}>Add person</Text>
           </View>
 
-          <View style={styles.addPersonForm}>
-            <Text style={styles.addPersonFieldLabel}>Name</Text>
-            <BottomSheetTextInput
-              placeholder="Name..."
-              placeholderTextColor={colors.inkSoft}
-              autoCapitalize="words"
-              returnKeyType="done"
-              selectionColor={colors.terracotta}
-              style={styles.addPersonNameInput}
-            />
+          <View style={styles.sheetForm}>
+            <View style={styles.sheetField}>
+              <Text style={styles.sheetFieldLabel}>Name</Text>
+              <BottomSheetTextInput
+                placeholder="Name..."
+                placeholderTextColor={colors.inkSoft}
+                autoCapitalize="words"
+                returnKeyType="done"
+                selectionColor={colors.terracotta}
+                style={styles.sheetTextInput}
+              />
+            </View>
           </View>
 
           <Pressable
             style={({ pressed }) => [
-              styles.savePersonButton,
-              pressed && styles.savePersonButtonPressed,
+              styles.sheetPrimaryButton,
+              pressed && styles.sheetPrimaryButtonPressed,
             ]}
             onPress={() => {}}>
             <SymbolView
@@ -194,7 +195,7 @@ export default function CreateScreen() {
               tintColor={colors.paperCard}
               size={18}
             />
-            <Text style={styles.savePersonButtonText}>Add person</Text>
+            <Text style={styles.sheetPrimaryButtonText}>Add person</Text>
           </Pressable>
         </BottomSheetView>
       </BottomSheet>
@@ -202,13 +203,60 @@ export default function CreateScreen() {
       <BottomSheet
         ref={addMomentSheetRef}
         index={-1}
-        snapPoints={addMomentSheetSnapPoints}
+        enableDynamicSizing
         enablePanDownToClose
         backgroundStyle={styles.addMomentSheetBackground}
+        handleIndicatorStyle={styles.sheetHandle}
       >
         <BottomSheetView
-          style={styles.addMomentSheetContent}>
-          <Text>Add Moment Sheet</Text>
+          style={[styles.sheetContent, { paddingBottom: insets.bottom + spacing.s6 }]}>
+          <View style={styles.sheetHeader}>
+            <Text style={styles.sheetEyebrow}>Timeline</Text>
+            <Text style={styles.sheetTitle}>Add moment</Text>
+          </View>
+
+          <View style={styles.sheetForm}>
+            <View style={styles.sheetField}>
+              <Text style={styles.sheetFieldLabel}>Title</Text>
+              <BottomSheetTextInput
+                placeholder="Where did the night go next?"
+                placeholderTextColor={colors.inkSoft}
+                autoCapitalize="sentences"
+                returnKeyType="next"
+                selectionColor={colors.terracotta}
+                style={styles.sheetTextInput}
+              />
+            </View>
+
+            <View style={styles.sheetField}>
+              <Text style={styles.sheetFieldLabel}>Approx time</Text>
+              <BottomSheetTextInput
+                placeholder="10:45 PM"
+                placeholderTextColor={colors.inkSoft}
+                keyboardType="numbers-and-punctuation"
+                returnKeyType="done"
+                selectionColor={colors.terracotta}
+                style={styles.sheetTextInput}
+              />
+            </View>
+          </View>
+
+          <Pressable
+            style={({ pressed }) => [
+              styles.sheetPrimaryButton,
+              pressed && styles.sheetPrimaryButtonPressed,
+            ]}
+            onPress={() => {}}>
+            <SymbolView
+              name={{
+                ios: 'plus.circle.fill',
+                android: 'add_circle',
+              }}
+              tintColor={colors.paperCard}
+              size={18}
+            />
+            <Text style={styles.sheetPrimaryButtonText}>Add moment</Text>
+          </Pressable>
         </BottomSheetView>
       </BottomSheet>
     </View>
@@ -443,7 +491,7 @@ const styles = StyleSheet.create({
     width: 44,
     backgroundColor: colors.rule,
   },
-  addPeopleSheetContent: {
+  sheetContent: {
     paddingHorizontal: layout.mobileGutter,
     paddingTop: spacing.s2,
     gap: spacing.s5,
@@ -457,10 +505,10 @@ const styles = StyleSheet.create({
     borderColor: colors.paperEdge,
     boxShadow: shadows.pop,
   },
-  addPeopleSheetHeader: {
+  sheetHeader: {
     gap: spacing.s1,
   },
-  addPeopleSheetEyebrow: {
+  sheetEyebrow: {
     fontFamily: fonts.label,
     fontSize: type.micro.fontSize,
     lineHeight: type.micro.lineHeight,
@@ -468,17 +516,20 @@ const styles = StyleSheet.create({
     textTransform: type.micro.textTransform,
     color: colors.inkSoft,
   },
-  addPeopleSheetTitle: {
+  sheetTitle: {
     fontFamily: fonts.display,
     fontSize: type.displayS.fontSize,
     lineHeight: type.displayS.lineHeight,
     letterSpacing: type.displayS.letterSpacing,
     color: colors.ink,
   },
-  addPersonForm: {
+  sheetForm: {
+    gap: spacing.s4,
+  },
+  sheetField: {
     gap: spacing.s2,
   },
-  addPersonFieldLabel: {
+  sheetFieldLabel: {
     fontFamily: fonts.label,
     fontSize: type.label.fontSize,
     lineHeight: type.label.lineHeight,
@@ -486,7 +537,7 @@ const styles = StyleSheet.create({
     textTransform: type.label.textTransform,
     color: colors.inkMid,
   },
-  addPersonNameInput: {
+  sheetTextInput: {
     minHeight: 52,
     borderRadius: radius.m,
     borderWidth: 1,
@@ -499,7 +550,7 @@ const styles = StyleSheet.create({
     lineHeight: type.bodyL.lineHeight,
     color: colors.ink,
   },
-  savePersonButton: {
+  sheetPrimaryButton: {
     minHeight: 50,
     borderRadius: radius.pill,
     backgroundColor: colors.terracotta,
@@ -509,23 +560,23 @@ const styles = StyleSheet.create({
     gap: spacing.s2,
     paddingHorizontal: spacing.s4,
   },
-  savePersonButtonPressed: {
+  sheetPrimaryButtonPressed: {
     backgroundColor: colors.terracottaDeep,
     boxShadow: shadows.press,
     transform: [{ scale: 0.98 }],
   },
-  savePersonButtonText: {
+  sheetPrimaryButtonText: {
     fontFamily: fonts.bodyStrong,
     fontSize: type.body.fontSize,
     lineHeight: type.body.lineHeight,
     color: colors.paperCard,
   },
-  addMomentSheetContent: {
-    padding: spacing.s5,
-    alignItems: 'center',
-    backgroundColor: colors.paperDeep,
-  },
   addMomentSheetBackground: {
-    backgroundColor: colors.paperDeep,
+    backgroundColor: colors.paperCard,
+    borderTopLeftRadius: radius.xl,
+    borderTopRightRadius: radius.xl,
+    borderWidth: 1,
+    borderColor: colors.paperEdge,
+    boxShadow: shadows.pop,
   },
 });
