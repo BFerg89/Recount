@@ -7,10 +7,10 @@ const contentPadding = 16;
 const monthSectionPadding = 16;
 const gridGap = 16;
 const screenBackgroundColor = '#F5F2EA';
-const headlineFontFamily = 'Newsreader_700Bold';
-const bodyFontFamily = 'BeVietnamPro_400Regular';
-const bodyStrongFontFamily = 'BeVietnamPro_600SemiBold';
-const labelFontFamily = 'SplineSans_500Medium';
+const headlineFontFamily = 'Newsreader_400Regular';
+const bodyFontFamily = 'Geist_400Regular';
+const bodyStrongFontFamily = 'Geist_600SemiBold';
+const labelFontFamily = 'Geist_500Medium';
 
 
 // Turns the stored date string into the display pieces each log card needs.
@@ -72,7 +72,7 @@ export default function TabOneScreen() {
 
   return (
     <View style={[styles.screen, { paddingTop: insets.top + 12 }]}>
-      <Text style={styles.title}>Logs</Text>
+      <Text style={styles.title}>Nights</Text>
       <ScrollView style={styles.contentContainer} contentContainerStyle={styles.content}>
         {monthSections.map((month) => (
           <View key={month.id} style={styles.monthSection}>

@@ -5,18 +5,17 @@ import { Pressable, ScrollView, StyleSheet, Text, TextInput, useWindowDimensions
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import BottomSheet, { BottomSheetView } from '@gorhom/bottom-sheet';
 
+import { nightLogTheme } from '@/constants/NightLogTheme';
 import { placeholderPeople } from '@/data/people';
 import { promptAnswers } from '@/data/promptedNotes';
+import { placeholderMoments } from '@/data/timelineMoments';
 
-const gridGap = 16;
-const contentPadding = 16;
-const sectionPadding = 16;
+const { colors, fonts, layout, radius, shadows, spacing, type } = nightLogTheme;
+
+const gridGap = spacing.s4;
+const contentPadding = layout.mobileGutter;
+const sectionPadding = layout.cardPadding;
 const visibleNoteCards = 2.5;
-const screenBackgroundColor = '#F5F2EA';
-const headlineFontFamily = 'Newsreader_700Bold';
-const bodyFontFamily = 'BeVietnamPro_400Regular';
-const bodyStrongFontFamily = 'BeVietnamPro_600SemiBold';
-const labelFontFamily = 'SplineSans_500Medium';
 
 export default function CreateScreen() {
   const insets = useSafeAreaInsets();
@@ -60,10 +59,64 @@ export default function CreateScreen() {
             </View>
           </View>
         </View>
-        <View style={[styles.section, styles.timelineSection]}>
-          <Text style={styles.sectionLabel}>Timeline</Text>
+        <View style={styles.peopleSection}>
+          <Text style={styles.sectionLabel}>Who was there · {placeholderPeople.length}</Text>
+            <View style={styles.peopleGrid}>
+              {placeholderPeople.map((person) => (
+                <View
+                  key={person.id}
+                  style={styles.person}
+                >
+                  <SymbolView name={{
+                    ios: 'person.circle',
+                    android: 'person',
+                  }}
+                  tintColor={colors.ink}/>
+                  <Text style={styles.personText}>{person.displayName}</Text>
+                </View>
+              ))}
+              <Pressable
+                style={({ pressed }) => [
+                  styles.addPersonButton,
+                  pressed && styles.addPersonButtonPressed,
+                ]}
+                onPress={() => addPeopleSheetRef.current?.expand()}>
+                <SymbolView name={{
+                  ios: 'plus.circle',
+                  android: 'add',
+                }}
+                tintColor={colors.terracottaDeep}/>
+                <Text style={styles.addPersonText}>Add</Text>
+              </Pressable>
+            </View>
+        </View>        
+        <View style={styles.timelineSection}>
+          <View style={styles.timelineHeader}>
+            <Text style={styles.sectionLabel}>Moments</Text>
+            <Text style={styles.sectionLabel}>{placeholderMoments.length} added</Text>
+          </View>
+          <View style={styles.momentListCard}>
+            {placeholderMoments.map((moment) => (
+              <View
+                key={moment.id}
+                style={styles.momentRow}>
+                <Text style={styles.momentTime}>{moment.approxTime}</Text>
+                <Text style={styles.momentTitle}>{moment.title}</Text>
+              </View>
+            ))}
+            <Pressable
+              style={styles.addMomentButton}>
+              <SymbolView name={{
+                ios: 'plus.circle',
+                android: 'add_circle',
+              }}
+              tintColor={colors.terracotta}
+              size={18}/>
+              <Text style={styles.addMomentText}>Add moment</Text>
+            </Pressable>
+          </View>
         </View>
-        <View style={[styles.section, styles.notesSection]}>
+        <View style={styles.notesSection}>
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
@@ -89,35 +142,7 @@ export default function CreateScreen() {
             ))}
           </ScrollView>
         </View>
-        <View style={[styles.section, styles.peopleSection]}>
-          <Text style={styles.sectionLabel}>{placeholderPeople.length} People:</Text>
-            <View style={styles.peopleGrid}>
-              {placeholderPeople.map((person) => (
-                <View
-                  key={person.id}
-                  style={styles.person}
-                >
-                  <SymbolView name={{
-                    ios: 'person.circle',
-                    android: 'person',
-                  }}/>
-                  <Text style={styles.personText}>{person.displayName}</Text>
-                </View>
-              ))}
-            </View>
-            <Pressable
-              style={({ pressed }) => [
-                styles.addPersonButton,
-                pressed && styles.addPersonButtonPressed,
-              ]}
-              onPress={() => addPeopleSheetRef.current?.expand()}>
-              <SymbolView name={{
-                ios: 'plus.circle',
-                android: 'add',
-              }}/>
-              <Text style={styles.addPersonText}>Add person</Text>
-            </Pressable>
-        </View>
+
       </ScrollView>
 
       <BottomSheet
@@ -139,62 +164,130 @@ export default function CreateScreen() {
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    gap: 8,
-    backgroundColor: screenBackgroundColor,
+    gap: spacing.s3,
+    backgroundColor: colors.paper,
   },
   contentContainer: {
     flex: 1,
   },
   title: {
-    paddingHorizontal: 24,
-    fontFamily: headlineFontFamily,
-    fontSize: 32,
+    paddingHorizontal: contentPadding,
+    fontFamily: fonts.display,
+    fontSize: type.displayM.fontSize,
+    lineHeight: type.displayM.lineHeight,
+    letterSpacing: type.displayM.letterSpacing,
+    color: colors.terracotta,
   },
   content: {
     flexGrow: 1,
-    padding: contentPadding,
-    gap: 16,
+    paddingHorizontal: contentPadding,
+    gap: layout.sectionSpacing,
   },
   titleSection: {
-    gap: 8,
+    gap: spacing.s3,
   },
   titleInput: {
     width: '100%',
-    fontFamily: bodyStrongFontFamily,
-    fontSize: 32,
+    fontFamily: fonts.display,
+    fontSize: type.displayL.fontSize,
+    lineHeight: type.displayL.lineHeight,
+    letterSpacing: type.displayL.letterSpacing,
+    color: colors.ink,
+    paddingVertical: 0,
   },
   dateRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    gap: spacing.s3,
   },
   locationInput: {
     flex: 1,
-    fontFamily: bodyStrongFontFamily,
-    fontSize: 24,
-    paddingVertical: 0,
+    minHeight: 44,
+    backgroundColor: colors.paperCard,
+    borderRadius: radius.m,
+    borderWidth: 1,
+    borderColor: colors.paperEdge,
+    paddingHorizontal: spacing.s2,
+    paddingBottom: spacing.s1,
+    fontFamily: fonts.bodyStrong,
+    fontSize: type.bodyL.fontSize,
+    lineHeight: type.bodyL.lineHeight,
+    color: colors.ink,
   },
   datePickerGroup: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    minHeight: 44,
+    gap: spacing.s1,
+    borderRadius: radius.m,
+    borderWidth: 1,
+    borderColor: colors.paperEdge,
+    paddingHorizontal: spacing.s3,
+    backgroundColor: colors.paperCard,
   },
   dateText: {
-    fontFamily: bodyStrongFontFamily,
-    fontSize: 24,
+    fontFamily: fonts.label,
+    fontSize: type.label.fontSize,
+    lineHeight: type.label.lineHeight,
+    letterSpacing: type.label.letterSpacing,
+    textTransform: type.label.textTransform,
+    color: colors.inkMid,
   },
   datePicker: {
     width: 140,
   },
-  section: {
-    padding: sectionPadding,
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: 'grey',
-    borderRadius: 8,
-  },
   timelineSection: {
+    minHeight: 104,
+    justifyContent: 'flex-start',
+    alignItems: 'stretch',
+    gap: spacing.s3,
+  },
+  timelineHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    width: '100%',
+  },
+  momentListCard: {
+    width: '100%',
+    backgroundColor: colors.paperCard,
+    borderWidth: 1,
+    borderColor: colors.paperEdge,
+    borderRadius: radius.m,
+    padding: layout.cardPadding,
+  },
+  momentRow: {
+    flexDirection: 'row',
+    alignItems: 'baseline',
+    gap: spacing.s4,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.rule,
+    paddingVertical: spacing.s1,
+  },
+  momentTitle: {
+    fontFamily: fonts.italicAccent,
+    fontSize: type.bodyL.fontSize,
+    lineHeight: type.bodyL.lineHeight,
+    color: colors.ink,
+    flex: 1,
+  },
+  momentTime: {
+    fontFamily: fonts.bodyStrong,
+    fontSize: type.bodyS.fontSize,
+    fontVariant: ['tabular-nums'],
+    color: colors.inkSoft,
+    width: 64,
+  },
+  addMomentButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingTop: spacing.s2,
+    gap: spacing.s1,
+  },
+  addMomentText: {
+    fontFamily: fonts.bodyStrong,
+    fontSize: type.body.fontSize,
+    color: colors.terracotta,
   },
   notesSection: {
     alignItems: 'stretch',
@@ -209,72 +302,96 @@ const styles = StyleSheet.create({
   },
   noteCard: {
     height: '100%',
-    borderRadius: 8,
-    padding: 16,
-    backgroundColor: '#fff',
+    borderRadius: radius.l,
+    borderWidth: 1,
+    borderColor: colors.paperEdge,
+    padding: spacing.s4,
+    backgroundColor: colors.paper,
   },
   notePrompt: {
-    fontFamily: bodyStrongFontFamily,
+    fontFamily: fonts.label,
+    fontSize: type.label.fontSize,
+    lineHeight: type.label.lineHeight,
+    letterSpacing: type.label.letterSpacing,
+    textTransform: type.label.textTransform,
+    color: colors.terracottaDeep,
   },
   noteAnswer: {
-    fontFamily: bodyFontFamily,
+    fontFamily: fonts.body,
+    fontSize: type.body.fontSize,
+    lineHeight: type.body.lineHeight,
+    color: colors.ink,
+    paddingVertical: spacing.s2,
   },
   peopleSection: {
     justifyContent: 'flex-start',
     alignItems: 'flex-start',
+    gap: spacing.s3,
+    paddingVertical: spacing.s2,
   },
   peopleGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    justifyContent: 'space-evenly',
-    gap: 8,
-    rowGap: 12,
-    paddingVertical: 8,
+    justifyContent: 'flex-start',
+    gap: spacing.s2,
+    rowGap: spacing.s3,
   },
   person: {
     flexDirection: 'row',
-    backgroundColor: 'rgba(80, 74, 69, 0.25)',
-    borderRadius: 6,
-    justifyContent: 'center',
     alignItems: 'center',
-    paddingVertical: 2,
-    paddingHorizontal: 8,
+    backgroundColor: colors.paperCard,
+    justifyContent: 'center',
+    gap: spacing.s1,
+    borderWidth: 1,
+    borderColor: colors.paperEdge,
+    borderRadius: radius.pill,
+    paddingLeft: spacing.s1,
+    paddingRight: spacing.s2,
+    minHeight: 32,
   },
   personText: {
-    fontFamily: labelFontFamily,
-    fontSize: 16,
+    fontFamily: fonts.label,
+    fontSize: type.bodyS.fontSize,
+    lineHeight: type.bodyS.lineHeight,
+    color: colors.ink,
   },
   addPersonButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    alignSelf: 'stretch',
-    borderRadius: 6,
+    gap: spacing.s1,
     borderWidth: 1,
-    borderColor: 'rgba(17, 24, 39, 0.35)',
-    paddingVertical: 2,
-    paddingHorizontal: 8,
+    borderStyle: 'dashed',
+    borderColor: colors.inkSoft,
+    borderRadius: radius.pill,
+    paddingLeft: spacing.s1,
+    paddingRight: spacing.s2,
   },
   addPersonButtonPressed: {
-    backgroundColor: 'rgba(80, 74, 69, 0.16)',
-    borderColor: 'rgba(17, 24, 39, 0.55)',
+    backgroundColor: colors.paperEdge,
+    boxShadow: shadows.press,
     transform: [{ scale: 0.98 }],
   },
   addPersonText: {
-    fontFamily: labelFontFamily,
-    fontSize: 16,
-    color: '#111827',
+    fontFamily: fonts.label,
+    fontSize: type.bodyS.fontSize,
+    lineHeight: type.bodyS.lineHeight,
+    color: colors.terracottaDeep,
   },
   sectionLabel: {
-    fontFamily: bodyStrongFontFamily,
-    fontSize: 16,
-    color: '#111827',
+    fontFamily: fonts.label,
+    fontSize: type.label.fontSize,
+    lineHeight: type.label.lineHeight,
+    letterSpacing: type.label.letterSpacing,
+    textTransform: type.label.textTransform,
+    color: colors.inkMid,
   },
   addPeopleSheetContent: {
-    padding: 24,
+    padding: spacing.s5,
     alignItems: 'center',
+    backgroundColor: colors.paperCard,
   },
   addPeopleSheetBackground: {
-    backgroundColor: '#ddd6c4',
-  }
+    backgroundColor: colors.paperCard,
+  },
 });

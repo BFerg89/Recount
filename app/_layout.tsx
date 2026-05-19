@@ -1,7 +1,8 @@
-import { BeVietnamPro_400Regular } from '@expo-google-fonts/be-vietnam-pro/400Regular';
-import { BeVietnamPro_600SemiBold } from '@expo-google-fonts/be-vietnam-pro/600SemiBold';
-import { Newsreader_700Bold } from '@expo-google-fonts/newsreader/700Bold';
-import { SplineSans_500Medium } from '@expo-google-fonts/spline-sans/500Medium';
+import { Geist_400Regular } from '@expo-google-fonts/geist/400Regular';
+import { Geist_500Medium } from '@expo-google-fonts/geist/500Medium';
+import { Geist_600SemiBold } from '@expo-google-fonts/geist/600SemiBold';
+import { Newsreader_500Medium } from '@expo-google-fonts/newsreader/500Medium';
+import { Newsreader_500Medium_Italic } from '@expo-google-fonts/newsreader/500Medium_Italic';
 import { DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { useFonts } from 'expo-font';
 
@@ -26,10 +27,11 @@ SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
   const [loaded, error] = useFonts({
-    Newsreader_700Bold,
-    BeVietnamPro_400Regular,
-    BeVietnamPro_600SemiBold,
-    SplineSans_500Medium,
+    Newsreader_500Medium,
+    Newsreader_500Medium_Italic,
+    Geist_400Regular,
+    Geist_500Medium,
+    Geist_600SemiBold,
     SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
   });
 
