@@ -3,17 +3,19 @@ import { SymbolView } from 'expo-symbols';
 import { useRef, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, TextInput, useWindowDimensions, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import BottomSheet, { BottomSheetTextInput, BottomSheetView } from '@gorhom/bottom-sheet';
+import BottomSheet from '@gorhom/bottom-sheet';
+
+import { AddMomentSheet } from '@/components/create/AddMomentSheet';
+import { AddPersonSheet } from '@/components/create/AddPersonSheet';
 
 import { nightLogTheme } from '@/constants/NightLogTheme';
 
 import type { DraftPerson } from '@/data/people';
-
 import { createEmptyPromptedNoteAnswers, promptedNoteDefinitions } from '@/data/promptedNotes';
-
 import type { DraftTimelineMoment } from '@/data/timelineMoments';
-import { useNightLogs } from '@/context/NightLogsContext';
 import type { NightLogEntry, NightLogPromptedNote } from '@/data/logEntries';
+
+import { useNightLogs } from '@/context/NightLogsContext';
 
 const { colors, fonts, layout, radius, shadows, spacing, type } = nightLogTheme;
 
@@ -55,6 +57,43 @@ export default function CreateScreen() {
     setMoments([]);
     setNewMomentTitle('');
     setNewMomentTime('');
+  };
+
+  const handleAddPerson = () => {
+    const trimmedName = newPersonName.trim();
+
+    if (!trimmedName) {
+      return;
+    }
+
+    const newPerson: DraftPerson = {
+      id: `draft-person-${Date.now()}`,
+      displayName: trimmedName,
+    };
+
+    setPeople((currentPeople) => [...currentPeople, newPerson]);
+    setNewPersonName('');
+    addPeopleSheetRef.current?.close();
+  };
+
+  const handleAddMoment = () => {
+    const trimmedTitle = newMomentTitle.trim();
+    const trimmedTime = newMomentTime.trim();
+
+    if (!trimmedTitle) {
+      return;
+    }
+
+    const newMoment: DraftTimelineMoment = {
+      id: `draft-moment-${Date.now()}`,
+      title: trimmedTitle,
+      approxTime: trimmedTime || null,
+    };
+
+    setMoments((currentMoments) => [...currentMoments, newMoment]);
+    setNewMomentTitle('');
+    setNewMomentTime('');
+    addMomentSheetRef.current?.close();
   };
 
   //TODO: Think about handling prompted notes better.
@@ -239,153 +278,21 @@ export default function CreateScreen() {
         </Pressable>
       </View>
 
-      <BottomSheet
-        ref={addPeopleSheetRef}
-        index={-1}
-        enableDynamicSizing
-        enablePanDownToClose
-        backgroundStyle={styles.addPeopleSheetBackground}
-        handleIndicatorStyle={styles.sheetHandle}
-      >
-        <BottomSheetView
-          style={[styles.sheetContent, { paddingBottom: insets.bottom + spacing.s6 }]}>
-          <View style={styles.sheetHeader}>
-            <Text style={styles.sheetEyebrow}>People</Text>
-            <Text style={styles.sheetTitle}>Add person</Text>
-          </View>
+      <AddPersonSheet
+        sheetRef={addPeopleSheetRef}
+        bottomInset={insets.bottom}
+        newPersonName={newPersonName}
+        onChangeNewPersonName={setNewPersonName}
+        onAddPerson={handleAddPerson}/>
 
-          <View style={styles.sheetForm}>
-            <View style={styles.sheetField}>
-              <Text style={styles.sheetFieldLabel}>Name</Text>
-              <BottomSheetTextInput
-                value={newPersonName}
-                onChangeText={setNewPersonName}
-                placeholder="Name..."
-                placeholderTextColor={colors.inkSoft}
-                autoCapitalize="words"
-                returnKeyType="done"
-                selectionColor={colors.terracotta}
-                style={styles.sheetTextInput}
-              />
-            </View>
-          </View>
-
-          <Pressable
-            style={({ pressed }) => [
-              styles.sheetPrimaryButton,
-              pressed && styles.sheetPrimaryButtonPressed,
-            ]}
-            onPress={() => {
-              const trimmedName = newPersonName.trim();
-
-              if (!trimmedName) {
-                return;
-              }
-
-              const newPerson: DraftPerson = {
-                id: `draft-person-${Date.now()}`,
-                displayName: trimmedName,
-              };
-
-              setPeople((currentPeople) => [...currentPeople, newPerson]);
-              setNewPersonName('');
-              addPeopleSheetRef.current?.close();
-            }}>
-            <SymbolView
-              name={{
-                ios: 'plus.circle.fill',
-                android: 'add_circle',
-              }}
-              tintColor={colors.paperCard}
-              size={18}
-            />
-            <Text style={styles.sheetPrimaryButtonText}>Add person</Text>
-          </Pressable>
-        </BottomSheetView>
-      </BottomSheet>
-
-      <BottomSheet
-        ref={addMomentSheetRef}
-        index={-1}
-        enableDynamicSizing
-        enablePanDownToClose
-        backgroundStyle={styles.addMomentSheetBackground}
-        handleIndicatorStyle={styles.sheetHandle}
-      >
-        <BottomSheetView
-          style={[styles.sheetContent, { paddingBottom: insets.bottom + spacing.s6 }]}>
-          <View style={styles.sheetHeader}>
-            <Text style={styles.sheetEyebrow}>Timeline</Text>
-            <Text style={styles.sheetTitle}>Add moment</Text>
-          </View>
-
-          <View style={styles.sheetForm}>
-            <View style={styles.sheetField}>
-              <Text style={styles.sheetFieldLabel}>Title</Text>
-              <BottomSheetTextInput
-                value={newMomentTitle}
-                onChangeText={setNewMomentTitle}
-                placeholder="Where did the night go next?"
-                placeholderTextColor={colors.inkSoft}
-                autoCapitalize="sentences"
-                returnKeyType="next"
-                selectionColor={colors.terracotta}
-                style={styles.sheetTextInput}
-              />
-            </View>
-
-            <View style={styles.sheetField}>
-              <Text style={styles.sheetFieldLabel}>Approx time</Text>
-              <BottomSheetTextInput
-                value={newMomentTime}
-                onChangeText={setNewMomentTime}
-                placeholder="10:45 PM"
-                placeholderTextColor={colors.inkSoft}
-                keyboardType="numbers-and-punctuation"
-                returnKeyType="done"
-                selectionColor={colors.terracotta}
-                style={styles.sheetTextInput}
-              />
-            </View>
-          </View>
-
-          <Pressable
-            style={({ pressed }) => [
-              styles.sheetPrimaryButton,
-              pressed && styles.sheetPrimaryButtonPressed,
-            ]}
-            onPress={() => {
-              const trimmedTitle = newMomentTitle.trim();
-              const trimmedTime = newMomentTime.trim();
-
-              // Only ignore empty titles as a time is not required.
-              if (!trimmedTitle) {
-                return;
-              }
-
-              const newMoment: DraftTimelineMoment = {
-                id: `draft-moment-${Date.now()}`,
-                title: trimmedTitle,
-                approxTime: trimmedTime || null,
-              };
-
-              setMoments((currentMoments) => [...currentMoments, newMoment]);
-              setNewMomentTitle('');
-              setNewMomentTime('');
-              addMomentSheetRef.current?.close();
-            }}>
-            <SymbolView
-              name={{
-                ios: 'plus.circle.fill',
-                android: 'add_circle',
-              }}
-              tintColor={colors.paperCard}
-              size={18}
-            />
-            <Text style={styles.sheetPrimaryButtonText}>Add moment</Text>
-          </Pressable>
-        </BottomSheetView>
-      </BottomSheet>
+      <AddMomentSheet
+        sheetRef={addMomentSheetRef}
+        bottomInset={insets.bottom}
+        newMomentTitle={newMomentTitle}
+        onChangeNewMomentTitle={setNewMomentTitle}
+        newMomentTime={newMomentTime}
+        onChangeNewMomentTime={setNewMomentTime}
+        onAddMoment={handleAddMoment}/>
     </View>
   );
 }
@@ -614,90 +521,6 @@ const styles = StyleSheet.create({
     textTransform: type.label.textTransform,
     color: colors.inkMid,
   },
-  sheetHandle: {
-    width: 44,
-    backgroundColor: colors.rule,
-  },
-  sheetContent: {
-    paddingHorizontal: layout.mobileGutter,
-    paddingTop: spacing.s2,
-    gap: spacing.s5,
-    backgroundColor: colors.paperCard,
-  },
-  addPeopleSheetBackground: {
-    backgroundColor: colors.paperCard,
-    borderTopLeftRadius: radius.xl,
-    borderTopRightRadius: radius.xl,
-    borderWidth: 1,
-    borderColor: colors.paperEdge,
-    boxShadow: shadows.pop,
-  },
-  sheetHeader: {
-    gap: spacing.s1,
-  },
-  sheetEyebrow: {
-    fontFamily: fonts.label,
-    fontSize: type.micro.fontSize,
-    lineHeight: type.micro.lineHeight,
-    letterSpacing: type.micro.letterSpacing,
-    textTransform: type.micro.textTransform,
-    color: colors.inkSoft,
-  },
-  sheetTitle: {
-    fontFamily: fonts.display,
-    fontSize: type.displayS.fontSize,
-    lineHeight: type.displayS.lineHeight,
-    letterSpacing: type.displayS.letterSpacing,
-    color: colors.ink,
-  },
-  sheetForm: {
-    gap: spacing.s4,
-  },
-  sheetField: {
-    gap: spacing.s2,
-  },
-  sheetFieldLabel: {
-    fontFamily: fonts.label,
-    fontSize: type.label.fontSize,
-    lineHeight: type.label.lineHeight,
-    letterSpacing: type.label.letterSpacing,
-    textTransform: type.label.textTransform,
-    color: colors.inkMid,
-  },
-  sheetTextInput: {
-    minHeight: 52,
-    borderRadius: radius.m,
-    borderWidth: 1,
-    borderColor: colors.paperEdge,
-    backgroundColor: colors.paper,
-    paddingHorizontal: spacing.s4,
-    paddingVertical: spacing.s3,
-    fontFamily: fonts.body,
-    fontSize: type.bodyL.fontSize,
-    lineHeight: type.bodyL.lineHeight,
-    color: colors.ink,
-  },
-  sheetPrimaryButton: {
-    minHeight: 50,
-    borderRadius: radius.pill,
-    backgroundColor: colors.terracotta,
-    alignItems: 'center',
-    justifyContent: 'center',
-    flexDirection: 'row',
-    gap: spacing.s2,
-    paddingHorizontal: spacing.s4,
-  },
-  sheetPrimaryButtonPressed: {
-    backgroundColor: colors.terracottaDeep,
-    boxShadow: shadows.press,
-    transform: [{ scale: 0.98 }],
-  },
-  sheetPrimaryButtonText: {
-    fontFamily: fonts.bodyStrong,
-    fontSize: type.body.fontSize,
-    lineHeight: type.body.lineHeight,
-    color: colors.paperCard,
-  },
   saveBar: {
     paddingVertical: layout.verticalCardGap,
     paddingHorizontal: layout.mobileGutter,
@@ -727,13 +550,5 @@ const styles = StyleSheet.create({
     fontSize: type.body.fontSize,
     lineHeight: type.body.lineHeight,
     color: colors.paperCard,
-  },
-  addMomentSheetBackground: {
-    backgroundColor: colors.paperCard,
-    borderTopLeftRadius: radius.xl,
-    borderTopRightRadius: radius.xl,
-    borderWidth: 1,
-    borderColor: colors.paperEdge,
-    boxShadow: shadows.pop,
   },
 });
