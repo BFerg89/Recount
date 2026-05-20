@@ -54,7 +54,6 @@ export const nightLogRadius = {
 
 export const nightLogFonts = {
   display: 'Newsreader_500Medium',
-  ui: 'Geist_400Regular',
   italicAccent: 'Newsreader_500Medium_Italic',
   body: 'Geist_400Regular',
   bodyStrong: 'Geist_600SemiBold',

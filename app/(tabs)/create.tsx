@@ -44,6 +44,7 @@ export default function CreateScreen() {
 
   const addPeopleSheetRef = useRef<BottomSheet>(null);
   const addMomentSheetRef = useRef<BottomSheet>(null);
+  const scrollRef = useRef<ScrollView>(null);
 
   const canSaveDraft = title.trim().length > 0 && location.trim().length > 0;
 
@@ -57,6 +58,12 @@ export default function CreateScreen() {
     setMoments([]);
     setNewMomentTitle('');
     setNewMomentTime('');
+  };
+  
+  const handleNoteFocus = () => {
+    setTimeout(() => {
+      scrollRef.current?.scrollToEnd({ animated: true })
+    }, 0);
   };
 
   const handleAddPerson = () => {
@@ -136,7 +143,11 @@ export default function CreateScreen() {
   return (
     <View style={[styles.screen, { paddingTop: insets.top + 12 }]}>
       <Text style={styles.title}>Create Log</Text>
-      <ScrollView style={styles.contentContainer} contentContainerStyle={styles.content}>
+      <ScrollView
+        ref={scrollRef}
+        style={styles.contentContainer} 
+        contentContainerStyle={styles.content}
+        automaticallyAdjustKeyboardInsets={true}>
         <View style={styles.titleSection}>
           <TextInput
             value={title}
@@ -246,6 +257,7 @@ export default function CreateScreen() {
                       };
                     });
                   }}
+                  onFocus={handleNoteFocus}
                   placeholder="Enter note..."
                   multiline
                   style={styles.noteAnswer}/>

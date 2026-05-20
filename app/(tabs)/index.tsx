@@ -1,5 +1,6 @@
-import { ScrollView, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useRouter } from 'expo-router';
 
 import { nightLogTheme } from '@/constants/NightLogTheme';
 import { useNightLogs } from '@/context/NightLogsContext';
@@ -62,6 +63,8 @@ export default function TabOneScreen() {
     }, {})
   );
 
+  const router = useRouter();
+
   return (
     <View style={[styles.screen, { paddingTop: insets.top + 12 }]}>
       <Text style={styles.title}>Nights</Text>
@@ -71,8 +74,9 @@ export default function TabOneScreen() {
             <Text style={styles.monthTitle}>{month.title}</Text>
             <View style={styles.logGrid}>
               {month.logs.map((log) => (
-                <View 
-                  key={log.id} 
+                <Pressable 
+                  key={log.id}
+                  onPress={() => router.push(`/logs/${log.id}`)}
                   style={[
                     styles.logCard,
                     { width: logCardWidth },
@@ -86,7 +90,7 @@ export default function TabOneScreen() {
                     <Text style={styles.cardTitle}>{log.title}</Text>
                     <Text style={styles.cardLocation}>{log.generalLocation}</Text>
                   </View>
-                </View>
+                </Pressable>
               ))}
             </View>
           </View>

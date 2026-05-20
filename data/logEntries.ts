@@ -2,6 +2,9 @@ import type { DraftPerson } from './people';
 import type { PromptedNoteType } from './promptedNotes';
 import type { DraftTimelineMoment } from './timelineMoments';
 
+import { placeholderPeople } from './people';
+import { placeholderMoments } from './timelineMoments';
+
 export type NightLogPromptedNote = {
   id: string;
   promptType: PromptedNoteType;
@@ -18,4 +21,14 @@ export type NightLogEntry = {
   promptedNotes: NightLogPromptedNote[];
 };
 
-export const logEntries: NightLogEntry[] = [];
+export const logEntries: NightLogEntry[] = [
+  {
+    id: 'testId',
+    title: 'Test Night',
+    date: new Date(),
+    generalLocation: 'Test City',
+    people: placeholderPeople,
+    timelineMoments: placeholderMoments,
+    promptedNotes: [],
+  }
+];

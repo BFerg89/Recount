@@ -62,6 +62,7 @@ function RootLayoutNav() {
         <NightLogsProvider>
           <Stack>
             <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+            <Stack.Screen name="logs" options={{ headerShown: false }} />
           </Stack>
         </NightLogsProvider>
       </ThemeProvider>
