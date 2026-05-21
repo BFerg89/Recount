@@ -13,7 +13,7 @@ export const placeholderMoments: DraftTimelineMoment[] = [
   {
     id: '2',
     approxTime: '10:00pm',
-    title: 'Dunny and blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah'
+    title: 'Dunny'
   },
   {
     id: '3',

@@ -286,7 +286,7 @@ export default function CreateScreen() {
             tintColor={colors.paperCard}
             size={18}
           />
-          <Text style={styles.saveButtonText}>Save draft</Text>
+          <Text style={styles.saveButtonText}>Save</Text>
         </Pressable>
       </View>
 

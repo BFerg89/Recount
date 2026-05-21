@@ -77,8 +77,9 @@ export default function TabOneScreen() {
                 <Pressable 
                   key={log.id}
                   onPress={() => router.push(`/logs/${log.id}`)}
-                  style={[
+                  style={({ pressed }) => [
                     styles.logCard,
+                    pressed && styles.logCardPressed,
                     { width: logCardWidth },
                     { transform: [{ rotate: getCardRotation(log.title) }] }
                   ]}>
@@ -109,9 +110,9 @@ const styles = StyleSheet.create({
   title: {
     paddingHorizontal: layout.mobileGutter,
     fontFamily: fonts.display,
-    fontSize: type.displayM.fontSize,
-    lineHeight: type.displayM.lineHeight,
-    letterSpacing: type.displayM.letterSpacing,
+    fontSize: type.displayXl.fontSize,
+    lineHeight: type.displayXl.lineHeight,
+    letterSpacing: type.displayXl.letterSpacing,
     color: colors.terracotta,
   },
   contentContainer: {
@@ -149,6 +150,10 @@ const styles = StyleSheet.create({
     padding: layout.cardPadding,
     backgroundColor: colors.paperCard,
     boxShadow: shadows.card,
+  },
+  logCardPressed: {
+    backgroundColor: colors.paperEdge,
+    boxShadow: shadows.press,
   },
   cardDate: {
     gap: spacing.s1,
