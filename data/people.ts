@@ -1,9 +1,9 @@
-export type DraftPerson = {
+export type CreatePersonInput = {
   id: string;
   displayName: string;
 };
 
-export const placeholderPeople: DraftPerson[] = [
+export const placeholderPeople: CreatePersonInput[] = [
   {
     id: '1',
     displayName: 'India'

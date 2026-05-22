@@ -4,7 +4,7 @@ import { useRouter } from 'expo-router';
 
 import { nightLogTheme } from '@/constants/NightLogTheme';
 import { useNightLogs } from '@/context/NightLogsContext';
-import type { NightLogEntry } from '@/data/logEntries';
+import { parseStoredDate, type NightLogEntry } from '@/data/nightLogModels';
 
 const { colors, fonts, layout, radius, shadows, spacing, type } = nightLogTheme;
 
@@ -37,13 +37,13 @@ export default function TabOneScreen() {
   const logCardWidth = (width - contentPadding * 2 - gridGap) / 2;
   const monthSections = Object.values(
     [...nightLogs]
-    .sort((a, b) => b.date.getTime() - a.date.getTime())
+    .sort((a, b) => parseStoredDate(b.date).getTime() - parseStoredDate(a.date).getTime())
     .reduce<Record<string, {
       id: string;
       title: string;
       logs: Array<NightLogEntry & ReturnType<typeof formatLogDate>>;
     }>>((sections, log) => {
-      const formattedDate = formatLogDate(log.date);
+      const formattedDate = formatLogDate(parseStoredDate(log.date));
       const sectionId = formattedDate.monthTitle.toLowerCase().replace(' ', '-');
 
       if (!sections[sectionId]) {

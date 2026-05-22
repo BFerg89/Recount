@@ -1,10 +1,10 @@
-export type DraftTimelineMoment = {
+export type CreateTimelineEventInput = {
   id: string;
   approxTime: string | null;
   title: string;
 };
 
-export const placeholderMoments: DraftTimelineMoment[] = [
+export const placeholderMoments: CreateTimelineEventInput[] = [
   {
     id: '1',
     approxTime: '8:00pm',

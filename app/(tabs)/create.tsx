@@ -10,10 +10,9 @@ import { AddPersonSheet } from '@/components/create/AddPersonSheet';
 
 import { nightLogTheme } from '@/constants/NightLogTheme';
 
-import type { DraftPerson } from '@/data/people';
+import type { CreatePersonInput } from '@/data/people';
 import { createEmptyPromptedNoteAnswers, promptedNoteDefinitions } from '@/data/promptedNotes';
-import type { DraftTimelineMoment } from '@/data/timelineMoments';
-import type { NightLogEntry, NightLogPromptedNote } from '@/data/logEntries';
+import type { CreateTimelineEventInput } from '@/data/timelineMoments';
 
 import { useNightLogs } from '@/context/NightLogsContext';
 
@@ -22,7 +21,7 @@ const { colors, fonts, layout, radius, shadows, spacing, type } = nightLogTheme;
 const gridGap = spacing.s4;
 
 export default function CreateScreen() {
-  const { addNightLog } = useNightLogs();
+  const { createNightLog } = useNightLogs();
   const insets = useSafeAreaInsets();
   const { width } = useWindowDimensions();
   const noteCardWidth = Math.min(
@@ -39,10 +38,10 @@ export default function CreateScreen() {
   const [location, setLocation] = useState('');
   const [noteAnswers, setNoteAnswers] = useState(createEmptyPromptedNoteAnswers);
 
-  const [people, setPeople] = useState<DraftPerson[]>([]);
+  const [people, setPeople] = useState<CreatePersonInput[]>([]);
   const [newPersonName, setNewPersonName] = useState('');
 
-  const [moments, setMoments] = useState<DraftTimelineMoment[]>([]);
+  const [moments, setMoments] = useState<CreateTimelineEventInput[]>([]);
   const [newMomentTitle, setNewMomentTitle] = useState('');
   const [newMomentTime, setNewMomentTime] = useState('');
 
@@ -50,7 +49,7 @@ export default function CreateScreen() {
   const addMomentSheetRef = useRef<BottomSheet>(null);
   const scrollRef = useRef<ScrollView>(null);
 
-  const canSaveDraft = title.trim().length > 0 && location.trim().length > 0;
+  const canCreateLog = title.trim().length > 0 && location.trim().length > 0;
 
   const resetCreateForm = () => {
     setDate(new Date());
@@ -77,8 +76,8 @@ export default function CreateScreen() {
       return;
     }
 
-    const newPerson: DraftPerson = {
-      id: `draft-person-${Date.now()}`,
+    const newPerson: CreatePersonInput = {
+      id: `local-person-${Date.now()}`,
       displayName: trimmedName,
     };
 
@@ -95,8 +94,8 @@ export default function CreateScreen() {
       return;
     }
 
-    const newMoment: DraftTimelineMoment = {
-      id: `draft-moment-${Date.now()}`,
+    const newMoment: CreateTimelineEventInput = {
+      id: `local-timeline-event-${Date.now()}`,
       title: trimmedTitle,
       approxTime: trimmedTime || null,
     };
@@ -107,40 +106,19 @@ export default function CreateScreen() {
     addMomentSheetRef.current?.close();
   };
 
-  //TODO: Think about handling prompted notes better.
-  const handleSaveDraft = () => {
-    if (!canSaveDraft) {
+  const handleCreateLog = () => {
+    if (!canCreateLog) {
       return;
     }
 
-    const createdAt = Date.now();
-    const promptedNotes: NightLogPromptedNote[] = promptedNoteDefinitions
-      .map((prompt) => {
-        const text = (noteAnswers[prompt.promptType] ?? '').trim();
-
-        if (!text) {
-          return null;
-        }
-
-        return {
-          id: `draft-note-${createdAt}-${prompt.promptType}`,
-          promptType: prompt.promptType,
-          text,
-        };
-      })
-      .filter((note): note is NightLogPromptedNote => note !== null);
-
-    const draftNightLog: NightLogEntry = {
-      id: `draft-night-log-${createdAt}`,
+    createNightLog({
       title: title.trim(),
       date,
       generalLocation: location.trim(),
       people,
-      timelineMoments: moments,
-      promptedNotes,
-    };
-
-    addNightLog(draftNightLog);
+      moments,
+      noteAnswers,
+    });
     resetCreateForm();
   };
 
@@ -280,14 +258,14 @@ export default function CreateScreen() {
 
       <View style={styles.saveBar}>
         <Pressable
-          disabled={!canSaveDraft}
-          accessibilityState={{ disabled: !canSaveDraft }}
+          disabled={!canCreateLog}
+          accessibilityState={{ disabled: !canCreateLog }}
           style={({ pressed }) => [
             styles.saveButton,
-            pressed && canSaveDraft && styles.saveButtonPressed,
-            !canSaveDraft && styles.saveButtonDisabled,
+            pressed && canCreateLog && styles.saveButtonPressed,
+            !canCreateLog && styles.saveButtonDisabled,
           ]} 
-          onPress={handleSaveDraft}>
+          onPress={handleCreateLog}>
           <SymbolView
             name={{
               ios: 'square.and.arrow.down',

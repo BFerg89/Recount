@@ -4,6 +4,7 @@ import { nightLogTheme } from '@/constants/NightLogTheme';
 import { useLocalSearchParams, router } from 'expo-router';
 
 import { useNightLogs } from '@/context/NightLogsContext';
+import { parseStoredDate } from '@/data/nightLogModels';
 import { promptedNoteDefinitions } from '@/data/promptedNotes';
 
 const { colors, fonts, layout, radius, shadows, spacing, type } = nightLogTheme;
@@ -39,18 +40,20 @@ export default function ViewLogScreen() {
 
   const selectedLogId = Array.isArray(id) ? id[0] : id;
   const log = nightLogs.find((nightLog) => nightLog.id === selectedLogId);
-  const date = log?.date;
+  const date = log ? parseStoredDate(log.date) : null;
   const weekday = date?.toLocaleDateString('en-US', { weekday: 'long' });
   const monthTitle = date?.toLocaleDateString('en-US', {
     month: 'short',
     year: 'numeric',
   })
   const people = log?.people;
-  const moments = log?.timelineMoments;
+  const moments = log
+    ? [...log.timelineEvents].sort((a, b) => a.sortOrder - b.sortOrder)
+    : [];
   const promptLabels = Object.fromEntries(
     promptedNoteDefinitions.map((prompt) => [prompt.promptType, prompt.label])
   );
-  const answeredNotes = log?.promptedNotes
+  const answeredNotes = log?.notes
     .filter((note) => note.text.trim().length > 0)
     .map((note) => ({
       ...note,
