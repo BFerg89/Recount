@@ -29,6 +29,10 @@ export default function CreateScreen() {
     336,
     Math.max(292, width - layout.mobileGutter * 2 - spacing.s6)
   ) / 2.2;
+  const notePromptColumns = Array.from(
+    { length: Math.ceil(promptedNoteDefinitions.length / 2) },
+    (_, index) => promptedNoteDefinitions.slice(index * 2, index * 2 + 2)
+  );
 
   const [date, setDate] = useState(new Date());
   const [title, setTitle] = useState('');
@@ -112,7 +116,7 @@ export default function CreateScreen() {
     const createdAt = Date.now();
     const promptedNotes: NightLogPromptedNote[] = promptedNoteDefinitions
       .map((prompt) => {
-        const text = noteAnswers[prompt.promptType].trim();
+        const text = (noteAnswers[prompt.promptType] ?? '').trim();
 
         if (!text) {
           return null;
@@ -243,24 +247,30 @@ export default function CreateScreen() {
             showsHorizontalScrollIndicator={false}
             style={styles.noteCardsScroll}
             contentContainerStyle={styles.noteCardsContent}>
-            {promptedNoteDefinitions.map((prompt) => (
-              <View key={prompt.promptType} style={[styles.noteCard, { width: noteCardWidth }]}>
-                <Text style={styles.notePrompt}>{prompt.label}</Text>
+            {notePromptColumns.map((column) => (
+              <View
+                key={column.map((prompt) => prompt.promptType).join('-')}
+                style={styles.noteColumn}>
+                {column.map((prompt) => (
+                  <View key={prompt.promptType} style={[styles.noteCard, { width: noteCardWidth }]}>
+                    <Text style={styles.notePrompt}>{prompt.label}</Text>
 
-                <TextInput
-                  value={noteAnswers[prompt.promptType]}
-                  onChangeText={(text) => {
-                    setNoteAnswers((previousAnswers) => {
-                      return {
-                        ...previousAnswers,
-                        [prompt.promptType]: text,
-                      };
-                    });
-                  }}
-                  onFocus={handleNoteFocus}
-                  placeholder="Enter note..."
-                  multiline
-                  style={styles.noteAnswer}/>
+                    <TextInput
+                      value={noteAnswers[prompt.promptType] ?? ''}
+                      onChangeText={(text) => {
+                        setNoteAnswers((previousAnswers) => {
+                          return {
+                            ...previousAnswers,
+                            [prompt.promptType]: text,
+                          };
+                        });
+                      }}
+                      onFocus={handleNoteFocus}
+                      placeholder="Enter note..."
+                      multiline
+                      style={styles.noteAnswer}/>
+                  </View>
+                ))}
               </View>
             ))}
           </ScrollView>
@@ -443,15 +453,21 @@ const styles = StyleSheet.create({
   notesSection: {
     alignItems: 'stretch',
     justifyContent: 'flex-start',
-    minHeight: 172,
+    minHeight: 360,
   },
   noteCardsScroll: {
     flex: 1,
   },
   noteCardsContent: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: gridGap,
+  },
+  noteColumn: {
     gap: gridGap,
   },
   noteCard: {
+    minHeight: 172,
     borderRadius: radius.l,
     borderWidth: 1,
     borderColor: colors.paperEdge,
@@ -464,11 +480,13 @@ const styles = StyleSheet.create({
     color: colors.inkMid,
   },
   noteAnswer: {
+    flex: 1,
     fontFamily: fonts.body,
     fontSize: type.body.fontSize,
     lineHeight: type.body.lineHeight,
     color: colors.ink,
     paddingVertical: spacing.s2,
+    textAlignVertical: 'top',
   },
   peopleSection: {
     justifyContent: 'flex-start',

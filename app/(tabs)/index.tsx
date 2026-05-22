@@ -66,7 +66,7 @@ export default function TabOneScreen() {
   const router = useRouter();
 
   return (
-    <View style={[styles.screen, { paddingTop: insets.top + 12 }]}>
+    <View style={styles.screen}>
       <Text style={styles.title}>Nights</Text>
       <ScrollView style={styles.contentContainer} contentContainerStyle={styles.content}>
         {monthSections.map((month) => (
@@ -106,12 +106,12 @@ const styles = StyleSheet.create({
     flex: 1,
     gap: spacing.s3,
     backgroundColor: colors.paper,
+    paddingTop: layout.statusBarSpace,
   },
   title: {
     paddingHorizontal: layout.mobileGutter,
     fontFamily: fonts.display,
     fontSize: type.displayXl.fontSize,
-    lineHeight: type.displayXl.lineHeight,
     letterSpacing: type.displayXl.letterSpacing,
     color: colors.terracotta,
   },

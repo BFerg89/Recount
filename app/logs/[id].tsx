@@ -1,12 +1,13 @@
-import { View, StyleSheet, Text, ScrollView, Pressable } from 'react-native';
+import { View, StyleSheet, Text, ScrollView, Pressable, useWindowDimensions } from 'react-native';
 import { SymbolView } from 'expo-symbols';
 import { nightLogTheme } from '@/constants/NightLogTheme';
 import { useLocalSearchParams, router } from 'expo-router';
 
 import { useNightLogs } from '@/context/NightLogsContext';
-import { MonoText } from '@/components/StyledText';
+import { promptedNoteDefinitions } from '@/data/promptedNotes';
 
 const { colors, fonts, layout, radius, shadows, spacing, type } = nightLogTheme;
+const gridGap = spacing.s4;
 
 const formatLogDate = (date: Date) => {
   return {
@@ -30,6 +31,11 @@ function handleback() {
 export default function ViewLogScreen() {
   const { id } = useLocalSearchParams();
   const { nightLogs } = useNightLogs();
+  const { width } = useWindowDimensions();
+  const noteCardWidth = Math.min(
+    336,
+    Math.max(292, width - layout.mobileGutter * 2 - spacing.s6)
+  ) / 2.2;
 
   const selectedLogId = Array.isArray(id) ? id[0] : id;
   const log = nightLogs.find((nightLog) => nightLog.id === selectedLogId);
@@ -41,6 +47,19 @@ export default function ViewLogScreen() {
   })
   const people = log?.people;
   const moments = log?.timelineMoments;
+  const promptLabels = Object.fromEntries(
+    promptedNoteDefinitions.map((prompt) => [prompt.promptType, prompt.label])
+  );
+  const answeredNotes = log?.promptedNotes
+    .filter((note) => note.text.trim().length > 0)
+    .map((note) => ({
+      ...note,
+      label: promptLabels[note.promptType] ?? 'Note:',
+    })) ?? [];
+  const noteColumns = Array.from(
+    { length: Math.ceil(answeredNotes.length / 2) },
+    (_, index) => answeredNotes.slice(index * 2, index * 2 + 2)
+  );
 
   return (
     <View style={styles.screen}>
@@ -86,11 +105,43 @@ export default function ViewLogScreen() {
             </View>
           </View>
           <View style={styles.timelineSection}>
-            {moments?.map((moment) => (
-              <Text
-                key={moment.id}>{moment.title}</Text>
-            ))}
+            <View style={styles.timelineHeader}>
+              <Text style={styles.sectionLabel}>Moments</Text>
+              <Text style={styles.sectionLabel}>{moments?.length ?? 0} added</Text>
+            </View>
+            <View style={styles.momentListCard}>
+              {moments?.map((moment) => (
+                <View
+                  key={moment.id}
+                  style={styles.momentRow}>
+                  <Text style={styles.momentTime}>{moment.approxTime}</Text>
+                  <Text style={styles.momentTitle}>{moment.title}</Text>
+                </View>
+              ))}
+            </View>
           </View>
+          {answeredNotes.length > 0 && (
+            <View style={styles.notesSection}>
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                style={styles.noteCardsScroll}
+                contentContainerStyle={styles.noteCardsContent}>
+                {noteColumns.map((column) => (
+                  <View
+                    key={column.map((note) => note.id).join('-')}
+                    style={styles.noteColumn}>
+                    {column.map((note) => (
+                      <View key={note.id} style={[styles.noteCard, { width: noteCardWidth }]}>
+                        <Text style={styles.notePrompt}>{note.label}</Text>
+                        <Text style={styles.noteAnswer}>{note.text}</Text>
+                      </View>
+                    ))}
+                  </View>
+                ))}
+              </ScrollView>
+            </View>
+          )}
         </View>
       </ScrollView>
     </View>
@@ -181,8 +232,82 @@ const styles = StyleSheet.create({
     color: colors.ink,
   },
   timelineSection: {
-    borderWidth: 2,
+    minHeight: 104,
+    justifyContent: 'flex-start',
+    alignItems: 'stretch',
+    gap: spacing.s3,
+  },
+  timelineHeader: {
+    flexDirection: 'row',
     alignItems: 'center',
-    gap: layout.verticalCardGap,
-  }
+    justifyContent: 'space-between',
+    width: '100%',
+  },
+  momentListCard: {
+    width: '100%',
+    backgroundColor: colors.paperCard,
+    borderWidth: 1,
+    borderColor: colors.paperEdge,
+    borderRadius: radius.m,
+    padding: layout.cardPadding,
+  },
+  momentRow: {
+    flexDirection: 'row',
+    alignItems: 'baseline',
+    gap: spacing.s4,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.rule,
+    paddingVertical: spacing.s1,
+  },
+  momentTitle: {
+    fontFamily: fonts.italicAccent,
+    fontSize: type.bodyL.fontSize,
+    lineHeight: type.bodyL.lineHeight,
+    color: colors.ink,
+    flex: 1,
+  },
+  momentTime: {
+    fontFamily: fonts.bodyStrong,
+    fontSize: type.bodyS.fontSize,
+    fontVariant: ['tabular-nums'],
+    color: colors.inkSoft,
+    width: 64,
+  },
+  notesSection: {
+    alignItems: 'stretch',
+    justifyContent: 'flex-start',
+    minHeight: 360,
+  },
+  noteCardsScroll: {
+    flex: 1,
+  },
+  noteCardsContent: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: gridGap,
+  },
+  noteColumn: {
+    gap: gridGap,
+  },
+  noteCard: {
+    minHeight: 172,
+    borderRadius: radius.l,
+    borderWidth: 1,
+    borderColor: colors.paperEdge,
+    padding: layout.cardPadding,
+    backgroundColor: colors.paperCard,
+  },
+  notePrompt: {
+    fontFamily: fonts.bodyStrong,
+    fontSize: type.bodyL.fontSize,
+    color: colors.inkMid,
+  },
+  noteAnswer: {
+    flex: 1,
+    fontFamily: fonts.body,
+    fontSize: type.body.fontSize,
+    lineHeight: type.body.lineHeight,
+    color: colors.ink,
+    paddingVertical: spacing.s2,
+  },
 });
