@@ -51,7 +51,6 @@ export function AddMomentSheet({
               placeholder="Where did the night go next?"
               placeholderTextColor={colors.inkSoft}
               autoCapitalize="sentences"
-              returnKeyType="next"
               selectionColor={colors.terracotta}
               style={styles.sheetTextInput}
             />
@@ -65,7 +64,6 @@ export function AddMomentSheet({
               placeholder="10:45 PM"
               placeholderTextColor={colors.inkSoft}
               keyboardType="numbers-and-punctuation"
-              returnKeyType="done"
               selectionColor={colors.terracotta}
               style={styles.sheetTextInput}
             />

@@ -12,7 +12,9 @@
     "@expo-google-fonts/newsreader": "^0.4.1",
     "@expo/ui": "~55.0.16",
     "@gorhom/bottom-sheet": "^5.2.14",
+    "@react-native-async-storage/async-storage": "2.2.0",
     "@react-navigation/native": "^7.1.33",
+    "@supabase/supabase-js": "^2.106.1",
     "expo": "~55.0.23",
     "expo-constants": "~55.0.16",
     "expo-dev-client": "~55.0.33",
@@ -20,6 +22,7 @@
     "expo-linking": "~55.0.15",
     "expo-router": "~55.0.14",
     "expo-splash-screen": "~55.0.20",
+    "expo-sqlite": "~55.0.16",
     "expo-status-bar": "~55.0.6",
     "expo-symbols": "~55.0.8",
     "expo-web-browser": "~55.0.15",
@@ -29,6 +32,7 @@
     "react-native-reanimated": "4.2.1",
     "react-native-safe-area-context": "~5.6.2",
     "react-native-screens": "~4.23.0",
+    "react-native-url-polyfill": "^3.0.0",
     "react-native-worklets": "0.7.4"
   },
   "devDependencies": {
