@@ -4,6 +4,7 @@ import { useRef, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, TextInput, useWindowDimensions, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import BottomSheet from '@gorhom/bottom-sheet';
+import { router } from 'expo-router';
 
 import { AddMomentSheet } from '@/components/create/AddMomentSheet';
 import { AddPersonSheet } from '@/components/create/AddPersonSheet';
@@ -20,6 +21,7 @@ const { colors, fonts, layout, radius, shadows, spacing, type } = nightLogTheme;
 
 const gridGap = spacing.s4;
 
+//TODO: Show save errors visually
 export default function CreateScreen() {
   const { createNightLog } = useNightLogs();
   const insets = useSafeAreaInsets();
@@ -37,19 +39,22 @@ export default function CreateScreen() {
   const [title, setTitle] = useState('');
   const [location, setLocation] = useState('');
   const [noteAnswers, setNoteAnswers] = useState(createEmptyPromptedNoteAnswers);
-
   const [people, setPeople] = useState<CreatePersonInput[]>([]);
   const [newPersonName, setNewPersonName] = useState('');
-
   const [moments, setMoments] = useState<CreateTimelineEventInput[]>([]);
   const [newMomentTitle, setNewMomentTitle] = useState('');
   const [newMomentTime, setNewMomentTime] = useState('');
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
 
   const addPeopleSheetRef = useRef<BottomSheet>(null);
   const addMomentSheetRef = useRef<BottomSheet>(null);
   const scrollRef = useRef<ScrollView>(null);
 
-  const canCreateLog = title.trim().length > 0 && location.trim().length > 0;
+  const canCreateLog = 
+    title.trim().length > 0 &&
+    location.trim().length > 0 &&
+    !isSaving;
 
   const resetCreateForm = () => {
     setDate(new Date());
@@ -106,20 +111,34 @@ export default function CreateScreen() {
     addMomentSheetRef.current?.close();
   };
 
-  const handleCreateLog = () => {
+  const handleCreateLog = async () => {
     if (!canCreateLog) {
       return;
     }
 
-    createNightLog({
-      title: title.trim(),
-      date,
-      generalLocation: location.trim(),
-      people,
-      moments,
-      noteAnswers,
-    });
-    resetCreateForm();
+    setIsSaving(true);
+    setSaveError(null);
+
+    try {
+      const createdNightLog = await createNightLog({
+        title: title.trim(),
+        date,
+        generalLocation: location.trim(),
+        people,
+        moments,
+        noteAnswers,
+      });
+
+      resetCreateForm();
+      router.replace(`/logs/${createdNightLog.id}`);
+    } catch (caughtError) {
+      const message = caughtError instanceof Error
+        ? caughtError.message
+        : 'Unable to save Night Log.';
+      setSaveError(message);
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return (
