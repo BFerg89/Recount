@@ -13,6 +13,7 @@ import { useEffect } from 'react';
 import 'react-native-reanimated';
 
 import { NightLogsProvider } from '@/context/NightLogsContext';
+import { AuthProvider, useAuth } from '@/context/AuthContext';
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -59,14 +60,41 @@ function RootLayoutNav() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <ThemeProvider value={DefaultTheme}>
-        <NightLogsProvider>
-          <Stack>
-            <Stack.Screen name="(auth)" options={{ headerShown: false }} />
-            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-            <Stack.Screen name="logs" options={{ headerShown: false }} />
-          </Stack>
-        </NightLogsProvider>
+        <AuthProvider>
+          <AuthenticatedApp />
+        </AuthProvider>
       </ThemeProvider>
     </GestureHandlerRootView>
+  );
+}
+
+function AuthenticatedApp() {
+  const { session } = useAuth();
+  const authKey = session?.user.id ?? 'signed-out';
+
+  return (
+    <NightLogsProvider key={authKey}>
+      <RootStack />
+    </NightLogsProvider>
+  );
+}
+
+function RootStack() {
+  const { session, isLoading } = useAuth();
+
+  if (isLoading) {
+    return null;
+  }
+
+  return (
+    <Stack>
+      <Stack.Protected guard={!session}>
+        <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+      </Stack.Protected>
+      <Stack.Protected guard={!!session}>
+        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+        <Stack.Screen name="logs" options={{ headerShown: false }} />
+      </Stack.Protected>
+    </Stack>
   );
 }

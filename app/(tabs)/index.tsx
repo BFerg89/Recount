@@ -97,15 +97,6 @@ export default function TabOneScreen() {
           </View>
         ))}
       </ScrollView>
-      <Pressable
-        onPress={() => (router.push('/login'))}
-        style={{
-          backgroundColor: 'green',
-          minHeight: 45,
-          minWidth: 45,
-        }}
-      >
-      </Pressable>
     </View>
   );
 }

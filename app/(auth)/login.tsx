@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { StyleSheet, View, TextInput, Pressable, Text } from 'react-native';
 import { nightLogTheme } from '@/constants/NightLogTheme';
+import { useAuth } from '@/context/AuthContext';
 
 const { colors, fonts, layout, radius, shadows, spacing, type } = nightLogTheme;
 
@@ -9,6 +10,8 @@ export default function LoginScreen() {
   const [password, setPassword] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [authError, setAuthError] = useState<string | null>(null);
+
+  const { signIn } = useAuth();
 
   const canSubmit = email.trim().length > 0 && password.length > 0;
 
@@ -21,7 +24,7 @@ export default function LoginScreen() {
     setIsSubmitting(true);
 
     try {
-      // Supabase signInWithPassword will plug in here once the client is configured.
+      await signIn(email, password);
     } catch {
       setAuthError('Could not log in. Check your details and try again.');
     } finally {
