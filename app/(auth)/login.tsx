@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { StyleSheet, View, TextInput, Pressable, Text } from 'react-native';
+import { router } from 'expo-router';
 import { nightLogTheme } from '@/constants/NightLogTheme';
 import { useAuth } from '@/context/AuthContext';
 
@@ -35,51 +36,68 @@ export default function LoginScreen() {
   return (
     <View style={styles.screen}>
       <View style={styles.content}>
-        <TextInput
-          value={email}
-          onChangeText={setEmail}
-          keyboardType='email-address'
-          autoCapitalize='none'
-          autoCorrect={false}
-          autoComplete='email'
-          textContentType='emailAddress'
-          placeholder='Email...'
-          placeholderTextColor={colors.inkSoft}
-          returnKeyType='next'
-          selectionColor={colors.terracotta}
-          style={styles.textInput}
-        />
-        <TextInput
-          value={password}
-          onChangeText={setPassword}
-          secureTextEntry
-          autoCapitalize='none'
-          autoCorrect={false}
-          autoComplete='password'
-          textContentType='password'
-          placeholder='Password...'
-          placeholderTextColor={colors.inkSoft}
-          returnKeyType='done'
-          onSubmitEditing={handleLogin}
-          selectionColor={colors.terracotta}
-          style={styles.textInput}
-        />
-        {authError && (
-          <Text style={styles.errorText}>{authError}</Text>
-        )}
+        <View style={styles.formArea}>
+          <TextInput
+            value={email}
+            onChangeText={setEmail}
+            keyboardType='email-address'
+            autoCapitalize='none'
+            autoCorrect={false}
+            autoComplete='email'
+            textContentType='emailAddress'
+            placeholder='Email...'
+            placeholderTextColor={colors.inkSoft}
+            returnKeyType='next'
+            selectionColor={colors.terracotta}
+            style={styles.textInput}
+          />
+          <TextInput
+            value={password}
+            onChangeText={setPassword}
+            secureTextEntry
+            autoCapitalize='none'
+            autoCorrect={false}
+            autoComplete='password'
+            textContentType='password'
+            placeholder='Password...'
+            placeholderTextColor={colors.inkSoft}
+            returnKeyType='done'
+            onSubmitEditing={handleLogin}
+            selectionColor={colors.terracotta}
+            style={styles.textInput}
+          />
+          {authError && (
+            <Text style={styles.errorText}>{authError}</Text>
+          )}
+          <Pressable
+            disabled={!canSubmit || isSubmitting}
+            accessibilityState={{ disabled: !canSubmit || isSubmitting }}
+            onPress={handleLogin}
+            style={({ pressed }) => [
+              styles.primaryButton,
+              pressed && canSubmit && !isSubmitting && styles.primaryButtonPressed,
+              (!canSubmit || isSubmitting) && styles.primaryButtonDisabled,
+            ]}
+          >
+            <Text style={styles.primaryButtonText}>
+              {isSubmitting ? 'Logging in...' : 'Login'}
+            </Text>
+          </Pressable>
+        </View>
         <Pressable
-          disabled={!canSubmit || isSubmitting}
-          accessibilityState={{ disabled: !canSubmit || isSubmitting }}
-          onPress={handleLogin}
-          style={({ pressed }) => [
-            styles.primaryButton,
-            pressed && canSubmit && !isSubmitting && styles.primaryButtonPressed,
-            (!canSubmit || isSubmitting) && styles.primaryButtonDisabled,
-          ]}
+          style={styles.signUpButton}
+          onPress={() => router.push('/sign-up')}
         >
-          <Text style={styles.primaryButtonText}>
-            {isSubmitting ? 'Logging in...' : 'Login'}
-          </Text>
+          {({ pressed }) => (
+            <>
+              <Text style={pressed ? styles.signUpTextPressed : styles.signUpText}>
+                New to NightLog?
+              </Text>
+              <Text style={pressed ? styles.signUpTextPressed : styles.signUpText}>
+                Sign Up!
+              </Text>
+            </>
+          )}
         </Pressable>
       </View>
     </View>
@@ -93,6 +111,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: layout.mobileGutter,
   },
   content: {
+    flex: 1,
+    justifyContent: 'space-between',
+    paddingTop: layout.statusBarSpace,
+    paddingBottom: spacing.s7,
+  },
+  formArea: {
     flex: 1,
     gap: layout.verticalCardGap,
     justifyContent: 'center',
@@ -139,5 +163,23 @@ const styles = StyleSheet.create({
     fontSize: type.body.fontSize,
     lineHeight: type.body.lineHeight,
     color: colors.paperCard,
+  },
+  signUpButton: {
+    alignItems: 'center',
+    alignSelf: 'center',
+  },
+  signUpText: {
+    fontFamily: fonts.label,
+    fontSize: type.label.fontSize,
+    lineHeight: type.label.lineHeight,
+    textTransform: type.label.textTransform,
+    color: colors.inkMid,
+  },
+  signUpTextPressed: {
+    fontFamily: fonts.label,
+    fontSize: type.label.fontSize,
+    lineHeight: type.label.lineHeight,
+    textTransform: type.label.textTransform,
+    color: colors.inkSoft,
   },
 });

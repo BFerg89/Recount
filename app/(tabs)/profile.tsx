@@ -1,4 +1,4 @@
-import { Text, View, Pressable, StyleSheet } from 'react-native';
+import { Text, View, Pressable, StyleSheet, ScrollView } from 'react-native';
 import { SymbolView } from 'expo-symbols';
 import { nightLogTheme } from '@/constants/NightLogTheme';
 import { useAuth } from '@/context/AuthContext';
@@ -38,16 +38,6 @@ export default function ProfileScreen() {
             <Text style={styles.addFriendsButton}>Add Friends</Text>
           </Pressable>
         </View>
-        <View style={styles.friendsSection}>
-          <Text style={styles.friendsLabel}>Friends · 20</Text>
-          <View style={styles.friendsCard}>
-            {friends.map((friend) => (
-              <PersonPill
-                key={friend}
-                displayName={friend}/>
-            ))}
-          </View>
-        </View>
         <View style={styles.userCard}>
           <SymbolView name={{
             ios: 'person.circle',
@@ -64,6 +54,27 @@ export default function ProfileScreen() {
             >{username}</Text>
             <Text style={styles.emailText}>{email}</Text>
           </View>
+        </View>
+        <View style={styles.friendsSection}>
+          <Text style={styles.friendsLabel}>Friends · 20</Text>
+          <ScrollView style={styles.friendsCard}>
+            {friends.map((friend) => (
+              <View 
+                key={friend}
+                style={styles.friendRow}
+              >
+                <SymbolView name={{
+                  ios: 'person.circle',
+                  android: 'person',
+                }}
+                size={40}/>
+                <View>
+                  <Text style={styles.friendName}>{friend}</Text>
+                  <Text>@{friend}</Text>
+                </View>
+              </View>
+            ))}
+          </ScrollView>
         </View>
         <View style={styles.actionSection}>
           <Pressable style={styles.button}>
@@ -118,17 +129,12 @@ const styles = StyleSheet.create({
     gap: spacing.s3,
   },
   friendsCard: {
-    flex: 1,
-    borderWidth: 1,
-    borderRadius: radius.xl,
-    borderColor: colors.paperEdge,
     backgroundColor: colors.paperCard,
-    boxShadow: shadows.card,
+    borderWidth: 1,
+    borderColor: colors.paperEdge,
+    borderRadius: radius.xl,
     padding: layout.cardPadding,
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
-    rowGap: spacing.s3,
+    boxShadow: shadows.card,
   },
   friendsLabel: {
     fontFamily: fonts.label,
@@ -137,6 +143,20 @@ const styles = StyleSheet.create({
     letterSpacing: type.label.letterSpacing,
     textTransform: type.label.textTransform,
     color: colors.inkMid,
+  },
+  friendRow: {
+    flexDirection: 'row',
+    borderBottomWidth: 1,
+    borderBottomColor: colors.rule,
+    paddingVertical: spacing.s1,
+    alignItems: 'center',
+    paddingHorizontal: spacing.s1,
+    gap: spacing.s2,
+  },
+  friendName: {
+    fontFamily: fonts.bodyStrong,
+    fontSize: type.body.fontSize,
+
   },
   userCard: {
     padding: layout.cardPadding,
