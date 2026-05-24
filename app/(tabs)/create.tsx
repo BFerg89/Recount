@@ -8,6 +8,7 @@ import { router } from 'expo-router';
 
 import { AddMomentSheet } from '@/components/create/AddMomentSheet';
 import { AddPersonSheet } from '@/components/create/AddPersonSheet';
+import { PersonPill } from '@/components/people/PersonPill';
 
 import { nightLogTheme } from '@/constants/NightLogTheme';
 
@@ -178,17 +179,10 @@ export default function CreateScreen() {
           <Text style={styles.sectionLabel}>Who was there · {people.length}</Text>
             <View style={styles.peopleGrid}>
               {people.map((person) => (
-                <View
+                <PersonPill
                   key={person.id}
-                  style={styles.person}
-                >
-                  <SymbolView name={{
-                    ios: 'person.circle',
-                    android: 'person',
-                  }}
-                  tintColor={colors.ink}/>
-                  <Text style={styles.personText}>{person.displayName}</Text>
-                </View>
+                  displayName={person.displayName}
+                />
               ))}
               <Pressable
                 style={({ pressed }) => [
@@ -410,6 +404,7 @@ const styles = StyleSheet.create({
     borderColor: colors.paperEdge,
     borderRadius: radius.m,
     padding: layout.cardPadding,
+    boxShadow: shadows.card,
   },
   momentRow: {
     flexDirection: 'row',
@@ -470,6 +465,7 @@ const styles = StyleSheet.create({
     borderColor: colors.paperEdge,
     padding: layout.cardPadding,
     backgroundColor: colors.paperCard,
+    boxShadow: shadows.card,
   },
   notePrompt: {
     fontFamily: fonts.bodyStrong,
@@ -497,25 +493,6 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-start',
     gap: spacing.s2,
     rowGap: spacing.s3,
-  },
-  person: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: colors.paperCard,
-    justifyContent: 'center',
-    gap: spacing.s1,
-    borderWidth: 1,
-    borderColor: colors.paperEdge,
-    borderRadius: radius.pill,
-    paddingLeft: spacing.s1,
-    paddingRight: spacing.s2,
-    minHeight: 32,
-  },
-  personText: {
-    fontFamily: fonts.label,
-    fontSize: type.bodyS.fontSize,
-    lineHeight: type.bodyS.lineHeight,
-    color: colors.ink,
   },
   addPersonButton: {
     flexDirection: 'row',

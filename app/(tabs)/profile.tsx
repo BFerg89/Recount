@@ -2,6 +2,7 @@ import { Text, View, Pressable, StyleSheet } from 'react-native';
 import { SymbolView } from 'expo-symbols';
 import { nightLogTheme } from '@/constants/NightLogTheme';
 import { useAuth } from '@/context/AuthContext';
+import { PersonPill } from '@/components/people/PersonPill';
 const { colors, fonts, layout, radius, shadows, spacing, type } = nightLogTheme;
 
 export default function ProfileScreen() {
@@ -10,6 +11,8 @@ export default function ProfileScreen() {
 
   const username = 'Bennett'; //Placeholder
   const useSmallUsername = username.length > 11;
+
+  const friends = ['Thea', 'Finlay', 'Georgia', 'India', 'Mac', 'Juliana', 'Isabella', 'Rory', 'Aurele']; //Placeholder
 
   const handleSignout = async () => {
     try {
@@ -30,14 +33,19 @@ export default function ProfileScreen() {
                 ios: 'plus',
                 android: 'add',
               }}
-              tintColor={colors.terracotta}/>
+              tintColor={colors.terracotta}
+              size={20}/>
             <Text style={styles.addFriendsButton}>Add Friends</Text>
           </Pressable>
         </View>
         <View style={styles.friendsSection}>
           <Text style={styles.friendsLabel}>Friends · 20</Text>
           <View style={styles.friendsCard}>
-            
+            {friends.map((friend) => (
+              <PersonPill
+                key={friend}
+                displayName={friend}/>
+            ))}
           </View>
         </View>
         <View style={styles.userCard}>
@@ -56,6 +64,18 @@ export default function ProfileScreen() {
             >{username}</Text>
             <Text style={styles.emailText}>{email}</Text>
           </View>
+        </View>
+        <View style={styles.actionSection}>
+          <Pressable style={styles.button}>
+            <Text style={styles.buttonText}>*Edit Profile*</Text>
+          </Pressable>
+          <Pressable 
+          style={[styles.button, {
+            borderColor: 'red', borderWidth: 0.5, borderStyle: 'dashed'
+            }]}
+          onPress={handleSignout}>
+            <Text style={styles.buttonText}>Sign Out</Text>
+          </Pressable>
         </View>
         </View>
       </View>
@@ -91,7 +111,7 @@ const styles = StyleSheet.create({
     color: colors.terracotta,
     fontFamily: fonts.bodyStrong,
     fontSize: type.bodyL.fontSize,
-    gap: spacing.s2,
+    gap: spacing.s1,
   },
   friendsSection: {
     flex: 1,
@@ -103,6 +123,12 @@ const styles = StyleSheet.create({
     borderRadius: radius.xl,
     borderColor: colors.paperEdge,
     backgroundColor: colors.paperCard,
+    boxShadow: shadows.card,
+    padding: layout.cardPadding,
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+    rowGap: spacing.s3,
   },
   friendsLabel: {
     fontFamily: fonts.label,
@@ -121,6 +147,7 @@ const styles = StyleSheet.create({
     borderColor: colors.paperEdge,
     borderWidth: 1,
     borderRadius: radius.xl,
+    boxShadow: shadows.card,
   },
   userCardDetails: {
     width: '100%'
@@ -146,5 +173,24 @@ const styles = StyleSheet.create({
     letterSpacing: type.label.letterSpacing,
     textTransform: type.label.textTransform,
     color: colors.inkMid,
-  }
+  },
+  actionSection: {
+    flexDirection: 'row',
+    gap: spacing.s3,
+  },
+  button: {
+    flex: 1,
+    minHeight: 40,
+    borderRadius: radius.pill,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: spacing.s2,
+    boxShadow: shadows.card,
+  },
+  buttonText: {
+    fontFamily: fonts.label,
+    fontSize: type.body.fontSize,
+    textTransform: type.label.textTransform,
+    color: colors.inkMid,
+  },
 });
