@@ -94,7 +94,7 @@ export default function LoginScreen() {
                 New to NightLog?
               </Text>
               <Text style={pressed ? styles.signUpTextPressed : styles.signUpText}>
-                Sign Up!
+                Sign Up
               </Text>
             </>
           )}
