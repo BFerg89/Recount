@@ -3,6 +3,7 @@ import { router } from 'expo-router';
 import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 
 import { nightLogTheme } from '@/constants/NightLogTheme';
+import { useAuth } from '@/context/AuthContext';
 
 const { colors, fonts, layout, radius, shadows, spacing, type } = nightLogTheme;
 
@@ -12,6 +13,11 @@ export default function SignUpScreen() {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [formError, setFormError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [authError, setAuthError] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+
+  const { signUp } = useAuth();
 
   const hasRequiredFields = (
     displayName.trim().length > 0 &&
@@ -21,8 +27,8 @@ export default function SignUpScreen() {
   );
   const passwordMismatch = confirmPassword.length > 0 && password !== confirmPassword;
   const canSubmit = hasRequiredFields && !passwordMismatch;
-  
-  const handleSignUp = () => {
+
+  const handleSignUp = async () => {
     if (!hasRequiredFields) {
       setFormError('Fill in each field to create your account.');
       return;
@@ -34,16 +40,29 @@ export default function SignUpScreen() {
     }
 
     setFormError(null);
+
+    if (isSubmitting) {
+      return;
+    }
+
+    setAuthError(null);
+    setIsSubmitting(true);
+
+    try {
+      const result = await signUp(email, password);
+      if (result.needsEmailConfirmation) {
+        setSuccessMessage('Check you email to confirm your accout.');
+      }
+    } catch {
+      setAuthError('Sign up auth error'); //Too general, eventually email/username take etc.
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
     <View style={styles.screen}>
-      <ScrollView
-        contentContainerStyle={styles.content}
-        contentInsetAdjustmentBehavior='automatic'
-        keyboardShouldPersistTaps='handled'
-        style={styles.scroll}
-      >
+      <View style={styles.content}>
         <View style={styles.formArea}>
           <TextInput
             value={displayName}
@@ -101,19 +120,22 @@ export default function SignUpScreen() {
             selectionColor={colors.terracotta}
             style={styles.textInput}
           />
-          {(formError || passwordMismatch) && (
+          {(formError || passwordMismatch || authError) && (
             <Text style={styles.errorText}>
-              {passwordMismatch ? 'Passwords do not match.' : formError}
+              {passwordMismatch ? 'Passwords do not match.' : formError ?? authError}
             </Text>
           )}
+          {successMessage && (
+            <Text style={styles.successText}>{successMessage}</Text>
+          )}
           <Pressable
-            disabled={!canSubmit}
-            accessibilityState={{ disabled: !canSubmit }}
+            disabled={!canSubmit || isSubmitting}
+            accessibilityState={{ disabled: !canSubmit || isSubmitting}}
             onPress={handleSignUp}
             style={({ pressed }) => [
               styles.primaryButton,
-              pressed && canSubmit && styles.primaryButtonPressed,
-              !canSubmit && styles.primaryButtonDisabled,
+              pressed && canSubmit && !isSubmitting && styles.primaryButtonPressed,
+              (!canSubmit || isSubmitting) && styles.primaryButtonDisabled,
             ]}
           >
             <Text style={styles.primaryButtonText}>Create account</Text>
@@ -134,7 +156,7 @@ export default function SignUpScreen() {
             </>
           )}
         </Pressable>
-      </ScrollView>
+      </View>
     </View>
   );
 }
@@ -145,13 +167,9 @@ const styles = StyleSheet.create({
     backgroundColor: colors.paper,
     paddingHorizontal: layout.mobileGutter,
   },
-  scroll: {
-    flex: 1,
-  },
   content: {
     flexGrow: 1,
     justifyContent: 'space-between',
-    paddingTop: layout.statusBarSpace,
     paddingBottom: spacing.s7,
   },
   formArea: {
@@ -177,6 +195,12 @@ const styles = StyleSheet.create({
     fontSize: type.bodyS.fontSize,
     lineHeight: type.bodyS.lineHeight,
     color: colors.terracottaDeep,
+  },
+  successText: {
+    fontFamily: fonts.body,
+    fontSize: type.bodyS.fontSize,
+    lineHeight: type.bodyS.lineHeight,
+    color: colors.inkMid,
   },
   primaryButton: {
     minHeight: 50,
@@ -210,7 +234,6 @@ const styles = StyleSheet.create({
     fontFamily: fonts.label,
     fontSize: type.label.fontSize,
     lineHeight: type.label.lineHeight,
-    letterSpacing: type.label.letterSpacing,
     textTransform: type.label.textTransform,
     color: colors.inkMid,
   },
@@ -218,7 +241,6 @@ const styles = StyleSheet.create({
     fontFamily: fonts.label,
     fontSize: type.label.fontSize,
     lineHeight: type.label.lineHeight,
-    letterSpacing: type.label.letterSpacing,
     textTransform: type.label.textTransform,
     color: colors.inkSoft,
   },

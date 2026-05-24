@@ -14,7 +14,10 @@ export default function LoginScreen() {
 
   const { signIn } = useAuth();
 
-  const canSubmit = email.trim().length > 0 && password.length > 0;
+  const canSubmit = (
+    email.trim().length > 0 &&
+    password.length > 0
+  );
 
   const handleLogin = async () => {
     if (!canSubmit || isSubmitting) {
@@ -86,7 +89,7 @@ export default function LoginScreen() {
         </View>
         <Pressable
           style={styles.signUpButton}
-          onPress={() => router.push('/sign-up')}
+          onPress={() => router.replace('/sign-up')}
         >
           {({ pressed }) => (
             <>
@@ -113,7 +116,6 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
     justifyContent: 'space-between',
-    paddingTop: layout.statusBarSpace,
     paddingBottom: spacing.s7,
   },
   formArea: {

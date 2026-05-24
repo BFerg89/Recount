@@ -21,8 +21,32 @@ import { useNightLogs } from '@/context/NightLogsContext';
 const { colors, fonts, layout, radius, shadows, spacing, type } = nightLogTheme;
 
 const gridGap = spacing.s4;
+const notSignedInSaveError = 'You need to be logged in to save a log.';
+const networkSaveError = 'Could not connect. Check your connection and try again.';
+const genericSaveError = 'Unable to save log. Please try again.';
 
-//TODO: Show save errors visually
+const getSaveErrorMessage = (caughtError: unknown) => {
+  if (!(caughtError instanceof Error)) {
+    return genericSaveError;
+  }
+
+  const message = caughtError.message.toLowerCase();
+
+  if (message.includes('signed in')) {
+    return notSignedInSaveError;
+  }
+
+  if (
+    message.includes('network request failed') ||
+    message.includes('failed to fetch') ||
+    message.includes('fetch failed')
+  ) {
+    return networkSaveError;
+  }
+
+  return genericSaveError;
+};
+
 export default function CreateScreen() {
   const { createNightLog } = useNightLogs();
   const insets = useSafeAreaInsets();
@@ -51,6 +75,12 @@ export default function CreateScreen() {
   const addPeopleSheetRef = useRef<BottomSheet>(null);
   const addMomentSheetRef = useRef<BottomSheet>(null);
   const scrollRef = useRef<ScrollView>(null);
+
+  const clearSaveError = () => {
+    if (saveError) {
+      setSaveError(null);
+    }
+  };
 
   const canCreateLog = 
     title.trim().length > 0 &&
@@ -88,6 +118,7 @@ export default function CreateScreen() {
     };
 
     setPeople((currentPeople) => [...currentPeople, newPerson]);
+    clearSaveError();
     setNewPersonName('');
     addPeopleSheetRef.current?.close();
   };
@@ -107,6 +138,7 @@ export default function CreateScreen() {
     };
 
     setMoments((currentMoments) => [...currentMoments, newMoment]);
+    clearSaveError();
     setNewMomentTitle('');
     setNewMomentTime('');
     addMomentSheetRef.current?.close();
@@ -133,10 +165,7 @@ export default function CreateScreen() {
       resetCreateForm();
       router.replace(`/logs/${createdNightLog.id}`);
     } catch (caughtError) {
-      const message = caughtError instanceof Error
-        ? caughtError.message
-        : 'Unable to save Night Log.';
-      setSaveError(message);
+      setSaveError(getSaveErrorMessage(caughtError));
     } finally {
       setIsSaving(false);
     }
@@ -153,13 +182,19 @@ export default function CreateScreen() {
         <View style={styles.titleSection}>
           <TextInput
             value={title}
-            onChangeText={setTitle}
+            onChangeText={(text) => {
+              setTitle(text);
+              clearSaveError();
+            }}
             placeholder='Name your night...'
             style={styles.titleInput}/>
           <View style={styles.dateRow}>
             <TextInput
               value={location}
-              onChangeText={setLocation}
+              onChangeText={(text) => {
+                setLocation(text);
+                clearSaveError();
+              }}
               style={styles.locationInput}
               placeholder='Location...'/>
             <View style={styles.datePickerGroup}>
@@ -168,6 +203,7 @@ export default function CreateScreen() {
                 value={date}
                 onValueChange={(_event, selectedDate) => {
                   setDate(selectedDate);
+                  clearSaveError();
                 }}
                 mode="date"
                 display="compact"
@@ -249,6 +285,7 @@ export default function CreateScreen() {
                     <TextInput
                       value={noteAnswers[prompt.promptType] ?? ''}
                       onChangeText={(text) => {
+                        clearSaveError();
                         setNoteAnswers((previousAnswers) => {
                           return {
                             ...previousAnswers,
@@ -270,6 +307,9 @@ export default function CreateScreen() {
       </ScrollView>
 
       <View style={styles.saveBar}>
+        {saveError && (
+          <Text style={styles.saveErrorText}>{saveError}</Text>
+        )}
         <Pressable
           disabled={!canCreateLog}
           accessibilityState={{ disabled: !canCreateLog }}
@@ -295,16 +335,25 @@ export default function CreateScreen() {
         sheetRef={addPeopleSheetRef}
         bottomInset={insets.bottom}
         newPersonName={newPersonName}
-        onChangeNewPersonName={setNewPersonName}
+        onChangeNewPersonName={(text) => {
+          setNewPersonName(text);
+          clearSaveError();
+        }}
         onAddPerson={handleAddPerson}/>
 
       <AddMomentSheet
         sheetRef={addMomentSheetRef}
         bottomInset={insets.bottom}
         newMomentTitle={newMomentTitle}
-        onChangeNewMomentTitle={setNewMomentTitle}
+        onChangeNewMomentTitle={(text) => {
+          setNewMomentTitle(text);
+          clearSaveError();
+        }}
         newMomentTime={newMomentTime}
-        onChangeNewMomentTime={setNewMomentTime}
+        onChangeNewMomentTime={(text) => {
+          setNewMomentTime(text);
+          clearSaveError();
+        }}
         onAddMoment={handleAddMoment}/>
     </View>
   );
@@ -530,6 +579,14 @@ const styles = StyleSheet.create({
     paddingHorizontal: layout.mobileGutter,
     borderTopWidth: 1,
     borderTopColor: colors.paperEdge,
+  },
+  saveErrorText: {
+    marginBottom: spacing.s2,
+    fontFamily: fonts.body,
+    fontSize: type.bodyS.fontSize,
+    lineHeight: type.bodyS.lineHeight,
+    color: colors.terracottaDeep,
+    textAlign: 'center',
   },
   saveButton: {
     minHeight: 40,

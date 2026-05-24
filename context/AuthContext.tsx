@@ -5,12 +5,17 @@ import type { Session, User } from '@supabase/supabase-js';
 
 import { supabase } from '@/lib/supabase';
 
+type SignUpResult = {
+  needsEmailConfirmation: boolean;
+};
+
 type AuthContextValue = {
   session: Session | null;
   user: User | null;
   isLoading: boolean;
   signIn: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
+  signUp: (email: string, password: string) => Promise<SignUpResult>;
 };
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -91,6 +96,20 @@ export function AuthProvider({ children }: PropsWithChildren) {
         if (error) {
           throw error;
         }
+      },
+      signUp: async (email, password) => {
+        const { data, error } = await supabase.auth.signUp({
+          email: email.trim(),
+          password,
+        });
+
+        if (error) {
+          throw error;
+        }
+
+        return {
+          needsEmailConfirmation: data.session === null,
+        };
       },
     };
   }, [session, isLoading]);

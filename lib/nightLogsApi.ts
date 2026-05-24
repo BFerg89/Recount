@@ -52,6 +52,24 @@ type NightLogWithChildrenRow = NightLogRow & {
   notes: NoteRow[] | null;
 };
 
+const toError = (error: unknown, fallbackMessage = 'Unknown NightLog API error.') => {
+  if (error instanceof Error) {
+    return error;
+  }
+
+  if (
+    typeof error === 'object' &&
+    error !== null &&
+    'message' in error &&
+    typeof error.message === 'string' &&
+    error.message.trim().length > 0
+  ) {
+    return new Error(error.message);
+  }
+
+  return new Error(fallbackMessage);
+};
+
 const mapNightPerson = (row: NightPersonRow): NightPerson => {
   return {
     id: row.id,
@@ -118,7 +136,7 @@ export async function createNightLog(input: CreateNightLogInput): Promise<NightL
   const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
 
   if (sessionError) {
-    throw sessionError;
+    throw toError(sessionError);
   }
 
   if (!sessionData.session) {
@@ -136,7 +154,7 @@ export async function createNightLog(input: CreateNightLogInput): Promise<NightL
     .single();
 
   if (nightLogError) {
-    throw nightLogError;
+    throw toError(nightLogError);
   }
 
   if (!nightLogData) {
@@ -161,7 +179,7 @@ export async function createNightLog(input: CreateNightLogInput): Promise<NightL
       : { data: [], error: null };
 
     if (peopleError) {
-      throw peopleError;
+      throw toError(peopleError);
     }
 
     const timelineEventsPayload = input.moments
@@ -181,7 +199,7 @@ export async function createNightLog(input: CreateNightLogInput): Promise<NightL
       : { data: [], error: null };
 
     if (timelineEventsError) {
-      throw timelineEventsError;
+      throw toError(timelineEventsError);
     }
 
     const notesPayload = promptedNoteDefinitions
@@ -200,7 +218,7 @@ export async function createNightLog(input: CreateNightLogInput): Promise<NightL
       : { data: [], error: null };
 
     if (notesError) {
-      throw notesError;
+      throw toError(notesError);
     }
 
     return mapNightLog(
@@ -219,7 +237,7 @@ export async function fetchNightLogs(): Promise<NightLogEntry[]> {
   const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
 
   if (sessionError) {
-    throw sessionError;
+    throw toError(sessionError);
   }
 
   if (!sessionData.session) {
@@ -265,7 +283,7 @@ export async function fetchNightLogs(): Promise<NightLogEntry[]> {
     .order('created_at', { ascending: false });
 
   if (error) {
-    throw error;
+    throw toError(error);
   }
 
   const rows = (data ?? []) as NightLogWithChildrenRow[];
