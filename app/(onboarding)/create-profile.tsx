@@ -2,6 +2,7 @@ import { useRef, useState } from 'react';
 import { Pressable, StyleSheet, Text, View, type TextInput } from 'react-native';
 
 import { router } from 'expo-router';
+import { useProfile } from '@/context/ProfileContext';
 import { createProfile } from '@/lib/profilesApi';
 
 import { AuthTextInput } from '@/components/auth/AuthTextInput';
@@ -16,6 +17,7 @@ export default function CreateProfileScreen() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [profileError, setProfileError] = useState<string | null>(null);
   const nicknameInputRef = useRef<TextInput>(null);
+  const { setCurrentProfile } = useProfile();
 
   const hasRequiredFields = (
     username.trim().length > 0 &&
@@ -31,21 +33,22 @@ export default function CreateProfileScreen() {
     setFormError(null);
 
     if (isSubmitting) {
-      return true;
+      return;
     }
 
     setProfileError(null);
     setIsSubmitting(true);
 
     try {
-      await createProfile({ username, nickname });
+      const createdProfile = await createProfile({ username, nickname });
+      setCurrentProfile(createdProfile);
       router.replace('/(tabs)');
     } catch (error) {
       setProfileError(error instanceof Error ? error.message : 'Could not create profile.');
     } finally {
       setIsSubmitting(false);
     }
-  }
+  };
 
   return (
     <View style={styles.screen}>
@@ -76,12 +79,13 @@ export default function CreateProfileScreen() {
             <Text style={styles.errorText}>{formError ?? profileError}</Text>
           )}
           <Pressable
+            disabled={!hasRequiredFields || isSubmitting}
             accessibilityState={{ disabled: !hasRequiredFields || isSubmitting }}
             onPress={handleCreateProfile}
             style={({ pressed }) => [
               styles.primaryButton,
-              pressed && hasRequiredFields && styles.primaryButtonPressed,
-              !hasRequiredFields && styles.primaryButtonDisabled,
+              pressed && hasRequiredFields && !isSubmitting && styles.primaryButtonPressed,
+              (!hasRequiredFields || isSubmitting) && styles.primaryButtonDisabled,
             ]}
           >
             <Text style={styles.primaryButtonText}>Create Profile</Text>

@@ -14,6 +14,7 @@ import 'react-native-reanimated';
 
 import { NightLogsProvider } from '@/context/NightLogsContext';
 import { AuthProvider, useAuth } from '@/context/AuthContext';
+import { ProfileProvider, useProfile } from '@/context/ProfileContext';
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -73,26 +74,34 @@ function AuthenticatedApp() {
   const authKey = session?.user.id ?? 'signed-out';
 
   return (
-    <NightLogsProvider key={authKey}>
-      <RootStack />
-    </NightLogsProvider>
+    <ProfileProvider key={authKey}>
+      <NightLogsProvider key={authKey}>
+        <RootStack />
+      </NightLogsProvider>
+    </ProfileProvider>
   );
 }
 
 function RootStack() {
   const { session, isLoading } = useAuth();
+  const { profile, isLoading: isProfileLoading } = useProfile();
 
-  if (isLoading) {
+  if (isLoading || (!!session && isProfileLoading)) {
     return null;
   }
+
+  const needsProfile = !!session && !profile;
+  const hasProfile = !!session && !!profile;
 
   return (
     <Stack>
       <Stack.Protected guard={!session}>
         <Stack.Screen name="(auth)" options={{ headerShown: false }} />
       </Stack.Protected>
-      <Stack.Protected guard={!!session}>
+      <Stack.Protected guard={needsProfile}>
         <Stack.Screen name={"(onboarding)"} options={{ headerShown: false }} />
+      </Stack.Protected>
+      <Stack.Protected guard={hasProfile}>
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen name="logs" options={{ headerShown: false }} />
       </Stack.Protected>
