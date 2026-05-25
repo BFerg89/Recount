@@ -15,7 +15,6 @@ export default function SignUpScreen() {
   const [formError, setFormError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [authError, setAuthError] = useState<string | null>(null);
-  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   const { signUp } = useAuth();
 
@@ -50,7 +49,7 @@ export default function SignUpScreen() {
     try {
       const result = await signUp(email, password);
       if (result.needsEmailConfirmation) {
-        setSuccessMessage('Check you email to confirm your accout.');
+        router.replace('/confirm-email');
       }
     } catch {
       setAuthError('Sign up auth error'); //Too general, eventually email/username take etc.
@@ -102,9 +101,6 @@ export default function SignUpScreen() {
               {passwordMismatch ? 'Passwords do not match.' : formError ?? authError}
             </Text>
           )}
-          {successMessage && (
-            <Text style={styles.successText}>{successMessage}</Text>
-          )}
           <Pressable
             disabled={!canSubmit || isSubmitting}
             accessibilityState={{ disabled: !canSubmit || isSubmitting}}
@@ -115,7 +111,7 @@ export default function SignUpScreen() {
               (!canSubmit || isSubmitting) && styles.primaryButtonDisabled,
             ]}
           >
-            <Text style={styles.primaryButtonText}>Create account</Text>
+            <Text style={styles.primaryButtonText}>Create Account</Text>
           </Pressable>
         </View>
         <Pressable
@@ -159,12 +155,6 @@ const styles = StyleSheet.create({
     fontSize: type.bodyS.fontSize,
     lineHeight: type.bodyS.lineHeight,
     color: colors.terracottaDeep,
-  },
-  successText: {
-    fontFamily: fonts.body,
-    fontSize: type.bodyS.fontSize,
-    lineHeight: type.bodyS.lineHeight,
-    color: colors.inkMid,
   },
   primaryButton: {
     minHeight: 50,
