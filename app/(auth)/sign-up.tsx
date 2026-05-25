@@ -1,14 +1,14 @@
 import { useState } from 'react';
 import { router } from 'expo-router';
-import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 
+import { AuthTextInput } from '@/components/auth/AuthTextInput';
 import { nightLogTheme } from '@/constants/NightLogTheme';
 import { useAuth } from '@/context/AuthContext';
 
 const { colors, fonts, layout, radius, shadows, spacing, type } = nightLogTheme;
 
 export default function SignUpScreen() {
-  const [displayName, setDisplayName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -20,7 +20,6 @@ export default function SignUpScreen() {
   const { signUp } = useAuth();
 
   const hasRequiredFields = (
-    displayName.trim().length > 0 &&
     email.trim().length > 0 &&
     password.length > 0 &&
     confirmPassword.length > 0
@@ -64,20 +63,7 @@ export default function SignUpScreen() {
     <View style={styles.screen}>
       <View style={styles.content}>
         <View style={styles.formArea}>
-          <TextInput
-            value={displayName}
-            onChangeText={setDisplayName}
-            autoCapitalize='words'
-            autoCorrect={false}
-            autoComplete='name'
-            textContentType='name'
-            placeholder='Name...'
-            placeholderTextColor={colors.inkSoft}
-            returnKeyType='next'
-            selectionColor={colors.terracotta}
-            style={styles.textInput}
-          />
-          <TextInput
+          <AuthTextInput
             value={email}
             onChangeText={setEmail}
             keyboardType='email-address'
@@ -86,12 +72,9 @@ export default function SignUpScreen() {
             autoComplete='email'
             textContentType='emailAddress'
             placeholder='Email...'
-            placeholderTextColor={colors.inkSoft}
             returnKeyType='next'
-            selectionColor={colors.terracotta}
-            style={styles.textInput}
           />
-          <TextInput
+          <AuthTextInput
             value={password}
             onChangeText={setPassword}
             secureTextEntry
@@ -100,12 +83,9 @@ export default function SignUpScreen() {
             autoComplete='new-password'
             textContentType='newPassword'
             placeholder='Password...'
-            placeholderTextColor={colors.inkSoft}
             returnKeyType='next'
-            selectionColor={colors.terracotta}
-            style={styles.textInput}
           />
-          <TextInput
+          <AuthTextInput
             value={confirmPassword}
             onChangeText={setConfirmPassword}
             secureTextEntry
@@ -114,11 +94,8 @@ export default function SignUpScreen() {
             autoComplete='new-password'
             textContentType='newPassword'
             placeholder='Confirm password...'
-            placeholderTextColor={colors.inkSoft}
             returnKeyType='done'
             onSubmitEditing={handleSignUp}
-            selectionColor={colors.terracotta}
-            style={styles.textInput}
           />
           {(formError || passwordMismatch || authError) && (
             <Text style={styles.errorText}>
@@ -176,19 +153,6 @@ const styles = StyleSheet.create({
     flex: 1,
     gap: layout.verticalCardGap,
     justifyContent: 'center',
-  },
-  textInput: {
-    minHeight: 52,
-    borderRadius: radius.m,
-    borderWidth: 1,
-    borderColor: colors.paperEdge,
-    backgroundColor: colors.paperCard,
-    paddingHorizontal: spacing.s4,
-    paddingVertical: spacing.s3,
-    fontFamily: fonts.body,
-    fontSize: type.bodyL.fontSize,
-    lineHeight: type.bodyL.lineHeight,
-    color: colors.ink,
   },
   errorText: {
     fontFamily: fonts.body,

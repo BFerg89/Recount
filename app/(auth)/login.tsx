@@ -1,6 +1,7 @@
-import { useState } from 'react';
-import { StyleSheet, View, TextInput, Pressable, Text } from 'react-native';
+import { useRef, useState } from 'react';
+import { StyleSheet, View, Pressable, Text, type TextInput } from 'react-native';
 import { router } from 'expo-router';
+import { AuthTextInput } from '@/components/auth/AuthTextInput';
 import { nightLogTheme } from '@/constants/NightLogTheme';
 import { useAuth } from '@/context/AuthContext';
 
@@ -11,6 +12,7 @@ export default function LoginScreen() {
   const [password, setPassword] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [authError, setAuthError] = useState<string | null>(null);
+  const passwordInputRef = useRef<TextInput>(null);
 
   const { signIn } = useAuth();
 
@@ -40,7 +42,7 @@ export default function LoginScreen() {
     <View style={styles.screen}>
       <View style={styles.content}>
         <View style={styles.formArea}>
-          <TextInput
+          <AuthTextInput
             value={email}
             onChangeText={setEmail}
             keyboardType='email-address'
@@ -49,12 +51,11 @@ export default function LoginScreen() {
             autoComplete='email'
             textContentType='emailAddress'
             placeholder='Email...'
-            placeholderTextColor={colors.inkSoft}
             returnKeyType='next'
-            selectionColor={colors.terracotta}
-            style={styles.textInput}
+            onSubmitEditing={() => passwordInputRef.current?.focus()}
           />
-          <TextInput
+          <AuthTextInput
+            ref={passwordInputRef}
             value={password}
             onChangeText={setPassword}
             secureTextEntry
@@ -63,11 +64,8 @@ export default function LoginScreen() {
             autoComplete='password'
             textContentType='password'
             placeholder='Password...'
-            placeholderTextColor={colors.inkSoft}
             returnKeyType='done'
             onSubmitEditing={handleLogin}
-            selectionColor={colors.terracotta}
-            style={styles.textInput}
           />
           {authError && (
             <Text style={styles.errorText}>{authError}</Text>
@@ -122,19 +120,6 @@ const styles = StyleSheet.create({
     flex: 1,
     gap: layout.verticalCardGap,
     justifyContent: 'center',
-  },
-  textInput: {
-    minHeight: 52,
-    borderRadius: radius.m,
-    borderWidth: 1,
-    borderColor: colors.paperEdge,
-    backgroundColor: colors.paperCard,
-    paddingHorizontal: spacing.s4,
-    paddingVertical: spacing.s3,
-    fontFamily: fonts.body,
-    fontSize: type.bodyL.fontSize,
-    lineHeight: type.bodyL.lineHeight,
-    color: colors.ink,
   },
   errorText: {
     fontFamily: fonts.body,
