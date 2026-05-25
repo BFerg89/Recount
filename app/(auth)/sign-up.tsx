@@ -1,12 +1,44 @@
 import { useState } from 'react';
 import { router } from 'expo-router';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { isAuthError, isAuthWeakPasswordError } from '@supabase/supabase-js';
 
 import { AuthTextInput } from '@/components/auth/AuthTextInput';
 import { nightLogTheme } from '@/constants/NightLogTheme';
 import { useAuth } from '@/context/AuthContext';
 
 const { colors, fonts, layout, radius, shadows, spacing, type } = nightLogTheme;
+const minimumPasswordLength = 6;
+
+const getSignUpErrorMessage = (error: unknown) => {
+  if (isAuthWeakPasswordError(error)) {
+    return `Password must be at least ${minimumPasswordLength} characters.`;
+  }
+
+  if (isAuthError(error)) {
+    switch (error.code) {
+      case 'email_exists':
+      case 'user_already_exists':
+        return 'An account with this email already exists. Log in instead.';
+      case 'email_address_invalid':
+      case 'validation_failed':
+        return 'Enter a valid email address.';
+      case 'signup_disabled':
+        return 'Sign up is currently disabled.';
+      case 'over_email_send_rate_limit':
+      case 'over_request_rate_limit':
+        return 'Too many sign up attempts. Wait a moment and try again.';
+      default:
+        return error.message || 'Could not create your account. Try again.';
+    }
+  }
+
+  if (error instanceof Error && error.message.trim().length > 0) {
+    return error.message;
+  }
+
+  return 'Could not create your account. Try again.';
+};
 
 export default function SignUpScreen() {
   const [email, setEmail] = useState('');
@@ -26,6 +58,26 @@ export default function SignUpScreen() {
   const passwordMismatch = confirmPassword.length > 0 && password !== confirmPassword;
   const canSubmit = hasRequiredFields && !passwordMismatch;
 
+  const clearStoredErrors = () => {
+    setFormError(null);
+    setAuthError(null);
+  };
+
+  const handleEmailChange = (nextEmail: string) => {
+    setEmail(nextEmail);
+    clearStoredErrors();
+  };
+
+  const handlePasswordChange = (nextPassword: string) => {
+    setPassword(nextPassword);
+    clearStoredErrors();
+  };
+
+  const handleConfirmPasswordChange = (nextConfirmPassword: string) => {
+    setConfirmPassword(nextConfirmPassword);
+    clearStoredErrors();
+  };
+
   const handleSignUp = async () => {
     if (!hasRequiredFields) {
       setFormError('Fill in each field to create your account.');
@@ -34,6 +86,11 @@ export default function SignUpScreen() {
 
     if (passwordMismatch) {
       setFormError('Passwords do not match.');
+      return;
+    }
+
+    if (password.length < minimumPasswordLength) {
+      setFormError(`Password must be at least ${minimumPasswordLength} characters.`);
       return;
     }
 
@@ -51,8 +108,8 @@ export default function SignUpScreen() {
       if (result.needsEmailConfirmation) {
         router.replace('/confirm-email');
       }
-    } catch {
-      setAuthError('Sign up auth error'); //Too general, eventually email/username take etc.
+    } catch (error) {
+      setAuthError(getSignUpErrorMessage(error));
     } finally {
       setIsSubmitting(false);
     }
@@ -64,7 +121,7 @@ export default function SignUpScreen() {
         <View style={styles.formArea}>
           <AuthTextInput
             value={email}
-            onChangeText={setEmail}
+            onChangeText={handleEmailChange}
             keyboardType='email-address'
             autoCapitalize='none'
             autoCorrect={false}
@@ -75,7 +132,7 @@ export default function SignUpScreen() {
           />
           <AuthTextInput
             value={password}
-            onChangeText={setPassword}
+            onChangeText={handlePasswordChange}
             secureTextEntry
             autoCapitalize='none'
             autoCorrect={false}
@@ -86,7 +143,7 @@ export default function SignUpScreen() {
           />
           <AuthTextInput
             value={confirmPassword}
-            onChangeText={setConfirmPassword}
+            onChangeText={handleConfirmPasswordChange}
             secureTextEntry
             autoCapitalize='none'
             autoCorrect={false}

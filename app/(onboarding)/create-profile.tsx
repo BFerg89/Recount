@@ -55,6 +55,7 @@ export default function CreateProfileScreen() {
       <View style={styles.content}>
         <View style={styles.formArea}>
           <AuthTextInput
+            prefix="@"
             value={username}
             onChangeText={setUsername}
             autoCapitalize='none'

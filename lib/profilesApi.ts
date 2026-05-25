@@ -80,6 +80,16 @@ export async function createProfile(input: CreateProfileInput): Promise<UserProf
 
   if (profileError) {
     // TODO: Translate duplicate username errors into a friendly "Username is already taken" message.
+    if (
+      profileError.code === '23505' &&
+      (
+        profileError.message.includes('profiles_username_unique') ||
+        profileError.details?.includes('profiles.username.unique')
+      )
+    ) {
+      throw new Error('Username is already taken.');
+    }
+    
     throw toError(profileError, 'Could not create profile.');
   }
 
