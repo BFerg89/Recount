@@ -1,11 +1,11 @@
 {
   "expo": {
-    "name": "NightLog",
-    "slug": "NightLog",
+    "name": "Recount",
+    "slug": "recount",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "nightlog",
+    "scheme": "recount",
     "userInterfaceStyle": "light",
     "splash": {
       "image": "./assets/images/splash-icon.png",
@@ -14,9 +14,10 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.bferg89.NightLog"
+      "bundleIdentifier": "com.bferg89.recount"
     },
     "android": {
+      "package": "com.bferg89.recount",
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/images/android-icon-foreground.png",

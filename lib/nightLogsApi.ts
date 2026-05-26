@@ -52,7 +52,7 @@ type NightLogWithChildrenRow = NightLogRow & {
   notes: NoteRow[] | null;
 };
 
-const toError = (error: unknown, fallbackMessage = 'Unknown NightLog API error.') => {
+const toError = (error: unknown, fallbackMessage = 'Unknown Log API error.') => {
   if (error instanceof Error) {
     return error;
   }
@@ -140,7 +140,7 @@ export async function createNightLog(input: CreateNightLogInput): Promise<NightL
   }
 
   if (!sessionData.session) {
-    throw new Error('You must be signed in to create a NightLog.');
+    throw new Error('You must be signed in to create a Log.');
   }
 
   const { data: nightLogData, error: nightLogError } = await supabase
@@ -158,7 +158,7 @@ export async function createNightLog(input: CreateNightLogInput): Promise<NightL
   }
 
   if (!nightLogData) {
-    throw new Error('NightLog was not returned after creation.');
+    throw new Error('Log was not returned after creation.');
   }
 
   const nightLog = nightLogData as NightLogRow;

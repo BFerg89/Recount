@@ -92,7 +92,7 @@ export default function LoginScreen() {
           {({ pressed }) => (
             <>
               <Text style={pressed ? styles.signUpTextPressed : styles.signUpText}>
-                New to NightLog?
+                New to Recount?
               </Text>
               <Text style={pressed ? styles.signUpTextPressed : styles.signUpText}>
                 Sign Up

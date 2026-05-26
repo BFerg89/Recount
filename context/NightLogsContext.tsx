@@ -46,7 +46,7 @@ export function NightLogsProvider({ children }: PropsWithChildren) {
     } catch (caughtError) {
       const message = caughtError instanceof Error
         ? caughtError.message
-        : 'Unable to load Night Logs.';
+        : 'Unable to load night logs.';
       setError(message);
       setNightLogs([]);
     } finally {

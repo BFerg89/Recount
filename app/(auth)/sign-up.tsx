@@ -178,7 +178,7 @@ export default function SignUpScreen() {
           {({ pressed }) => (
             <>
               <Text style={pressed ? styles.loginTextPressed : styles.loginText}>
-                Already have NightLog?
+                Already have Recount?
               </Text>
               <Text style={pressed ? styles.loginTextPressed : styles.loginText}>
                 Login

@@ -5,6 +5,7 @@ import type { Session, User } from '@supabase/supabase-js';
 
 import { supabase } from '@/lib/supabase';
 
+// TODO: Fix error: if user account is deleted while user is logged in, after app refresh they are brought to onboarding not auth
 type SignUpResult = {
   needsEmailConfirmation: boolean;
 };
