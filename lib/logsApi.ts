@@ -21,7 +21,7 @@ type LogRow = {
 
 type LogPersonRow = {
   id: string;
-  night_log_id: string;
+  log_id: string;
   display_name: string;
   created_at: string;
   updated_at: string;
@@ -29,7 +29,7 @@ type LogPersonRow = {
 
 type TimelineEventRow = {
   id: string;
-  night_log_id: string;
+  log_id: string;
   title: string;
   approx_time: string | null;
   sort_order: number;
@@ -39,7 +39,7 @@ type TimelineEventRow = {
 
 type NoteRow = {
   id: string;
-  night_log_id: string;
+  log_id: string;
   prompt_type: LogNote['promptType'];
   text: string;
   created_at: string;
@@ -47,7 +47,7 @@ type NoteRow = {
 };
 
 type LogWithChildrenRow = LogRow & {
-  night_people: LogPersonRow[] | null;
+  log_people: LogPersonRow[] | null;
   timeline_events: TimelineEventRow[] | null;
   notes: NoteRow[] | null;
 };
@@ -73,7 +73,7 @@ const toError = (error: unknown, fallbackMessage = 'Unknown log API error.') => 
 const mapLogPerson = (row: LogPersonRow): LogPerson => {
   return {
     id: row.id,
-    logId: row.night_log_id,
+    logId: row.log_id,
     displayName: row.display_name,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
@@ -83,7 +83,7 @@ const mapLogPerson = (row: LogPersonRow): LogPerson => {
 const mapTimelineEvent = (row: TimelineEventRow): TimelineEvent => {
   return {
     id: row.id,
-    logId: row.night_log_id,
+    logId: row.log_id,
     title: row.title,
     approxTime: row.approx_time,
     sortOrder: row.sort_order,
@@ -95,7 +95,7 @@ const mapTimelineEvent = (row: TimelineEventRow): TimelineEvent => {
 const mapLogNote = (row: NoteRow): LogNote => {
   return {
     id: row.id,
-    logId: row.night_log_id,
+    logId: row.log_id,
     promptType: row.prompt_type,
     text: row.text,
     createdAt: row.created_at,
@@ -127,7 +127,7 @@ const mapLog = (
 
 const rollbackCreatedLog = async (logId: string) => {
   await supabase
-    .from('night_logs')
+    .from('logs')
     .delete()
     .eq('id', logId);
 };
@@ -144,7 +144,7 @@ export async function createLog(input: CreateLogInput): Promise<LogEntry> {
   }
 
   const { data: logData, error: logError } = await supabase
-    .from('night_logs')
+    .from('logs')
     .insert({
       title: input.title.trim(),
       date: formatDateForStorage(input.date),
@@ -166,16 +166,16 @@ export async function createLog(input: CreateLogInput): Promise<LogEntry> {
   try {
     const peoplePayload = input.people
       .map((person) => ({
-        night_log_id: log.id,
+        log_id: log.id,
         display_name: person.displayName.trim(),
       }))
       .filter((person) => person.display_name.length > 0);
 
     const { data: peopleData, error: peopleError } = peoplePayload.length > 0
       ? await supabase
-        .from('night_people')
+        .from('log_people')
         .insert(peoplePayload)
-        .select('id, night_log_id, display_name, created_at, updated_at')
+        .select('id, log_id, display_name, created_at, updated_at')
       : { data: [], error: null };
 
     if (peopleError) {
@@ -184,7 +184,7 @@ export async function createLog(input: CreateLogInput): Promise<LogEntry> {
 
     const timelineEventsPayload = input.moments
       .map((moment, index) => ({
-        night_log_id: log.id,
+        log_id: log.id,
         title: moment.title.trim(),
         approx_time: moment.approxTime?.trim() || null,
         sort_order: index,
@@ -195,7 +195,7 @@ export async function createLog(input: CreateLogInput): Promise<LogEntry> {
       ? await supabase
         .from('timeline_events')
         .insert(timelineEventsPayload)
-        .select('id, night_log_id, title, approx_time, sort_order, created_at, updated_at')
+        .select('id, log_id, title, approx_time, sort_order, created_at, updated_at')
       : { data: [], error: null };
 
     if (timelineEventsError) {
@@ -204,7 +204,7 @@ export async function createLog(input: CreateLogInput): Promise<LogEntry> {
 
     const notesPayload = promptedNoteDefinitions
       .map((prompt) => ({
-        night_log_id: log.id,
+        log_id: log.id,
         prompt_type: prompt.promptType,
         text: (input.noteAnswers[prompt.promptType] ?? '').trim(),
       }))
@@ -214,7 +214,7 @@ export async function createLog(input: CreateLogInput): Promise<LogEntry> {
       ? await supabase
         .from('notes')
         .insert(notesPayload)
-        .select('id, night_log_id, prompt_type, text, created_at, updated_at')
+        .select('id, log_id, prompt_type, text, created_at, updated_at')
       : { data: [], error: null };
 
     if (notesError) {
@@ -245,7 +245,7 @@ export async function fetchLogs(): Promise<LogEntry[]> {
   }
 
   const { data, error } = await supabase
-    .from('night_logs')
+    .from('logs')
     .select(`
       id,
       creator_id,
@@ -254,16 +254,16 @@ export async function fetchLogs(): Promise<LogEntry[]> {
       general_location,
       created_at,
       updated_at,
-      night_people (
+      log_people (
         id,
-        night_log_id,
+        log_id,
         display_name,
         created_at,
         updated_at
       ),
       timeline_events (
         id,
-        night_log_id,
+        log_id,
         title,
         approx_time,
         sort_order,
@@ -272,7 +272,7 @@ export async function fetchLogs(): Promise<LogEntry[]> {
       ),
       notes (
         id,
-        night_log_id,
+        log_id,
         prompt_type,
         text,
         created_at,
@@ -291,7 +291,7 @@ export async function fetchLogs(): Promise<LogEntry[]> {
   return rows.map((row) =>
     mapLog(
       row,
-      row.night_people ?? [],
+      row.log_people ?? [],
       row.timeline_events ?? [],
       row.notes ?? []
     )
