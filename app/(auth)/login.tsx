@@ -2,10 +2,10 @@ import { useRef, useState } from 'react';
 import { StyleSheet, View, Pressable, Text, type TextInput } from 'react-native';
 import { router } from 'expo-router';
 import { AuthTextInput } from '@/components/auth/AuthTextInput';
-import { nightLogTheme } from '@/constants/NightLogTheme';
+import { recountTheme } from '@/constants/RecountTheme';
 import { useAuth } from '@/context/AuthContext';
 
-const { colors, fonts, layout, radius, shadows, spacing, type } = nightLogTheme;
+const { colors, fonts, layout, radius, shadows, spacing, type } = recountTheme;
 
 export default function LoginScreen() {
   const [email, setEmail] = useState('');

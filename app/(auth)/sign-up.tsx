@@ -4,10 +4,10 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { isAuthError, isAuthWeakPasswordError } from '@supabase/supabase-js';
 
 import { AuthTextInput } from '@/components/auth/AuthTextInput';
-import { nightLogTheme } from '@/constants/NightLogTheme';
+import { recountTheme } from '@/constants/RecountTheme';
 import { useAuth } from '@/context/AuthContext';
 
-const { colors, fonts, layout, radius, shadows, spacing, type } = nightLogTheme;
+const { colors, fonts, layout, radius, shadows, spacing, type } = recountTheme;
 const minimumPasswordLength = 6;
 
 const getSignUpErrorMessage = (error: unknown) => {

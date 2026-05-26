@@ -6,9 +6,9 @@ import { useProfile } from '@/context/ProfileContext';
 import { createProfile } from '@/lib/profilesApi';
 
 import { AuthTextInput } from '@/components/auth/AuthTextInput';
-import { nightLogTheme } from '@/constants/NightLogTheme';
+import { recountTheme } from '@/constants/RecountTheme';
 
-const { colors, fonts, layout, radius, shadows, spacing, type } = nightLogTheme;
+const { colors, fonts, layout, radius, shadows, spacing, type } = recountTheme;
 
 export default function CreateProfileScreen() {
   const [username, setUsername] = useState('');

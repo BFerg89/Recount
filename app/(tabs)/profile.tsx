@@ -1,9 +1,9 @@
 import { Text, View, Pressable, StyleSheet, ScrollView } from 'react-native';
 import { SymbolView } from 'expo-symbols';
-import { nightLogTheme } from '@/constants/NightLogTheme';
+import { recountTheme } from '@/constants/RecountTheme';
 import { useAuth } from '@/context/AuthContext';
 import { PersonPill } from '@/components/people/PersonPill';
-const { colors, fonts, layout, radius, shadows, spacing, type } = nightLogTheme;
+const { colors, fonts, layout, radius, shadows, spacing, type } = recountTheme;
 
 export default function ProfileScreen() {
   const { user, signOut } = useAuth();

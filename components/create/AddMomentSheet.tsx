@@ -3,9 +3,9 @@ import { SymbolView } from 'expo-symbols';
 import type { RefObject } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
-import { nightLogTheme } from '@/constants/NightLogTheme';
+import { recountTheme } from '@/constants/RecountTheme';
 
-const { colors, fonts, layout, radius, shadows, spacing, type } = nightLogTheme;
+const { colors, fonts, layout, radius, shadows, spacing, type } = recountTheme;
 
 type AddMomentSheetProps = {
   sheetRef: RefObject<BottomSheet | null>;
@@ -48,7 +48,7 @@ export function AddMomentSheet({
             <BottomSheetTextInput
               value={newMomentTitle}
               onChangeText={onChangeNewMomentTitle}
-              placeholder="Where did the night go next?"
+              placeholder="What happened next?"
               placeholderTextColor={colors.inkSoft}
               autoCapitalize="sentences"
               selectionColor={colors.terracotta}

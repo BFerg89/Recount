@@ -1,13 +1,13 @@
-import type { NightLogEntry } from './nightLogModels';
+import type { LogEntry } from './logModels';
 
-const testNightLogId = 'testId';
+const testLogId = 'testId';
 const testCreatedAt = '2026-05-22T00:00:00.000Z';
 
-export const logEntries: NightLogEntry[] = [
+export const logEntries: LogEntry[] = [
   {
-    id: testNightLogId,
+    id: testLogId,
     creatorId: null,
-    title: 'Test Night',
+    title: 'Test Log',
     date: '2026-05-22',
     generalLocation: 'Test City',
     createdAt: testCreatedAt,
@@ -15,21 +15,21 @@ export const logEntries: NightLogEntry[] = [
     people: [
       {
         id: 'test-person-1',
-        nightLogId: testNightLogId,
+        logId: testLogId,
         displayName: 'India',
         createdAt: testCreatedAt,
         updatedAt: testCreatedAt,
       },
       {
         id: 'test-person-2',
-        nightLogId: testNightLogId,
+        logId: testLogId,
         displayName: 'Juliana',
         createdAt: testCreatedAt,
         updatedAt: testCreatedAt,
       },
       {
         id: 'test-person-3',
-        nightLogId: testNightLogId,
+        logId: testLogId,
         displayName: 'Bennett',
         createdAt: testCreatedAt,
         updatedAt: testCreatedAt,
@@ -38,7 +38,7 @@ export const logEntries: NightLogEntry[] = [
     timelineEvents: [
       {
         id: 'test-event-1',
-        nightLogId: testNightLogId,
+        logId: testLogId,
         approxTime: '8:00pm',
         title: 'Triple Platinum Pres',
         sortOrder: 0,
@@ -47,7 +47,7 @@ export const logEntries: NightLogEntry[] = [
       },
       {
         id: 'test-event-2',
-        nightLogId: testNightLogId,
+        logId: testLogId,
         approxTime: '10:00pm',
         title: 'Dunny',
         sortOrder: 1,
@@ -56,7 +56,7 @@ export const logEntries: NightLogEntry[] = [
       },
       {
         id: 'test-event-3',
-        nightLogId: testNightLogId,
+        logId: testLogId,
         approxTime: '12:00am',
         title: 'Union',
         sortOrder: 2,
@@ -65,7 +65,7 @@ export const logEntries: NightLogEntry[] = [
       },
       {
         id: 'test-event-4',
-        nightLogId: testNightLogId,
+        logId: testLogId,
         approxTime: '2:00am',
         title: '111b',
         sortOrder: 3,

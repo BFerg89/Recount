@@ -1,9 +1,9 @@
 import { SymbolView } from 'expo-symbols';
 import { StyleSheet, Text, View, type StyleProp, type TextStyle, type ViewStyle } from 'react-native';
 
-import { nightLogTheme } from '@/constants/NightLogTheme';
+import { recountTheme } from '@/constants/RecountTheme';
 
-const { colors, fonts, radius, spacing, type } = nightLogTheme;
+const { colors, fonts, radius, spacing, type } = recountTheme;
 
 type PersonPillProps = {
   displayName: string;

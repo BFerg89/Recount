@@ -1,4 +1,4 @@
-export const nightLogColors = {
+export const recountColors = {
   paperDeep: '#EBE4D2',
   paper: '#F2EDE0',
   paperCard: '#FBF6E9',
@@ -32,7 +32,7 @@ export const nightLogColors = {
   ],
 } as const;
 
-export const nightLogSpacing = {
+export const recountSpacing = {
   s1: 4,
   s2: 8,
   s3: 12,
@@ -43,7 +43,7 @@ export const nightLogSpacing = {
   s8: 48,
 } as const;
 
-export const nightLogRadius = {
+export const recountRadius = {
   xs: 4,
   s: 8,
   m: 10,
@@ -52,7 +52,7 @@ export const nightLogRadius = {
   pill: 999,
 } as const;
 
-export const nightLogFonts = {
+export const recountFonts = {
   display: 'Newsreader_500Medium',
   italicAccent: 'Newsreader_500Medium_Italic',
   body: 'Geist_400Regular',
@@ -60,75 +60,75 @@ export const nightLogFonts = {
   label: 'Geist_500Medium',
 } as const;
 
-export const nightLogType = {
+export const recountType = {
   displayXl: {
-    fontFamily: nightLogFonts.display,
+    fontFamily: recountFonts.display,
     fontSize: 56,
     lineHeight: 53,
     letterSpacing: -1.4,
   },
   displayL: {
-    fontFamily: nightLogFonts.display,
+    fontFamily: recountFonts.display,
     fontSize: 44,
     lineHeight: 44,
     letterSpacing: -1,
   },
   displayM: {
-    fontFamily: nightLogFonts.display,
+    fontFamily: recountFonts.display,
     fontSize: 34,
     lineHeight: 36,
     letterSpacing: -0.6,
   },
   displayS: {
-    fontFamily: nightLogFonts.display,
+    fontFamily: recountFonts.display,
     fontSize: 22,
     lineHeight: 24,
     letterSpacing: -0.2,
   },
   numeral: {
-    fontFamily: nightLogFonts.display,
+    fontFamily: recountFonts.display,
     fontSize: 48,
     lineHeight: 46,
     fontVariant: ['tabular-nums'],
   },
   italicAccent: {
-    fontFamily: nightLogFonts.italicAccent,
+    fontFamily: recountFonts.italicAccent,
     fontSize: 14,
     lineHeight: 20,
     fontStyle: 'italic',
     fontWeight: '500',
   },
   bodyL: {
-    fontFamily: nightLogFonts.body,
+    fontFamily: recountFonts.body,
     fontSize: 16,
     lineHeight: 23,
   },
   body: {
-    fontFamily: nightLogFonts.body,
+    fontFamily: recountFonts.body,
     fontSize: 14,
     lineHeight: 20,
   },
   bodyS: {
-    fontFamily: nightLogFonts.body,
+    fontFamily: recountFonts.body,
     fontSize: 13,
     lineHeight: 18,
-    color: nightLogColors.inkMid,
+    color: recountColors.inkMid,
   },
   caption: {
-    fontFamily: nightLogFonts.body,
+    fontFamily: recountFonts.body,
     fontSize: 12,
     lineHeight: 16,
     fontVariant: ['tabular-nums'],
   },
   label: {
-    fontFamily: nightLogFonts.label,
+    fontFamily: recountFonts.label,
     fontSize: 11,
     lineHeight: 15,
     letterSpacing: 1.6,
     textTransform: 'uppercase',
   },
   micro: {
-    fontFamily: nightLogFonts.label,
+    fontFamily: recountFonts.label,
     fontSize: 10,
     lineHeight: 14,
     letterSpacing: 1.4,
@@ -136,13 +136,13 @@ export const nightLogType = {
   },
 } as const;
 
-export const nightLogShadows = {
+export const recountShadows = {
   card: '0 10px 24px rgba(60, 40, 20, 0.12), inset 0 1px 0 rgba(255, 250, 238, 0.8)',
   pop: '0 18px 36px rgba(60, 40, 20, 0.18), inset 0 1px 0 rgba(255, 250, 238, 0.8)',
   press: 'inset 0 2px 5px rgba(60, 40, 20, 0.12)',
 } as const;
 
-export const nightLogMotion = {
+export const recountMotion = {
   fast: 120,
   base: 180,
   slow: 320,
@@ -151,23 +151,23 @@ export const nightLogMotion = {
   caretBlink: 1100,
 } as const;
 
-export const nightLogLayout = {
-  mobileGutter: nightLogSpacing.s5,
+export const recountLayout = {
+  mobileGutter: recountSpacing.s5,
   verticalCardGap: 14,
-  sectionSpacing: nightLogSpacing.s6,
+  sectionSpacing: recountSpacing.s6,
   statusBarSpace: 60,
-  cardPadding: nightLogSpacing.s4,
+  cardPadding: recountSpacing.s4,
   cardTiltMax: 0.4,
 } as const;
 
-export const nightLogTheme = {
-  colors: nightLogColors,
-  spacing: nightLogSpacing,
-  radius: nightLogRadius,
-  radii: nightLogRadius,
-  fonts: nightLogFonts,
-  type: nightLogType,
-  shadows: nightLogShadows,
-  motion: nightLogMotion,
-  layout: nightLogLayout,
+export const recountTheme = {
+  colors: recountColors,
+  spacing: recountSpacing,
+  radius: recountRadius,
+  radii: recountRadius,
+  fonts: recountFonts,
+  type: recountType,
+  shadows: recountShadows,
+  motion: recountMotion,
+  layout: recountLayout,
 } as const;

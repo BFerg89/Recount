@@ -1,5 +1,5 @@
 import { Text, View, StyleSheet } from 'react-native';
-import { nightLogColors, nightLogType } from '@/constants/NightLogTheme';
+import { recountColors, recountType } from '@/constants/RecountTheme';
 
 export default function ConfirmEmail() {
   return (
@@ -12,14 +12,14 @@ export default function ConfirmEmail() {
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor: nightLogColors.paper,
+    backgroundColor: recountColors.paper,
     justifyContent: 'center',
     alignItems: 'center',
   },
   text: {
-    fontFamily: nightLogType.label.fontFamily,
-    fontSize: nightLogType.bodyL.fontSize,
-    letterSpacing: nightLogType.label.letterSpacing,
-    color: nightLogColors.inkMid,
+    fontFamily: recountType.label.fontFamily,
+    fontSize: recountType.bodyL.fontSize,
+    letterSpacing: recountType.label.letterSpacing,
+    color: recountColors.inkMid,
   }
 });

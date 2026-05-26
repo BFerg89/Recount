@@ -2,11 +2,11 @@ import { Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View } fr
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 
-import { nightLogTheme } from '@/constants/NightLogTheme';
-import { useNightLogs } from '@/context/NightLogsContext';
-import { parseStoredDate, type NightLogEntry } from '@/data/nightLogModels';
+import { recountTheme } from '@/constants/RecountTheme';
+import { useLogs } from '@/context/LogsContext';
+import { parseStoredDate, type LogEntry } from '@/data/logModels';
 
-const { colors, fonts, layout, radius, shadows, spacing, type } = nightLogTheme;
+const { colors, fonts, layout, radius, shadows, spacing, type } = recountTheme;
 
 const contentPadding = layout.mobileGutter;
 const gridGap = layout.verticalCardGap;
@@ -31,17 +31,17 @@ const getCardRotation = (title: string) => {
 };
 
 export default function TabOneScreen() {
-  const { nightLogs } = useNightLogs();
+  const { logs } = useLogs();
   const insets = useSafeAreaInsets();
   const { width } = useWindowDimensions();
   const logCardWidth = (width - contentPadding * 2 - gridGap) / 2;
   const monthSections = Object.values(
-    [...nightLogs]
+    [...logs]
     .sort((a, b) => parseStoredDate(b.date).getTime() - parseStoredDate(a.date).getTime())
     .reduce<Record<string, {
       id: string;
       title: string;
-      logs: Array<NightLogEntry & ReturnType<typeof formatLogDate>>;
+      logs: Array<LogEntry & ReturnType<typeof formatLogDate>>;
     }>>((sections, log) => {
       const formattedDate = formatLogDate(parseStoredDate(log.date));
       const sectionId = formattedDate.monthTitle.toLowerCase().replace(' ', '-');
@@ -67,7 +67,7 @@ export default function TabOneScreen() {
 
   return (
     <View style={styles.screen}>
-      <Text style={styles.title}>Nights</Text>
+      <Text style={styles.title}>Logs</Text>
       <ScrollView style={styles.contentContainer} contentContainerStyle={styles.content}>
         {monthSections.map((month) => (
           <View key={month.id} style={styles.monthSection}>

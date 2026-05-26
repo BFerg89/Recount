@@ -1,9 +1,9 @@
 import { forwardRef } from 'react';
 import { StyleSheet, Text, TextInput, View, type TextInputProps } from 'react-native';
 
-import { nightLogTheme } from '@/constants/NightLogTheme';
+import { recountTheme } from '@/constants/RecountTheme';
 
-const { colors, fonts, radius, spacing, type } = nightLogTheme;
+const { colors, fonts, radius, spacing, type } = recountTheme;
 
 type AuthTextInputProps = TextInputProps & {
   prefix?: string;

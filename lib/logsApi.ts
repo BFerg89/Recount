@@ -1,15 +1,15 @@
 import { promptedNoteDefinitions } from '@/data/promptedNotes';
 import {
   formatDateForStorage,
-  type CreateNightLogInput,
-  type NightLogEntry,
-  type NightLogNote,
-  type NightPerson,
+  type CreateLogInput,
+  type LogEntry,
+  type LogNote,
+  type LogPerson,
   type TimelineEvent,
-} from '@/data/nightLogModels';
+} from '@/data/logModels';
 import { supabase } from '@/lib/supabase';
 
-type NightLogRow = {
+type LogRow = {
   id: string;
   creator_id: string | null;
   title: string;
@@ -19,7 +19,7 @@ type NightLogRow = {
   updated_at: string;
 };
 
-type NightPersonRow = {
+type LogPersonRow = {
   id: string;
   night_log_id: string;
   display_name: string;
@@ -40,19 +40,19 @@ type TimelineEventRow = {
 type NoteRow = {
   id: string;
   night_log_id: string;
-  prompt_type: NightLogNote['promptType'];
+  prompt_type: LogNote['promptType'];
   text: string;
   created_at: string;
   updated_at: string;
 };
 
-type NightLogWithChildrenRow = NightLogRow & {
-  night_people: NightPersonRow[] | null;
+type LogWithChildrenRow = LogRow & {
+  night_people: LogPersonRow[] | null;
   timeline_events: TimelineEventRow[] | null;
   notes: NoteRow[] | null;
 };
 
-const toError = (error: unknown, fallbackMessage = 'Unknown Log API error.') => {
+const toError = (error: unknown, fallbackMessage = 'Unknown log API error.') => {
   if (error instanceof Error) {
     return error;
   }
@@ -70,10 +70,10 @@ const toError = (error: unknown, fallbackMessage = 'Unknown Log API error.') => 
   return new Error(fallbackMessage);
 };
 
-const mapNightPerson = (row: NightPersonRow): NightPerson => {
+const mapLogPerson = (row: LogPersonRow): LogPerson => {
   return {
     id: row.id,
-    nightLogId: row.night_log_id,
+    logId: row.night_log_id,
     displayName: row.display_name,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
@@ -83,7 +83,7 @@ const mapNightPerson = (row: NightPersonRow): NightPerson => {
 const mapTimelineEvent = (row: TimelineEventRow): TimelineEvent => {
   return {
     id: row.id,
-    nightLogId: row.night_log_id,
+    logId: row.night_log_id,
     title: row.title,
     approxTime: row.approx_time,
     sortOrder: row.sort_order,
@@ -92,10 +92,10 @@ const mapTimelineEvent = (row: TimelineEventRow): TimelineEvent => {
   };
 };
 
-const mapNightLogNote = (row: NoteRow): NightLogNote => {
+const mapLogNote = (row: NoteRow): LogNote => {
   return {
     id: row.id,
-    nightLogId: row.night_log_id,
+    logId: row.night_log_id,
     promptType: row.prompt_type,
     text: row.text,
     createdAt: row.created_at,
@@ -103,12 +103,12 @@ const mapNightLogNote = (row: NoteRow): NightLogNote => {
   };
 };
 
-const mapNightLog = (
-  row: NightLogRow,
-  people: NightPersonRow[],
+const mapLog = (
+  row: LogRow,
+  people: LogPersonRow[],
   timelineEvents: TimelineEventRow[],
   notes: NoteRow[]
-): NightLogEntry => {
+): LogEntry => {
   return {
     id: row.id,
     creatorId: row.creator_id,
@@ -117,22 +117,22 @@ const mapNightLog = (
     generalLocation: row.general_location,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
-    people: people.map(mapNightPerson),
+    people: people.map(mapLogPerson),
     timelineEvents: timelineEvents
       .map(mapTimelineEvent)
       .sort((a, b) => a.sortOrder - b.sortOrder),
-    notes: notes.map(mapNightLogNote),
+    notes: notes.map(mapLogNote),
   };
 };
 
-const rollbackCreatedNightLog = async (nightLogId: string) => {
+const rollbackCreatedLog = async (logId: string) => {
   await supabase
     .from('night_logs')
     .delete()
-    .eq('id', nightLogId);
+    .eq('id', logId);
 };
 
-export async function createNightLog(input: CreateNightLogInput): Promise<NightLogEntry> {
+export async function createLog(input: CreateLogInput): Promise<LogEntry> {
   const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
 
   if (sessionError) {
@@ -140,10 +140,10 @@ export async function createNightLog(input: CreateNightLogInput): Promise<NightL
   }
 
   if (!sessionData.session) {
-    throw new Error('You must be signed in to create a Log.');
+    throw new Error('You must be signed in to create a log.');
   }
 
-  const { data: nightLogData, error: nightLogError } = await supabase
+  const { data: logData, error: logError } = await supabase
     .from('night_logs')
     .insert({
       title: input.title.trim(),
@@ -153,20 +153,20 @@ export async function createNightLog(input: CreateNightLogInput): Promise<NightL
     .select('id, creator_id, title, date, general_location, created_at, updated_at')
     .single();
 
-  if (nightLogError) {
-    throw toError(nightLogError);
+  if (logError) {
+    throw toError(logError);
   }
 
-  if (!nightLogData) {
+  if (!logData) {
     throw new Error('Log was not returned after creation.');
   }
 
-  const nightLog = nightLogData as NightLogRow;
+  const log = logData as LogRow;
 
   try {
     const peoplePayload = input.people
       .map((person) => ({
-        night_log_id: nightLog.id,
+        night_log_id: log.id,
         display_name: person.displayName.trim(),
       }))
       .filter((person) => person.display_name.length > 0);
@@ -184,7 +184,7 @@ export async function createNightLog(input: CreateNightLogInput): Promise<NightL
 
     const timelineEventsPayload = input.moments
       .map((moment, index) => ({
-        night_log_id: nightLog.id,
+        night_log_id: log.id,
         title: moment.title.trim(),
         approx_time: moment.approxTime?.trim() || null,
         sort_order: index,
@@ -204,7 +204,7 @@ export async function createNightLog(input: CreateNightLogInput): Promise<NightL
 
     const notesPayload = promptedNoteDefinitions
       .map((prompt) => ({
-        night_log_id: nightLog.id,
+        night_log_id: log.id,
         prompt_type: prompt.promptType,
         text: (input.noteAnswers[prompt.promptType] ?? '').trim(),
       }))
@@ -221,19 +221,19 @@ export async function createNightLog(input: CreateNightLogInput): Promise<NightL
       throw toError(notesError);
     }
 
-    return mapNightLog(
-      nightLog,
-      peopleData as NightPersonRow[],
+    return mapLog(
+      log,
+      peopleData as LogPersonRow[],
       timelineEventsData as TimelineEventRow[],
       notesData as NoteRow[]
     );
   } catch (error) {
-    await rollbackCreatedNightLog(nightLog.id);
+    await rollbackCreatedLog(log.id);
     throw error;
   }
 }
 
-export async function fetchNightLogs(): Promise<NightLogEntry[]> {
+export async function fetchLogs(): Promise<LogEntry[]> {
   const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
 
   if (sessionError) {
@@ -286,10 +286,10 @@ export async function fetchNightLogs(): Promise<NightLogEntry[]> {
     throw toError(error);
   }
 
-  const rows = (data ?? []) as NightLogWithChildrenRow[];
+  const rows = (data ?? []) as LogWithChildrenRow[];
 
-  return rows.map((row) => 
-    mapNightLog(
+  return rows.map((row) =>
+    mapLog(
       row,
       row.night_people ?? [],
       row.timeline_events ?? [],

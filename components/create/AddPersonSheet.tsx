@@ -3,8 +3,8 @@ import { SymbolView } from 'expo-symbols';
 import type { RefObject } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
-import { nightLogTheme } from '@/constants/NightLogTheme';
-const { colors, fonts, layout, radius, shadows, spacing, type } = nightLogTheme;
+import { recountTheme } from '@/constants/RecountTheme';
+const { colors, fonts, layout, radius, shadows, spacing, type } = recountTheme;
 
 type AddPersonSheetProps = {
   sheetRef: RefObject<BottomSheet | null>;

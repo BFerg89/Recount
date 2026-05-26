@@ -1,14 +1,14 @@
 import { View, StyleSheet, Text, ScrollView, Pressable, useWindowDimensions } from 'react-native';
 import { SymbolView } from 'expo-symbols';
-import { nightLogTheme } from '@/constants/NightLogTheme';
+import { recountTheme } from '@/constants/RecountTheme';
 import { useLocalSearchParams, router } from 'expo-router';
 
 import { PersonPill } from '@/components/people/PersonPill';
-import { useNightLogs } from '@/context/NightLogsContext';
-import { parseStoredDate } from '@/data/nightLogModels';
+import { useLogs } from '@/context/LogsContext';
+import { parseStoredDate } from '@/data/logModels';
 import { promptedNoteDefinitions } from '@/data/promptedNotes';
 
-const { colors, fonts, layout, radius, shadows, spacing, type } = nightLogTheme;
+const { colors, fonts, layout, radius, shadows, spacing, type } = recountTheme;
 const gridGap = spacing.s4;
 
 const formatLogDate = (date: Date) => {
@@ -32,7 +32,7 @@ function handleback() {
 
 export default function ViewLogScreen() {
   const { id } = useLocalSearchParams();
-  const { nightLogs } = useNightLogs();
+  const { logs } = useLogs();
   const { width } = useWindowDimensions();
   const noteCardWidth = Math.min(
     336,
@@ -40,7 +40,7 @@ export default function ViewLogScreen() {
   ) / 2.2;
 
   const selectedLogId = Array.isArray(id) ? id[0] : id;
-  const log = nightLogs.find((nightLog) => nightLog.id === selectedLogId);
+  const log = logs.find((log) => log.id === selectedLogId);
   const date = log ? parseStoredDate(log.date) : null;
   const weekday = date?.toLocaleDateString('en-US', { weekday: 'long' });
   const monthTitle = date?.toLocaleDateString('en-US', {

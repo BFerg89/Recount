@@ -2,7 +2,7 @@ import type { CreatePersonInput } from './people';
 import type { CreateTimelineEventInput } from './timelineMoments';
 import type { PromptedNoteAnswers, PromptedNoteType } from './promptedNotes';
 
-export type CreateNightLogInput = {
+export type CreateLogInput = {
   title: string;
   date: Date;
   generalLocation: string;
@@ -11,9 +11,9 @@ export type CreateNightLogInput = {
   noteAnswers: PromptedNoteAnswers;
 };
 
-export type NightPerson = {
+export type LogPerson = {
   id: string;
-  nightLogId: string;
+  logId: string;
   displayName: string;
   createdAt: string;
   updatedAt: string;
@@ -21,7 +21,7 @@ export type NightPerson = {
 
 export type TimelineEvent = {
   id: string;
-  nightLogId: string;
+  logId: string;
   title: string;
   approxTime: string | null;
   sortOrder: number;
@@ -29,16 +29,16 @@ export type TimelineEvent = {
   updatedAt: string;
 };
 
-export type NightLogNote = {
+export type LogNote = {
   id: string;
-  nightLogId: string;
+  logId: string;
   promptType: PromptedNoteType;
   text: string;
   createdAt: string;
   updatedAt: string;
 };
 
-export type NightLogEntry = {
+export type LogEntry = {
   id: string;
   creatorId: string | null;
   title: string;
@@ -46,9 +46,9 @@ export type NightLogEntry = {
   generalLocation: string;
   createdAt: string;
   updatedAt: string;
-  people: NightPerson[];
+  people: LogPerson[];
   timelineEvents: TimelineEvent[];
-  notes: NightLogNote[];
+  notes: LogNote[];
 };
 
 export const formatDateForStorage = (date: Date) => {

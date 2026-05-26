@@ -10,15 +10,15 @@ import { AddMomentSheet } from '@/components/create/AddMomentSheet';
 import { AddPersonSheet } from '@/components/create/AddPersonSheet';
 import { PersonPill } from '@/components/people/PersonPill';
 
-import { nightLogTheme } from '@/constants/NightLogTheme';
+import { recountTheme } from '@/constants/RecountTheme';
 
 import type { CreatePersonInput } from '@/data/people';
 import { createEmptyPromptedNoteAnswers, promptedNoteDefinitions } from '@/data/promptedNotes';
 import type { CreateTimelineEventInput } from '@/data/timelineMoments';
 
-import { useNightLogs } from '@/context/NightLogsContext';
+import { useLogs } from '@/context/LogsContext';
 
-const { colors, fonts, layout, radius, shadows, spacing, type } = nightLogTheme;
+const { colors, fonts, layout, radius, shadows, spacing, type } = recountTheme;
 
 const gridGap = spacing.s4;
 const notSignedInSaveError = 'You need to be logged in to save a log.';
@@ -48,7 +48,7 @@ const getSaveErrorMessage = (caughtError: unknown) => {
 };
 
 export default function CreateScreen() {
-  const { createNightLog } = useNightLogs();
+  const { createLog } = useLogs();
   const insets = useSafeAreaInsets();
   const { width } = useWindowDimensions();
   const noteCardWidth = Math.min(
@@ -153,7 +153,7 @@ export default function CreateScreen() {
     setSaveError(null);
 
     try {
-      const createdNightLog = await createNightLog({
+      const createdLog = await createLog({
         title: title.trim(),
         date,
         generalLocation: location.trim(),
@@ -163,7 +163,7 @@ export default function CreateScreen() {
       });
 
       resetCreateForm();
-      router.replace(`/logs/${createdNightLog.id}`);
+      router.replace(`/logs/${createdLog.id}`);
     } catch (caughtError) {
       setSaveError(getSaveErrorMessage(caughtError));
     } finally {
@@ -186,7 +186,7 @@ export default function CreateScreen() {
               setTitle(text);
               clearSaveError();
             }}
-            placeholder='Name your night...'
+            placeholder='Name this log...'
             style={styles.titleInput}/>
           <View style={styles.dateRow}>
             <TextInput

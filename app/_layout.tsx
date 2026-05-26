@@ -12,7 +12,7 @@ import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
 import 'react-native-reanimated';
 
-import { NightLogsProvider } from '@/context/NightLogsContext';
+import { LogsProvider } from '@/context/LogsContext';
 import { AuthProvider, useAuth } from '@/context/AuthContext';
 import { ProfileProvider, useProfile } from '@/context/ProfileContext';
 
@@ -75,9 +75,9 @@ function AuthenticatedApp() {
 
   return (
     <ProfileProvider key={authKey}>
-      <NightLogsProvider key={authKey}>
+      <LogsProvider key={authKey}>
         <RootStack />
-      </NightLogsProvider>
+      </LogsProvider>
     </ProfileProvider>
   );
 }

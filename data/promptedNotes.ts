@@ -73,11 +73,11 @@ export const promptedNoteDefinitions = [
   },
   {
     promptType: 'person_who_carried',
-    label: 'Who Carried The Night:',
+    label: 'Who Carried:',
   },
   {
     promptType: 'npc_of_the_night',
-    label: 'NPC Of The Night:',
+    label: 'Unexpected Cameo:',
   },
   {
     promptType: 'lost_and_found',
