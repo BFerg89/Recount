@@ -9,6 +9,7 @@ import { router } from 'expo-router';
 import { AddMomentSheet } from '@/components/create/AddMomentSheet';
 import { AddPersonSheet } from '@/components/create/AddPersonSheet';
 import { PersonPill } from '@/components/people/PersonPill';
+import { PrimaryButton } from '@/components/ui/PrimaryButton';
 
 import { recountTheme } from '@/constants/RecountTheme';
 
@@ -310,25 +311,22 @@ export default function CreateScreen() {
         {saveError && (
           <Text style={styles.saveErrorText}>{saveError}</Text>
         )}
-        <Pressable
+        <PrimaryButton
+          label="Save"
+          variant="save"
           disabled={!canCreateLog}
-          accessibilityState={{ disabled: !canCreateLog }}
-          style={({ pressed }) => [
-            styles.saveButton,
-            pressed && canCreateLog && styles.saveButtonPressed,
-            !canCreateLog && styles.saveButtonDisabled,
-          ]} 
-          onPress={handleCreateLog}>
-          <SymbolView
-            name={{
-              ios: 'square.and.arrow.down',
-              android: 'save',
-            }}
-            tintColor={colors.paperCard}
-            size={18}
-          />
-          <Text style={styles.saveButtonText}>Save</Text>
-        </Pressable>
+          onPress={handleCreateLog}
+          icon={(
+            <SymbolView
+              name={{
+                ios: 'square.and.arrow.down',
+                android: 'save',
+              }}
+              tintColor={colors.paperCard}
+              size={18}
+            />
+          )}
+        />
       </View>
 
       <AddPersonSheet
@@ -587,29 +585,5 @@ const styles = StyleSheet.create({
     lineHeight: type.bodyS.lineHeight,
     color: colors.terracottaDeep,
     textAlign: 'center',
-  },
-  saveButton: {
-    minHeight: 40,
-    borderRadius: radius.pill,
-    backgroundColor: colors.terracotta,
-    alignItems: 'center',
-    justifyContent: 'center',
-    flexDirection: 'row',
-    gap: spacing.s2,
-    boxShadow: shadows.card,
-  },
-  saveButtonPressed: {
-    backgroundColor: colors.terracottaDeep,
-    boxShadow: shadows.press,
-    transform: [{ scale: 0.98 }],
-  },
-  saveButtonDisabled: {
-    opacity: 0.5,
-  },
-  saveButtonText: {
-    fontFamily: fonts.bodyStrong,
-    fontSize: type.body.fontSize,
-    lineHeight: type.body.lineHeight,
-    color: colors.paperCard,
   },
 });

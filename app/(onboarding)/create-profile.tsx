@@ -1,14 +1,15 @@
 import { useRef, useState } from 'react';
-import { Pressable, StyleSheet, Text, View, type TextInput } from 'react-native';
+import { StyleSheet, Text, View, type TextInput } from 'react-native';
 
 import { router } from 'expo-router';
 import { useProfile } from '@/context/ProfileContext';
 import { createProfile } from '@/lib/profilesApi';
 
 import { AuthTextInput } from '@/components/auth/AuthTextInput';
+import { PrimaryButton } from '@/components/ui/PrimaryButton';
 import { recountTheme } from '@/constants/RecountTheme';
 
-const { colors, fonts, layout, radius, shadows, spacing, type } = recountTheme;
+const { colors, fonts, layout, spacing, type } = recountTheme;
 
 export default function CreateProfileScreen() {
   const [username, setUsername] = useState('');
@@ -79,18 +80,11 @@ export default function CreateProfileScreen() {
           {(formError || profileError) && (
             <Text style={styles.errorText}>{formError ?? profileError}</Text>
           )}
-          <Pressable
+          <PrimaryButton
+            label="Create Profile"
             disabled={!hasRequiredFields || isSubmitting}
-            accessibilityState={{ disabled: !hasRequiredFields || isSubmitting }}
             onPress={handleCreateProfile}
-            style={({ pressed }) => [
-              styles.primaryButton,
-              pressed && hasRequiredFields && !isSubmitting && styles.primaryButtonPressed,
-              (!hasRequiredFields || isSubmitting) && styles.primaryButtonDisabled,
-            ]}
-          >
-            <Text style={styles.primaryButtonText}>Create Profile</Text>
-          </Pressable>
+          />
         </View>
       </View>
     </View>
@@ -112,30 +106,6 @@ const styles = StyleSheet.create({
     flex: 1,
     gap: layout.verticalCardGap,
     justifyContent: 'center',
-  },
-  primaryButton: {
-    minHeight: 50,
-    borderRadius: radius.pill,
-    backgroundColor: colors.terracotta,
-    alignItems: 'center',
-    justifyContent: 'center',
-    flexDirection: 'row',
-    gap: spacing.s2,
-    paddingHorizontal: spacing.s4,
-  },
-  primaryButtonPressed: {
-    backgroundColor: colors.terracottaDeep,
-    boxShadow: shadows.press,
-    transform: [{ scale: 0.98 }],
-  },
-  primaryButtonDisabled: {
-    opacity: 0.5,
-  },
-  primaryButtonText: {
-    fontFamily: fonts.bodyStrong,
-    fontSize: type.body.fontSize,
-    lineHeight: type.body.lineHeight,
-    color: colors.paperCard,
   },
   errorText: {
     fontFamily: fonts.body,

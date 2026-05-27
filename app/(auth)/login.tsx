@@ -2,10 +2,11 @@ import { useRef, useState } from 'react';
 import { StyleSheet, View, Pressable, Text, type TextInput } from 'react-native';
 import { router } from 'expo-router';
 import { AuthTextInput } from '@/components/auth/AuthTextInput';
+import { PrimaryButton } from '@/components/ui/PrimaryButton';
 import { recountTheme } from '@/constants/RecountTheme';
 import { useAuth } from '@/context/AuthContext';
 
-const { colors, fonts, layout, radius, shadows, spacing, type } = recountTheme;
+const { colors, fonts, layout, spacing, type } = recountTheme;
 
 export default function LoginScreen() {
   const [email, setEmail] = useState('');
@@ -70,20 +71,11 @@ export default function LoginScreen() {
           {authError && (
             <Text style={styles.errorText}>{authError}</Text>
           )}
-          <Pressable
+          <PrimaryButton
+            label={isSubmitting ? 'Logging in...' : 'Login'}
             disabled={!canSubmit || isSubmitting}
-            accessibilityState={{ disabled: !canSubmit || isSubmitting }}
             onPress={handleLogin}
-            style={({ pressed }) => [
-              styles.primaryButton,
-              pressed && canSubmit && !isSubmitting && styles.primaryButtonPressed,
-              (!canSubmit || isSubmitting) && styles.primaryButtonDisabled,
-            ]}
-          >
-            <Text style={styles.primaryButtonText}>
-              {isSubmitting ? 'Logging in...' : 'Login'}
-            </Text>
-          </Pressable>
+          />
         </View>
         <Pressable
           style={styles.signUpButton}
@@ -126,30 +118,6 @@ const styles = StyleSheet.create({
     fontSize: type.bodyS.fontSize,
     lineHeight: type.bodyS.lineHeight,
     color: colors.terracottaDeep,
-  },
-  primaryButton: {
-    minHeight: 50,
-    borderRadius: radius.pill,
-    backgroundColor: colors.terracotta,
-    alignItems: 'center',
-    justifyContent: 'center',
-    flexDirection: 'row',
-    gap: spacing.s2,
-    paddingHorizontal: spacing.s4,
-  },
-  primaryButtonPressed: {
-    backgroundColor: colors.terracottaDeep,
-    boxShadow: shadows.press,
-    transform: [{ scale: 0.98 }],
-  },
-  primaryButtonDisabled: {
-    opacity: 0.5,
-  },
-  primaryButtonText: {
-    fontFamily: fonts.bodyStrong,
-    fontSize: type.body.fontSize,
-    lineHeight: type.body.lineHeight,
-    color: colors.paperCard,
   },
   signUpButton: {
     alignItems: 'center',

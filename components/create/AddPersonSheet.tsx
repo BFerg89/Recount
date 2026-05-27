@@ -1,8 +1,9 @@
 import BottomSheet, { BottomSheetTextInput, BottomSheetView } from '@gorhom/bottom-sheet';
 import { SymbolView } from 'expo-symbols';
 import type { RefObject } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 
+import { PrimaryButton } from '@/components/ui/PrimaryButton';
 import { recountTheme } from '@/constants/RecountTheme';
 const { colors, fonts, layout, radius, shadows, spacing, type } = recountTheme;
 
@@ -53,22 +54,20 @@ export function AddPersonSheet({
           </View>
         </View>
 
-        <Pressable
-          style={({ pressed }) => [
-            styles.sheetPrimaryButton,
-            pressed && styles.sheetPrimaryButtonPressed,
-          ]}
-          onPress={onAddPerson}>
-          <SymbolView
-            name={{
-              ios: 'plus.circle.fill',
-              android: 'add_circle',
-            }}
-            tintColor={colors.paperCard}
-            size={18}
-          />
-          <Text style={styles.sheetPrimaryButtonText}>Add person</Text>
-        </Pressable>
+        <PrimaryButton
+          label="Add person"
+          onPress={onAddPerson}
+          icon={(
+            <SymbolView
+              name={{
+                ios: 'plus.circle.fill',
+                android: 'add_circle',
+              }}
+              tintColor={colors.paperCard}
+              size={18}
+            />
+          )}
+        />
       </BottomSheetView>
     </BottomSheet>
   );
@@ -137,26 +136,5 @@ const styles = StyleSheet.create({
     fontSize: type.bodyL.fontSize,
     lineHeight: type.bodyL.lineHeight,
     color: colors.ink,
-  },
-  sheetPrimaryButton: {
-    minHeight: 50,
-    borderRadius: radius.pill,
-    backgroundColor: colors.terracotta,
-    alignItems: 'center',
-    justifyContent: 'center',
-    flexDirection: 'row',
-    gap: spacing.s2,
-    paddingHorizontal: spacing.s4,
-  },
-  sheetPrimaryButtonPressed: {
-    backgroundColor: colors.terracottaDeep,
-    boxShadow: shadows.press,
-    transform: [{ scale: 0.98 }],
-  },
-  sheetPrimaryButtonText: {
-    fontFamily: fonts.bodyStrong,
-    fontSize: type.body.fontSize,
-    lineHeight: type.body.lineHeight,
-    color: colors.paperCard,
   },
 });
