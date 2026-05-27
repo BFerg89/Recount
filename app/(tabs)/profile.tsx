@@ -1,16 +1,25 @@
 import { Text, View, Pressable, StyleSheet, ScrollView } from 'react-native';
+import { useRef, useState } from 'react';
 import { SymbolView } from 'expo-symbols';
 import { recountTheme } from '@/constants/RecountTheme';
 import { useAuth } from '@/context/AuthContext';
-import { PersonPill } from '@/components/people/PersonPill';
+import { useProfile } from '@/context/ProfileContext';
+import { AddFriendSheet } from '@/components/profile/AddFriendSheet';
+import BottomSheet from '@gorhom/bottom-sheet';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 const { colors, fonts, layout, radius, shadows, spacing, type } = recountTheme;
 
 export default function ProfileScreen() {
   const { user, signOut } = useAuth();
-  const email = user?.email ?? 'No email found';
 
-  const username = 'Bennett'; //Placeholder
-  const useSmallUsername = username.length > 11;
+  const { profile } = useProfile();
+  const username = profile?.username ?? 'No username found';
+  const nickname = profile?.nickname ?? 'No nickname found'
+  const useSmallNickname = nickname.length > 11;
+
+  const addFriendSheetRef = useRef<BottomSheet>(null);
+  const insets = useSafeAreaInsets();
+  const [friendUsername, setFriendUsername] = useState('');
 
   const friends = ['Thea', 'Finlay', 'Georgia', 'India', 'Mac', 'Juliana', 'Isabella', 'Rory', 'Aurele']; //Placeholder
 
@@ -22,12 +31,19 @@ export default function ProfileScreen() {
     }
   };
 
+  const handleAddFriend = () => {
+
+  }
+
   return (
     <View style={styles.screen}>
       <View style={styles.content}>
         <View style={styles.titleSection}>
           <Text style={styles.titleText}>Profile</Text>
-          <Pressable style={styles.addFriendsButton}>
+          <Pressable 
+            style={styles.addFriendsButton}
+            onPress={() => addFriendSheetRef.current?.expand()}
+          >
             <SymbolView
               name={{
                 ios: 'plus',
@@ -48,11 +64,11 @@ export default function ProfileScreen() {
             <Text
               numberOfLines={1}
               style={[
-                styles.usernameText,
-                useSmallUsername && styles.usernameTextSmall,
+                styles.nicknameText,
+                useSmallNickname && styles.nicknameTextSmall,
               ]}
-            >{username}</Text>
-            <Text style={styles.emailText}>{email}</Text>
+            >{nickname}</Text>
+            <Text style={styles.usernameText}>@{username}</Text>
           </View>
         </View>
         <View style={styles.friendsSection}>
@@ -88,8 +104,18 @@ export default function ProfileScreen() {
             <Text style={styles.buttonText}>Sign Out</Text>
           </Pressable>
         </View>
-        </View>
       </View>
+
+      <AddFriendSheet
+        sheetRef={addFriendSheetRef}
+        bottomInset={insets.bottom}
+        friendUsername={friendUsername}
+        onChangeFriendUsername={(username) => {
+          setFriendUsername(username);
+        }}
+        onAddFriend={handleAddFriend}
+        />
+    </View>
   );
 }
 
@@ -172,26 +198,25 @@ const styles = StyleSheet.create({
   userCardDetails: {
     width: '100%'
   },
-  usernameText: {
+  nicknameText: {
     fontFamily: fonts.bodyStrong,
     fontSize: type.displayM.fontSize,
     lineHeight: type.displayM.lineHeight,
     letterSpacing: type.displayM.letterSpacing,
     color: colors.ink,
   },
-  usernameTextSmall: {
+  nicknameTextSmall: {
     fontFamily: fonts.bodyStrong,
     fontSize: type.displayS.fontSize,
     lineHeight: type.displayS.lineHeight,
     letterSpacing: type.displayS.letterSpacing,
     color: colors.ink,
   },
-  emailText: {
+  usernameText: {
     fontFamily: fonts.label,
     fontSize: type.label.fontSize,
     lineHeight: type.label.lineHeight,
     letterSpacing: type.label.letterSpacing,
-    textTransform: type.label.textTransform,
     color: colors.inkMid,
   },
   actionSection: {
