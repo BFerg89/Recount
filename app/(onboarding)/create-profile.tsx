@@ -1,15 +1,16 @@
 import { useRef, useState } from 'react';
-import { StyleSheet, Text, View, type TextInput } from 'react-native';
+import { StyleSheet, Text, type TextInput } from 'react-native';
 
 import { router } from 'expo-router';
 import { useProfile } from '@/context/ProfileContext';
 import { createProfile } from '@/lib/profilesApi';
 
+import { AuthFormScreen } from '@/components/auth/AuthFormScreen';
 import { AuthTextInput } from '@/components/auth/AuthTextInput';
 import { PrimaryButton } from '@/components/ui/PrimaryButton';
 import { recountTheme } from '@/constants/RecountTheme';
 
-const { colors, fonts, layout, spacing, type } = recountTheme;
+const { colors, fonts, type } = recountTheme;
 
 export default function CreateProfileScreen() {
   const [username, setUsername] = useState('');
@@ -52,61 +53,42 @@ export default function CreateProfileScreen() {
   };
 
   return (
-    <View style={styles.screen}>
-      <View style={styles.content}>
-        <View style={styles.formArea}>
-          <AuthTextInput
-            prefix="@"
-            value={username}
-            onChangeText={setUsername}
-            autoCapitalize='none'
-            autoCorrect={false}
-            autoComplete='username'
-            textContentType='username'
-            placeholder='Username...'
-            returnKeyType='next'
-            onSubmitEditing={() => nicknameInputRef.current?.focus()}
-          />
-          <AuthTextInput
-            ref={nicknameInputRef}
-            value={nickname}
-            onChangeText={setNickname}
-            autoCapitalize='words'
-            autoCorrect={false}
-            placeholder='Nickname...'
-            returnKeyType='done'
-            onSubmitEditing={handleCreateProfile}
-          />
-          {(formError || profileError) && (
-            <Text style={styles.errorText}>{formError ?? profileError}</Text>
-          )}
-          <PrimaryButton
-            label="Create Profile"
-            disabled={!hasRequiredFields || isSubmitting}
-            onPress={handleCreateProfile}
-          />
-        </View>
-      </View>
-    </View>
+    <AuthFormScreen>
+      <AuthTextInput
+        prefix="@"
+        value={username}
+        onChangeText={setUsername}
+        autoCapitalize='none'
+        autoCorrect={false}
+        autoComplete='username'
+        textContentType='username'
+        placeholder='Username...'
+        returnKeyType='next'
+        onSubmitEditing={() => nicknameInputRef.current?.focus()}
+      />
+      <AuthTextInput
+        ref={nicknameInputRef}
+        value={nickname}
+        onChangeText={setNickname}
+        autoCapitalize='words'
+        autoCorrect={false}
+        placeholder='Nickname...'
+        returnKeyType='done'
+        onSubmitEditing={handleCreateProfile}
+      />
+      {(formError || profileError) && (
+        <Text style={styles.errorText}>{formError ?? profileError}</Text>
+      )}
+      <PrimaryButton
+        label="Create Profile"
+        disabled={!hasRequiredFields || isSubmitting}
+        onPress={handleCreateProfile}
+      />
+    </AuthFormScreen>
   );
 }
 
 const styles = StyleSheet.create({
-  screen: {
-    flex: 1,
-    backgroundColor: colors.paper,
-    paddingHorizontal: layout.mobileGutter,
-  },
-  content: {
-    flex: 1,
-    justifyContent: 'space-between',
-    paddingBottom: spacing.s7,
-  },
-  formArea: {
-    flex: 1,
-    gap: layout.verticalCardGap,
-    justifyContent: 'center',
-  },
   errorText: {
     fontFamily: fonts.body,
     fontSize: type.bodyS.fontSize,

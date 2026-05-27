@@ -1,14 +1,15 @@
 import { useState } from 'react';
 import { router } from 'expo-router';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text } from 'react-native';
 import { isAuthError, isAuthWeakPasswordError } from '@supabase/supabase-js';
 
+import { AuthFormScreen } from '@/components/auth/AuthFormScreen';
 import { AuthTextInput } from '@/components/auth/AuthTextInput';
 import { PrimaryButton } from '@/components/ui/PrimaryButton';
 import { recountTheme } from '@/constants/RecountTheme';
 import { useAuth } from '@/context/AuthContext';
 
-const { colors, fonts, layout, spacing, type } = recountTheme;
+const { colors, fonts, type } = recountTheme;
 const minimumPasswordLength = 6;
 
 const getSignUpErrorMessage = (error: unknown) => {
@@ -117,54 +118,8 @@ export default function SignUpScreen() {
   };
 
   return (
-    <View style={styles.screen}>
-      <View style={styles.content}>
-        <View style={styles.formArea}>
-          <AuthTextInput
-            value={email}
-            onChangeText={handleEmailChange}
-            keyboardType='email-address'
-            autoCapitalize='none'
-            autoCorrect={false}
-            autoComplete='email'
-            textContentType='emailAddress'
-            placeholder='Email...'
-            returnKeyType='next'
-          />
-          <AuthTextInput
-            value={password}
-            onChangeText={handlePasswordChange}
-            secureTextEntry
-            autoCapitalize='none'
-            autoCorrect={false}
-            autoComplete='new-password'
-            textContentType='newPassword'
-            placeholder='Password...'
-            returnKeyType='next'
-          />
-          <AuthTextInput
-            value={confirmPassword}
-            onChangeText={handleConfirmPasswordChange}
-            secureTextEntry
-            autoCapitalize='none'
-            autoCorrect={false}
-            autoComplete='new-password'
-            textContentType='newPassword'
-            placeholder='Confirm password...'
-            returnKeyType='done'
-            onSubmitEditing={handleSignUp}
-          />
-          {(formError || passwordMismatch || authError) && (
-            <Text style={styles.errorText}>
-              {passwordMismatch ? 'Passwords do not match.' : formError ?? authError}
-            </Text>
-          )}
-          <PrimaryButton
-            label="Create Account"
-            disabled={!canSubmit || isSubmitting}
-            onPress={handleSignUp}
-          />
-        </View>
+    <AuthFormScreen
+      footer={(
         <Pressable
           onPress={() => router.replace('/login')}
           style={styles.loginButton}
@@ -180,27 +135,56 @@ export default function SignUpScreen() {
             </>
           )}
         </Pressable>
-      </View>
-    </View>
+      )}>
+      <AuthTextInput
+        value={email}
+        onChangeText={handleEmailChange}
+        keyboardType='email-address'
+        autoCapitalize='none'
+        autoCorrect={false}
+        autoComplete='email'
+        textContentType='emailAddress'
+        placeholder='Email...'
+        returnKeyType='next'
+      />
+      <AuthTextInput
+        value={password}
+        onChangeText={handlePasswordChange}
+        secureTextEntry
+        autoCapitalize='none'
+        autoCorrect={false}
+        autoComplete='new-password'
+        textContentType='newPassword'
+        placeholder='Password...'
+        returnKeyType='next'
+      />
+      <AuthTextInput
+        value={confirmPassword}
+        onChangeText={handleConfirmPasswordChange}
+        secureTextEntry
+        autoCapitalize='none'
+        autoCorrect={false}
+        autoComplete='new-password'
+        textContentType='newPassword'
+        placeholder='Confirm password...'
+        returnKeyType='done'
+        onSubmitEditing={handleSignUp}
+      />
+      {(formError || passwordMismatch || authError) && (
+        <Text style={styles.errorText}>
+          {passwordMismatch ? 'Passwords do not match.' : formError ?? authError}
+        </Text>
+      )}
+      <PrimaryButton
+        label="Create Account"
+        disabled={!canSubmit || isSubmitting}
+        onPress={handleSignUp}
+      />
+    </AuthFormScreen>
   );
 }
 
 const styles = StyleSheet.create({
-  screen: {
-    flex: 1,
-    backgroundColor: colors.paper,
-    paddingHorizontal: layout.mobileGutter,
-  },
-  content: {
-    flexGrow: 1,
-    justifyContent: 'space-between',
-    paddingBottom: spacing.s7,
-  },
-  formArea: {
-    flex: 1,
-    gap: layout.verticalCardGap,
-    justifyContent: 'center',
-  },
   errorText: {
     fontFamily: fonts.body,
     fontSize: type.bodyS.fontSize,

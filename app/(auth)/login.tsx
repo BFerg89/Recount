@@ -1,12 +1,13 @@
 import { useRef, useState } from 'react';
-import { StyleSheet, View, Pressable, Text, type TextInput } from 'react-native';
+import { Pressable, StyleSheet, Text, type TextInput } from 'react-native';
 import { router } from 'expo-router';
+import { AuthFormScreen } from '@/components/auth/AuthFormScreen';
 import { AuthTextInput } from '@/components/auth/AuthTextInput';
 import { PrimaryButton } from '@/components/ui/PrimaryButton';
 import { recountTheme } from '@/constants/RecountTheme';
 import { useAuth } from '@/context/AuthContext';
 
-const { colors, fonts, layout, spacing, type } = recountTheme;
+const { colors, fonts, type } = recountTheme;
 
 export default function LoginScreen() {
   const [email, setEmail] = useState('');
@@ -40,43 +41,8 @@ export default function LoginScreen() {
   };
 
   return (
-    <View style={styles.screen}>
-      <View style={styles.content}>
-        <View style={styles.formArea}>
-          <AuthTextInput
-            value={email}
-            onChangeText={setEmail}
-            keyboardType='email-address'
-            autoCapitalize='none'
-            autoCorrect={false}
-            autoComplete='email'
-            textContentType='emailAddress'
-            placeholder='Email...'
-            returnKeyType='next'
-            onSubmitEditing={() => passwordInputRef.current?.focus()}
-          />
-          <AuthTextInput
-            ref={passwordInputRef}
-            value={password}
-            onChangeText={setPassword}
-            secureTextEntry
-            autoCapitalize='none'
-            autoCorrect={false}
-            autoComplete='password'
-            textContentType='password'
-            placeholder='Password...'
-            returnKeyType='done'
-            onSubmitEditing={handleLogin}
-          />
-          {authError && (
-            <Text style={styles.errorText}>{authError}</Text>
-          )}
-          <PrimaryButton
-            label={isSubmitting ? 'Logging in...' : 'Login'}
-            disabled={!canSubmit || isSubmitting}
-            onPress={handleLogin}
-          />
-        </View>
+    <AuthFormScreen
+      footer={(
         <Pressable
           style={styles.signUpButton}
           onPress={() => router.replace('/sign-up')}
@@ -92,27 +58,45 @@ export default function LoginScreen() {
             </>
           )}
         </Pressable>
-      </View>
-    </View>
+      )}>
+      <AuthTextInput
+        value={email}
+        onChangeText={setEmail}
+        keyboardType='email-address'
+        autoCapitalize='none'
+        autoCorrect={false}
+        autoComplete='email'
+        textContentType='emailAddress'
+        placeholder='Email...'
+        returnKeyType='next'
+        onSubmitEditing={() => passwordInputRef.current?.focus()}
+      />
+      <AuthTextInput
+        ref={passwordInputRef}
+        value={password}
+        onChangeText={setPassword}
+        secureTextEntry
+        autoCapitalize='none'
+        autoCorrect={false}
+        autoComplete='password'
+        textContentType='password'
+        placeholder='Password...'
+        returnKeyType='done'
+        onSubmitEditing={handleLogin}
+      />
+      {authError && (
+        <Text style={styles.errorText}>{authError}</Text>
+      )}
+      <PrimaryButton
+        label={isSubmitting ? 'Logging in...' : 'Login'}
+        disabled={!canSubmit || isSubmitting}
+        onPress={handleLogin}
+      />
+    </AuthFormScreen>
   )
 }
 
 const styles = StyleSheet.create({
-  screen: {
-    flex: 1,
-    backgroundColor: colors.paper,
-    paddingHorizontal: layout.mobileGutter,
-  },
-  content: {
-    flex: 1,
-    justifyContent: 'space-between',
-    paddingBottom: spacing.s7,
-  },
-  formArea: {
-    flex: 1,
-    gap: layout.verticalCardGap,
-    justifyContent: 'center',
-  },
   errorText: {
     fontFamily: fonts.body,
     fontSize: type.bodyS.fontSize,
