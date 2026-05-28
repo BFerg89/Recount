@@ -24,6 +24,12 @@ type FriendshipRow = {
   updated_at: string;
 };
 
+export type FriendProfile = {
+  id: string;
+  username: string;
+  nickname: string;
+};
+
 const toError = (error: unknown, fallbackMessage = 'Unknown Friends API error.') => {
   if (error instanceof Error) {
     return error;
@@ -67,4 +73,46 @@ export async function fetchFriendships(): Promise<Friendship[]> {
   const rows = (data ?? []) as FriendshipRow[];
 
   return rows.map(mapFriendship);
+}
+
+async function lookupProfileByUsername(inputUsername: string): Promise<FriendProfile | null> {
+  const username = inputUsername.trim().toLowerCase();
+
+  if (!/^[a-z0-9_]{3,24}$/.test(username)) {
+    throw new Error('Invalid username.');
+  }
+
+  const { data, error } = await supabase.rpc('lookup_profile_by_username', { p_username: username });
+
+  if (error) {
+    throw toError(error, 'Could not look up user.');
+  }
+
+  const rows = (data ?? []) as FriendProfile[];
+
+  return rows[0] ?? null;
+} 
+
+export async function sendFriendRequest(username: string): Promise<void> {
+  const targetProfile = await lookupProfileByUsername(username);
+
+  if (targetProfile === null) {
+    throw new Error('User not found.');
+  }
+
+  const { error: insertError } = await supabase
+    .from('friendships')
+    .insert({ addressee_id: targetProfile.id });
+
+  if (insertError) {
+    if (insertError.code === '23505') {
+      throw new Error('Friend request already sent.');
+    }
+
+    if (insertError.code === '23514') {
+      throw new Error('You cannot add yourself.');
+    }
+
+    throw toError(insertError, 'Could not send friend request.');
+  }
 }

@@ -9,7 +9,7 @@ import { useAuth } from '@/context/AuthContext';
 import { useLogs } from '@/context/LogsContext';
 import { useProfile } from '@/context/ProfileContext';
 import { AddFriendSheet } from '@/components/profile/AddFriendSheet';
-import { fetchFriendships, Friendship } from '@/lib/friendsApi';
+import { fetchFriendships, sendFriendRequest, type Friendship } from '@/lib/friendsApi';
 
 const { colors, fonts, layout, radius, shadows, spacing, type } = recountTheme;
 
@@ -97,6 +97,7 @@ export default function ProfileScreen() {
   const addFriendSheetRef = useRef<BottomSheet>(null);
   const insets = useSafeAreaInsets();
   const [friendUsername, setFriendUsername] = useState('');
+  const [addFriendError, setAddFriendError] = useState<string | null>(null);
 
   const [friendships, setFriendships] = useState<Friendship[]>([]);
   const [isFriendshipsLoading, setIsFriendshipsLoading] = useState(false);
@@ -159,7 +160,21 @@ export default function ProfileScreen() {
     }
   };
 
-  const handleAddFriend = () => {
+  const handleAddFriend = async () => {
+    setAddFriendError(null);
+
+    try {
+      await sendFriendRequest(friendUsername);
+      setFriendUsername('');
+      addFriendSheetRef.current?.close();
+      await refreshFriendships();
+    } catch (caughtError) {
+      const message = caughtError instanceof Error
+        ? caughtError.message
+        : 'Could not send friend request.';
+
+      setAddFriendError(message);
+    }
   };
 
   return (
@@ -305,8 +320,10 @@ export default function ProfileScreen() {
         sheetRef={addFriendSheetRef}
         bottomInset={insets.bottom}
         friendUsername={friendUsername}
+        errorMessage={addFriendError}
         onChangeFriendUsername={(username) => {
           setFriendUsername(username);
+          setAddFriendError(null);
         }}
         onAddFriend={handleAddFriend}
       />

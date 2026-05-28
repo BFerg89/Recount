@@ -20,6 +20,7 @@ type BottomActionSheetProps = {
 type SheetFieldProps = {
   label: string;
   children: ReactNode;
+  errorMessage?: string | null;
 };
 
 type PrefixedSheetTextInputProps = SheetTextInputProps & {
@@ -65,11 +66,16 @@ export function SheetForm({ children }: { children: ReactNode }) {
   );
 }
 
-export function SheetField({ label, children }: SheetFieldProps) {
+export function SheetField({ label, children, errorMessage }: SheetFieldProps) {
   return (
     <View style={styles.sheetField}>
       <Text style={styles.sheetFieldLabel}>{label}</Text>
       {children}
+      {errorMessage && (
+        <Text selectable style={styles.sheetFieldErrorText}>
+          {errorMessage}
+        </Text>
+      )}
     </View>
   );
 }
@@ -160,6 +166,12 @@ const styles = StyleSheet.create({
     letterSpacing: type.label.letterSpacing,
     textTransform: type.label.textTransform,
     color: colors.inkMid,
+  },
+  sheetFieldErrorText: {
+    fontFamily: fonts.body,
+    fontSize: type.bodyS.fontSize,
+    lineHeight: type.bodyS.lineHeight,
+    color: colors.terracottaDeep,
   },
   sheetTextInput: {
     minHeight: 52,

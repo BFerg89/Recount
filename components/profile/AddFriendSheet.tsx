@@ -17,6 +17,7 @@ type AddFriendSheetProps = {
   sheetRef: RefObject<BottomSheet | null>;
   bottomInset: number;
   friendUsername: string;
+  errorMessage?: string | null;
   onChangeFriendUsername: (username: string) => void;
   onAddFriend: () => void;
 };
@@ -25,6 +26,7 @@ export function AddFriendSheet({
   sheetRef,
   bottomInset,
   friendUsername,
+  errorMessage,
   onChangeFriendUsername,
   onAddFriend,
 }: AddFriendSheetProps) {
@@ -55,7 +57,7 @@ export function AddFriendSheet({
         />
       )}>
       <SheetForm>
-        <SheetField label="Username">
+        <SheetField label="Username" errorMessage={errorMessage}>
           <PrefixedSheetTextInput
             prefix="@"
             value={friendUsername}
