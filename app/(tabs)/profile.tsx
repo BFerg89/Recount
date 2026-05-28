@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { SymbolView } from 'expo-symbols';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import BottomSheet from '@gorhom/bottom-sheet';
@@ -9,6 +9,7 @@ import { useAuth } from '@/context/AuthContext';
 import { useLogs } from '@/context/LogsContext';
 import { useProfile } from '@/context/ProfileContext';
 import { AddFriendSheet } from '@/components/profile/AddFriendSheet';
+import { fetchFriendships, Friendship } from '@/lib/friendsApi';
 
 const { colors, fonts, layout, radius, shadows, spacing, type } = recountTheme;
 
@@ -26,20 +27,6 @@ type FriendRowProps = {
   statusLabel: string;
   statusVariant?: 'default' | 'request';
 };
-
-const friendPreviews: FriendPreview[] = [
-  { id: 'friend-thea', displayName: 'Thea', username: 'thea' },
-  { id: 'friend-finlay', displayName: 'Finlay', username: 'finlay' },
-  { id: 'friend-georgia', displayName: 'Georgia', username: 'georgia' },
-  { id: 'friend-india', displayName: 'India', username: 'india' },
-  { id: 'friend-mac', displayName: 'Mac', username: 'mac' },
-  { id: 'friend-juliana', displayName: 'Juliana', username: 'juliana' },
-  { id: 'friend-isabella', displayName: 'Isabella', username: 'isabella' },
-  { id: 'friend-rory', displayName: 'Rory', username: 'rory' },
-  { id: 'friend-aurele', displayName: 'Aurele', username: 'aurele' },
-];
-
-const pendingFriendRequests: FriendPreview[] = [];
 
 const getInitials = (displayName: string, fallback: string) => {
   const source = displayName.trim() || fallback.trim();
@@ -111,10 +98,58 @@ export default function ProfileScreen() {
   const insets = useSafeAreaInsets();
   const [friendUsername, setFriendUsername] = useState('');
 
+  const [friendships, setFriendships] = useState<Friendship[]>([]);
+  const [isFriendshipsLoading, setIsFriendshipsLoading] = useState(false);
+  const [friendshipsError, setFriendshipsError] = useState<string | null>(null);
+
   const username = profile?.username ?? 'username';
   const nickname = profile?.nickname ?? 'NightLog user';
   const profileInitials = getInitials(nickname, username);
   const useCompactNickname = nickname.length > 15;
+
+  const friends = friendships.filter((friendship) => friendship.status === 'accepted');
+  const incomingFriendRequests = friendships.filter(
+    (friendship) => friendship.status === 'pending' && friendship.direction === 'incoming'
+  );
+
+  // TODO: Decide where/how outgoing requests are displayed
+  const outgoingFriendRequests = friendships.filter(
+    (friendship) => friendship.status === 'pending' && friendship.direction === 'outgoing'
+  );
+
+  const friendPreviews = friends.map((friendship) => ({
+    id: friendship.id,
+    displayName: friendship.otherProfile.nickname,
+    username: friendship.otherProfile.username,
+  }));
+
+  const pendingFriendRequests = incomingFriendRequests.map((friendship) => ({
+    id: friendship.id,
+    displayName: friendship.otherProfile.nickname,
+    username: friendship.otherProfile.username,
+  }));
+
+  const refreshFriendships = useCallback(async () => {
+    setIsFriendshipsLoading(true);
+    setFriendshipsError(null);
+
+    try {
+      const fetchedFriendships = await fetchFriendships();
+      setFriendships(fetchedFriendships);
+    } catch (caughtError) {
+      const message = caughtError instanceof Error
+        ? caughtError.message
+        : 'Unable to load friendships.';
+      setFriendshipsError(message);
+      setFriendships([]);
+    } finally {
+      setIsFriendshipsLoading(false);
+    }
+  }, []); 
+
+  useEffect(() => {
+    refreshFriendships();
+  }, [refreshFriendships]);
 
   const handleSignout = async () => {
     try {
@@ -211,7 +246,7 @@ export default function ProfileScreen() {
                   friend={request}
                   index={index}
                   isLast={index === pendingFriendRequests.length - 1}
-                  statusLabel={request.direction === 'outgoing' ? 'Sent' : 'Incoming'}
+                  statusLabel='Incoming'
                   statusVariant="request"
                 />
               ))}
