@@ -116,3 +116,20 @@ export async function sendFriendRequest(username: string): Promise<void> {
     throw toError(insertError, 'Could not send friend request.');
   }
 }
+
+export async function acceptFriendRequest(friendshipId: string): Promise<void> {
+  const { data, error } = await supabase
+    .from('friendships')
+    .update({ status: 'accepted' })
+    .eq('id', friendshipId)
+    .select('id')
+    .maybeSingle();
+  
+    if (error) {
+      throw toError(error, 'Could not accept friend request.');
+    }
+
+    if (!data) {
+      throw new Error("Friend request can no longer be accepted.");
+    }
+}

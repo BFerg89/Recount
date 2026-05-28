@@ -9,7 +9,7 @@ import { useAuth } from '@/context/AuthContext';
 import { useLogs } from '@/context/LogsContext';
 import { useProfile } from '@/context/ProfileContext';
 import { AddFriendSheet } from '@/components/profile/AddFriendSheet';
-import { fetchFriendships, sendFriendRequest, type Friendship } from '@/lib/friendsApi';
+import { acceptFriendRequest, fetchFriendships, sendFriendRequest, type Friendship } from '@/lib/friendsApi';
 
 const { colors, fonts, layout, radius, shadows, spacing, type } = recountTheme;
 
@@ -26,6 +26,9 @@ type FriendRowProps = {
   isLast: boolean;
   statusLabel: string;
   statusVariant?: 'default' | 'request';
+  actionLabel?: string;
+  onActionPress?: () => void;
+  isActionDisabled?: boolean;
 };
 
 const getInitials = (displayName: string, fallback: string) => {
@@ -49,8 +52,37 @@ function FriendRow({
   isLast,
   statusLabel,
   statusVariant = 'default',
+  actionLabel,
+  onActionPress,
+  isActionDisabled,
 }: FriendRowProps) {
   const isRequest = statusVariant === 'request';
+
+  const statusContent = (
+    <Text style={isRequest ? styles.requestStatusText : styles.friendStatusText}>
+      {actionLabel ?? statusLabel}
+    </Text>
+  );
+
+  const statusPill = onActionPress ? (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityState={{ disabled: isActionDisabled === true }}
+      disabled={isActionDisabled}
+      onPress={onActionPress}
+      style={({ pressed }) => [
+        isRequest ? styles.requestStatusPill : styles.friendStatusPill,
+        pressed && styles.requestStatusPillPressed,
+        isActionDisabled && styles.requestStatusPillDisabled,
+      ]}
+    >
+      {statusContent}
+    </Pressable>
+  ) : (
+    <View style={isRequest ? styles.requestStatusPill : styles.friendStatusPill}>
+      {statusContent}
+    </View>
+  );
 
   return (
     <View
@@ -80,11 +112,7 @@ function FriendRow({
         </Text>
       </View>
 
-      <View style={isRequest ? styles.requestStatusPill : styles.friendStatusPill}>
-        <Text style={isRequest ? styles.requestStatusText : styles.friendStatusText}>
-          {statusLabel}
-        </Text>
-      </View>
+      {statusPill}
     </View>
   );
 }
@@ -177,6 +205,19 @@ export default function ProfileScreen() {
     }
   };
 
+  const handleAcceptFriendRequest = async (friendshipId: string) => {
+    try {
+      await acceptFriendRequest(friendshipId);
+      await refreshFriendships();
+    } catch (caughtError) {
+      const message = caughtError instanceof Error
+        ? caughtError.message
+        : 'Could not accept friend request.';
+
+      setFriendshipsError(message);
+    }
+  };
+
   return (
     <View style={styles.screen}>
       <ScrollView
@@ -261,7 +302,9 @@ export default function ProfileScreen() {
                   friend={request}
                   index={index}
                   isLast={index === pendingFriendRequests.length - 1}
-                  statusLabel='Incoming'
+                  statusLabel='Accept'
+                  actionLabel='Accept'
+                  onActionPress={() => handleAcceptFriendRequest(request.id)}
                   statusVariant="request"
                 />
               ))}
@@ -571,6 +614,16 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: colors.paper,
+  },
+  requestStatusPillPressed: {
+    borderColor: colors.terracotta,
+    backgroundColor: colors.terracottaSoft,
+    transform: [{ scale: 0.98 }],
+  },
+  requestStatusPillDisabled: {
+    borderColor: colors.paperEdge,
+    backgroundColor: colors.paperDeep,
+    opacity: 0.65,
   },
   requestStatusText: {
     fontFamily: fonts.label,
