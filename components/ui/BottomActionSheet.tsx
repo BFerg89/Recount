@@ -1,12 +1,15 @@
 import BottomSheet, { BottomSheetTextInput, BottomSheetView } from '@gorhom/bottom-sheet';
+import { forwardRef } from 'react';
 import type { ComponentProps, ReactNode, RefObject } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
+import type { TextInput as GestureTextInput } from 'react-native-gesture-handler';
 
 import { recountTheme } from '@/constants/RecountTheme';
 
 const { colors, fonts, layout, radius, shadows, spacing, type } = recountTheme;
 
 type SheetTextInputProps = ComponentProps<typeof BottomSheetTextInput>;
+export type SheetTextInputRef = GestureTextInput;
 
 type BottomActionSheetProps = {
   sheetRef: RefObject<BottomSheet | null>;
@@ -41,6 +44,10 @@ export function BottomActionSheet({
       index={-1}
       enableDynamicSizing
       enablePanDownToClose
+      keyboardBehavior="interactive"
+      keyboardBlurBehavior="restore"
+      enableBlurKeyboardOnGesture
+      android_keyboardInputMode="adjustResize"
       backgroundStyle={styles.sheetBackground}
       handleIndicatorStyle={styles.sheetHandle}
     >
@@ -80,21 +87,22 @@ export function SheetField({ label, children, errorMessage }: SheetFieldProps) {
   );
 }
 
-export function SheetTextInput({
+export const SheetTextInput = forwardRef<SheetTextInputRef, SheetTextInputProps>(function SheetTextInput({
   placeholderTextColor = colors.inkSoft,
   selectionColor = colors.terracotta,
   style,
   ...textInputProps
-}: SheetTextInputProps) {
+}, ref) {
   return (
     <BottomSheetTextInput
+      ref={ref}
       placeholderTextColor={placeholderTextColor}
       selectionColor={selectionColor}
       style={[styles.sheetTextInput, style]}
       {...textInputProps}
     />
   );
-}
+});
 
 export function PrefixedSheetTextInput({
   prefix,

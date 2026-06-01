@@ -1,10 +1,12 @@
 import type BottomSheet from '@gorhom/bottom-sheet';
 import { SymbolView } from 'expo-symbols';
+import { useRef } from 'react';
 import type { RefObject } from 'react';
 
 import { PrimaryButton } from '@/components/ui/PrimaryButton';
 import {
   BottomActionSheet,
+  type SheetTextInputRef,
   SheetField,
   SheetForm,
   SheetTextInput,
@@ -32,6 +34,8 @@ export function AddMomentSheet({
   onChangeNewMomentTime,
   onAddMoment,
 }: AddMomentSheetProps) {
+  const momentTimeInputRef = useRef<SheetTextInputRef>(null);
+
   return (
     <BottomActionSheet
       sheetRef={sheetRef}
@@ -61,15 +65,20 @@ export function AddMomentSheet({
             onChangeText={onChangeNewMomentTitle}
             placeholder="What happened next?"
             autoCapitalize="sentences"
+            returnKeyType="next"
+            onSubmitEditing={() => momentTimeInputRef.current?.focus()}
           />
         </SheetField>
 
         <SheetField label="Approx time">
           <SheetTextInput
+            ref={momentTimeInputRef}
             value={newMomentTime}
             onChangeText={onChangeNewMomentTime}
             placeholder="10:45 PM"
             keyboardType="numbers-and-punctuation"
+            returnKeyType="done"
+            onSubmitEditing={onAddMoment}
           />
         </SheetField>
       </SheetForm>

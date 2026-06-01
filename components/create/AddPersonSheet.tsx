@@ -57,6 +57,7 @@ export function AddPersonSheet({
             placeholder="Name..."
             autoCapitalize="words"
             returnKeyType="done"
+            onSubmitEditing={onAddPerson}
           />
         </SheetField>
       </SheetForm>

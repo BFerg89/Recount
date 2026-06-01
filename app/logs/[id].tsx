@@ -85,7 +85,12 @@ export default function ViewLogScreen() {
             </Pressable>
             <View style={styles.titleSection}>
               <Text style={styles.subTitle}>{weekday} · {monthTitle}</Text>
-              <Text style={styles.title}>{log?.title}</Text>
+              <Text
+                style={styles.title}
+                numberOfLines={2}
+                ellipsizeMode="tail">
+                {log?.title}
+              </Text>
               <Text style={styles.subTitle}>{log?.generalLocation}</Text>
             </View>
           </View>
@@ -164,8 +169,8 @@ const styles = StyleSheet.create({
   },
   header: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
+    gap: spacing.s3,
   },
   backButton: {
     width: 48,
@@ -179,6 +184,8 @@ const styles = StyleSheet.create({
     boxShadow: shadows.press,
   },
   titleSection: {
+    flex: 1,
+    minWidth: 0,
     gap: spacing.s1,
     alignItems: 'flex-end',
   },
@@ -190,9 +197,11 @@ const styles = StyleSheet.create({
     color: colors.terracottaDeep,
   },
   title: {
+    alignSelf: 'stretch',
     fontFamily: fonts.display,
     fontSize: type.displayXl.fontSize,
     letterSpacing: type.displayXl.letterSpacing,
+    textAlign: 'right',
     color: colors.ink,
   },
   peopleSection: {

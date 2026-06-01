@@ -141,7 +141,10 @@ export default function ProfileScreen() {
     (friendship) => friendship.status === 'pending' && friendship.direction === 'incoming'
   );
 
-  // TODO: Decide where/how outgoing requests are displayed
+  // TODO Friends v1 polish:
+  // 1. Render friendship errors and friends empty state.
+  // 2. Add request management: decline incoming, cancel outgoing, and remove accepted friends.
+  // 3. Decide outgoing request UX: Sent Requests section or Pending label in Friend Requests.
   const outgoingFriendRequests = friendships.filter(
     (friendship) => friendship.status === 'pending' && friendship.direction === 'outgoing'
   );

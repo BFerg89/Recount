@@ -1,7 +1,7 @@
 import DateTimePicker from '@expo/ui/datetimepicker';
 import { SymbolView } from 'expo-symbols';
 import { useRef, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, TextInput, useWindowDimensions, View } from 'react-native';
+import { Keyboard, Pressable, ScrollView, StyleSheet, Text, TextInput, useWindowDimensions, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import BottomSheet from '@gorhom/bottom-sheet';
 import { router } from 'expo-router';
@@ -76,6 +76,7 @@ export default function CreateScreen() {
   const addPeopleSheetRef = useRef<BottomSheet>(null);
   const addMomentSheetRef = useRef<BottomSheet>(null);
   const scrollRef = useRef<ScrollView>(null);
+  const locationInputRef = useRef<TextInput>(null);
 
   const clearSaveError = () => {
     if (saveError) {
@@ -106,6 +107,16 @@ export default function CreateScreen() {
     }, 0);
   };
 
+  const handleOpenAddPeopleSheet = () => {
+    Keyboard.dismiss();
+    addPeopleSheetRef.current?.expand();
+  };
+
+  const handleOpenAddMomentSheet = () => {
+    Keyboard.dismiss();
+    addMomentSheetRef.current?.expand();
+  };
+
   const handleAddPerson = () => {
     const trimmedName = newPersonName.trim();
 
@@ -118,6 +129,7 @@ export default function CreateScreen() {
       displayName: trimmedName,
     };
 
+    Keyboard.dismiss();
     setPeople((currentPeople) => [...currentPeople, newPerson]);
     clearSaveError();
     setNewPersonName('');
@@ -138,6 +150,7 @@ export default function CreateScreen() {
       approxTime: trimmedTime || null,
     };
 
+    Keyboard.dismiss();
     setMoments((currentMoments) => [...currentMoments, newMoment]);
     clearSaveError();
     setNewMomentTitle('');
@@ -178,8 +191,15 @@ export default function CreateScreen() {
       <ScrollView
         ref={scrollRef}
         style={styles.contentContainer} 
-        contentContainerStyle={styles.content}
-        automaticallyAdjustKeyboardInsets={true}>
+        contentContainerStyle={styles.scrollContent}
+        automaticallyAdjustKeyboardInsets={true}
+        keyboardDismissMode="interactive"
+        keyboardShouldPersistTaps="handled">
+        <View
+          accessible={false}
+          onResponderRelease={Keyboard.dismiss}
+          onStartShouldSetResponder={(event) => event.target === event.currentTarget}
+          style={styles.content}>
         <View style={styles.titleSection}>
           <TextInput
             value={title}
@@ -188,16 +208,21 @@ export default function CreateScreen() {
               clearSaveError();
             }}
             placeholder='Name this log...'
+            returnKeyType="next"
+            onSubmitEditing={() => locationInputRef.current?.focus()}
             style={styles.titleInput}/>
           <View style={styles.dateRow}>
             <TextInput
+              ref={locationInputRef}
               value={location}
               onChangeText={(text) => {
                 setLocation(text);
                 clearSaveError();
               }}
               style={styles.locationInput}
-              placeholder='Location...'/>
+              placeholder='Location...'
+              returnKeyType="done"
+              onSubmitEditing={Keyboard.dismiss}/>
             <View style={styles.datePickerGroup}>
               <Text style={styles.dateText}>When:</Text>
               <DateTimePicker
@@ -226,7 +251,7 @@ export default function CreateScreen() {
                   styles.addPersonButton,
                   pressed && styles.addPersonButtonPressed,
                 ]}
-                onPress={() => addPeopleSheetRef.current?.expand()}>
+                onPress={handleOpenAddPeopleSheet}>
                 <SymbolView name={{
                   ios: 'plus.circle',
                   android: 'add',
@@ -252,7 +277,7 @@ export default function CreateScreen() {
             ))}
             <Pressable
               style={styles.addMomentButton}
-              onPress={() => addMomentSheetRef.current?.expand()}>
+              onPress={handleOpenAddMomentSheet}>
               {({ pressed }) => (
                 <>
                   <SymbolView name={{
@@ -305,6 +330,7 @@ export default function CreateScreen() {
           </ScrollView>
         </View>
 
+        </View>
       </ScrollView>
 
       <View style={styles.saveBar}>
@@ -365,6 +391,9 @@ const styles = StyleSheet.create({
   contentContainer: {
     flex: 1,
     marginTop: spacing.s3,
+  },
+  scrollContent: {
+    flexGrow: 1,
   },
   title: {
     paddingHorizontal: layout.mobileGutter,
