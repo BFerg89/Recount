@@ -72,7 +72,7 @@ export default function ViewLogScreen() {
       <ScrollView
         contentContainerStyle={[
           styles.scrollContent,
-          { paddingBottom: insets.bottom + spacing.s8 },
+          { paddingBottom: spacing.s8 },
         ]}>
         <View style={styles.content}>
           <View style={styles.header}>

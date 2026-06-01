@@ -142,9 +142,8 @@ export default function ProfileScreen() {
   );
 
   // TODO Friends v1 polish:
-  // 1. Render friendship errors and friends empty state.
-  // 2. Add request management: decline incoming, cancel outgoing, and remove accepted friends.
-  // 3. Decide outgoing request UX: Sent Requests section or Pending label in Friend Requests.
+  // 1. Add request management: decline incoming, cancel outgoing, and remove accepted friends.
+  // 2. Decide outgoing request UX: Sent Requests section or Pending label in Friend Requests.
   const outgoingFriendRequests = friendships.filter(
     (friendship) => friendship.status === 'pending' && friendship.direction === 'outgoing'
   );
@@ -160,6 +159,19 @@ export default function ProfileScreen() {
     displayName: friendship.otherProfile.nickname,
     username: friendship.otherProfile.username,
   }));
+
+  const friendshipStatusMessage = isFriendshipsLoading
+    ? 'Loading friends...'
+    : friendshipsError
+      ? 'Could not load friends'
+      : null;
+  const friendshipStatusIconName = isFriendshipsLoading
+    ? ({ ios: 'hourglass', android: 'hourglass_empty' } as const)
+    : ({ ios: 'exclamationmark.circle', android: 'error_outline' } as const);
+  const friendshipStatusIconTint = isFriendshipsLoading
+    ? colors.inkSoft
+    : colors.terracottaDeep;
+  const isFriendshipStatusError = !isFriendshipsLoading && friendshipsError !== null;
 
   const refreshFriendships = useCallback(async () => {
     setIsFriendshipsLoading(true);
@@ -177,7 +189,7 @@ export default function ProfileScreen() {
     } finally {
       setIsFriendshipsLoading(false);
     }
-  }, []); 
+  }, []);
 
   useEffect(() => {
     refreshFriendships();
@@ -228,7 +240,7 @@ export default function ProfileScreen() {
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
         style={styles.scrollView}
-        contentContainerStyle={styles.content}>
+        contentContainerStyle={[styles.content, { paddingBottom: spacing.s8 }]}>
         <View style={styles.titleSection}>
           <Text style={styles.titleText}>Profile</Text>
 
@@ -292,62 +304,110 @@ export default function ProfileScreen() {
           </View>
         </View>
 
-        <View style={styles.friendsSection}>
-          <View style={styles.sectionHeader}>
-            <Text style={styles.sectionLabel}>Friend requests</Text>
-          </View>
-
-          {pendingFriendRequests.length > 0 ? (
-            <View style={styles.friendsCard}>
-              {pendingFriendRequests.map((request, index) => (
-                <FriendRow
-                  key={request.id}
-                  friend={request}
-                  index={index}
-                  isLast={index === pendingFriendRequests.length - 1}
-                  statusLabel='Accept'
-                  actionLabel='Accept'
-                  onActionPress={() => handleAcceptFriendRequest(request.id)}
-                  statusVariant="request"
-                />
-              ))}
-            </View>
-          ) : (
-            <View style={styles.emptyRequestsCard}>
-              <View style={styles.emptyRequestsIcon}>
-                <SymbolView
-                  name={{
-                    ios: 'person.2',
-                    android: 'group',
-                  }}
-                  tintColor={colors.inkSoft}
-                  size={23}
-                />
-              </View>
-              <View style={styles.emptyRequestsCopy}>
-                <Text style={styles.emptyRequestsTitle}>No pending requests</Text>
-              </View>
-            </View>
-          )}
-        </View>
-
-        <View style={styles.friendsSection}>
-          <View style={styles.sectionHeader}>
-            <Text style={styles.sectionLabel}>Friends</Text>
-          </View>
-
-          <View style={styles.friendsCard}>
-            {friendPreviews.map((friend, index) => (
-              <FriendRow
-                key={friend.id}
-                friend={friend}
-                index={index}
-                isLast={index === friendPreviews.length - 1}
-                statusLabel="Friend"
+        {friendshipStatusMessage ? (
+          <View
+            style={[
+              styles.emptyStateCard,
+              isFriendshipStatusError && styles.errorStateCard,
+            ]}>
+            <View
+              style={[
+                styles.emptyStateIcon,
+                isFriendshipStatusError && styles.errorStateIcon,
+              ]}>
+              <SymbolView
+                name={friendshipStatusIconName}
+                tintColor={friendshipStatusIconTint}
+                size={22}
               />
-            ))}
+            </View>
+            <View style={styles.emptyStateCopy}>
+              <Text selectable={isFriendshipStatusError} style={styles.emptyStateTitle}>
+                {friendshipStatusMessage}
+              </Text>
+            </View>
           </View>
-        </View>
+        ) : (
+          <>
+            <View style={styles.friendsSection}>
+              <View style={styles.sectionHeader}>
+                <Text style={styles.sectionLabel}>Friend requests</Text>
+              </View>
+
+              {pendingFriendRequests.length > 0 ? (
+                <View style={styles.friendsCard}>
+                  {pendingFriendRequests.map((request, index) => (
+                    <FriendRow
+                      key={request.id}
+                      friend={request}
+                      index={index}
+                      isLast={index === pendingFriendRequests.length - 1}
+                      statusLabel="Accept"
+                      actionLabel="Accept"
+                      onActionPress={() => handleAcceptFriendRequest(request.id)}
+                      statusVariant="request"
+                    />
+                  ))}
+                </View>
+              ) : (
+                <View style={styles.emptyStateCard}>
+                  <View style={styles.emptyStateIcon}>
+                    <SymbolView
+                      name={{
+                        ios: 'person.2',
+                        android: 'group',
+                      }}
+                      tintColor={colors.inkSoft}
+                      size={23}
+                    />
+                  </View>
+                  <View style={styles.emptyStateCopy}>
+                    <Text style={styles.emptyStateTitle}>No pending requests</Text>
+                  </View>
+                </View>
+              )}
+            </View>
+
+            <View style={styles.friendsSection}>
+              <View style={styles.sectionHeader}>
+                <Text style={styles.sectionLabel}>Friends</Text>
+              </View>
+
+              {friendPreviews.length > 0 ? (
+                <View style={styles.friendsCard}>
+                  {friendPreviews.map((friend, index) => (
+                    <FriendRow
+                      key={friend.id}
+                      friend={friend}
+                      index={index}
+                      isLast={index === friendPreviews.length - 1}
+                      statusLabel="Friend"
+                    />
+                  ))}
+                </View>
+              ) : (
+                <View style={styles.emptyStateCard}>
+                  <View style={styles.emptyStateIcon}>
+                    <SymbolView
+                      name={{
+                        ios: 'person.2',
+                        android: 'group',
+                      }}
+                      tintColor={colors.inkSoft}
+                      size={23}
+                    />
+                  </View>
+                  <View style={styles.emptyStateCopy}>
+                    <Text style={styles.emptyStateTitle}>No friends yet</Text>
+                    <Text style={styles.emptyStateText}>
+                      Add the people you create memories with!
+                    </Text>
+                  </View>
+                </View>
+              )}
+            </View>
+          </>
+        )}
 
         <View style={styles.accountSection}>
           <Text style={styles.sectionLabel}>Account</Text>
@@ -636,7 +696,7 @@ const styles = StyleSheet.create({
     textTransform: type.micro.textTransform,
     color: colors.terracottaDeep,
   },
-  emptyRequestsCard: {
+  emptyStateCard: {
     minHeight: 96,
     flexDirection: 'row',
     alignItems: 'center',
@@ -648,7 +708,10 @@ const styles = StyleSheet.create({
     padding: layout.cardPadding,
     boxShadow: shadows.card,
   },
-  emptyRequestsIcon: {
+  errorStateCard: {
+    borderColor: colors.terracottaSoft,
+  },
+  emptyStateIcon: {
     width: 44,
     height: 44,
     borderRadius: radius.pill,
@@ -658,16 +721,26 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.paperEdge,
   },
-  emptyRequestsCopy: {
+  errorStateIcon: {
+    backgroundColor: colors.terracottaSoft,
+    borderColor: colors.terracottaSoft,
+  },
+  emptyStateCopy: {
     flex: 1,
     minWidth: 0,
     gap: spacing.s1,
   },
-  emptyRequestsTitle: {
+  emptyStateTitle: {
     fontFamily: fonts.bodyStrong,
     fontSize: type.body.fontSize,
     lineHeight: type.body.lineHeight,
     color: colors.ink,
+  },
+  emptyStateText: {
+    fontFamily: fonts.body,
+    fontSize: type.bodyS.fontSize,
+    lineHeight: type.bodyS.lineHeight,
+    color: colors.inkMid,
   },
   accountSection: {
     gap: spacing.s2,
