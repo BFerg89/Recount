@@ -91,7 +91,7 @@ async function lookupProfileByUsername(inputUsername: string): Promise<FriendPro
   const rows = (data ?? []) as FriendProfile[];
 
   return rows[0] ?? null;
-} 
+}
 
 export async function sendFriendRequest(username: string): Promise<void> {
   const targetProfile = await lookupProfileByUsername(username);
@@ -125,11 +125,28 @@ export async function acceptFriendRequest(friendshipId: string): Promise<void> {
     .select('id')
     .maybeSingle();
   
-    if (error) {
-      throw toError(error, 'Could not accept friend request.');
-    }
+  if (error) {
+    throw toError(error, 'Could not accept friend request.');
+  }
 
-    if (!data) {
-      throw new Error("Friend request can no longer be accepted.");
-    }
+  if (!data) {
+    throw new Error('Friend request can no longer be accepted.');
+  }
+}
+
+export async function deleteFriendship(friendshipId: string): Promise<void> {
+  const { data, error } = await supabase
+    .from('friendships')
+    .delete()
+    .eq('id', friendshipId)
+    .select('id')
+    .maybeSingle();
+
+  if (error) {
+    throw toError(error, 'Could not delete friendship.');
+  }
+
+  if (!data) {
+    throw new Error('Friendship can no longer be changed.');
+  }
 }

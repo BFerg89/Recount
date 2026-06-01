@@ -9,7 +9,7 @@ import { useAuth } from '@/context/AuthContext';
 import { useLogs } from '@/context/LogsContext';
 import { useProfile } from '@/context/ProfileContext';
 import { AddFriendSheet } from '@/components/profile/AddFriendSheet';
-import { acceptFriendRequest, fetchFriendships, sendFriendRequest, type Friendship } from '@/lib/friendsApi';
+import { acceptFriendRequest, deleteFriendship, fetchFriendships, sendFriendRequest, type Friendship } from '@/lib/friendsApi';
 
 const { colors, fonts, layout, radius, shadows, spacing, type } = recountTheme;
 
@@ -24,11 +24,14 @@ type FriendRowProps = {
   friend: FriendPreview;
   index: number;
   isLast: boolean;
-  statusLabel: string;
+  statusLabel?: string;
   statusVariant?: 'default' | 'request';
   actionLabel?: string;
   onActionPress?: () => void;
   isActionDisabled?: boolean;
+  onDeletePress?: () => void;
+  isDeleteDisabled?: boolean;
+  deleteAccessibilityLabel?: string;
 };
 
 const getInitials = (displayName: string, fallback: string) => {
@@ -55,34 +58,68 @@ function FriendRow({
   actionLabel,
   onActionPress,
   isActionDisabled,
+  onDeletePress,
+  isDeleteDisabled,
+  deleteAccessibilityLabel,
 }: FriendRowProps) {
-  const isRequest = statusVariant === 'request';
+  const isFriendRequest = statusVariant === 'request';
 
-  const statusContent = (
-    <Text style={isRequest ? styles.requestStatusText : styles.friendStatusText}>
+  const actionContent = statusLabel || actionLabel ? (
+    <Text style={isFriendRequest ? styles.acceptButtonText : styles.friendStatusBadgeText}>
       {actionLabel ?? statusLabel}
     </Text>
-  );
+  ) : null;
 
-  const statusPill = onActionPress ? (
+  const rowPrimaryAction = onActionPress ? (
     <Pressable
       accessibilityRole="button"
       accessibilityState={{ disabled: isActionDisabled === true }}
       disabled={isActionDisabled}
       onPress={onActionPress}
       style={({ pressed }) => [
-        isRequest ? styles.requestStatusPill : styles.friendStatusPill,
-        pressed && styles.requestStatusPillPressed,
-        isActionDisabled && styles.requestStatusPillDisabled,
+        isFriendRequest ? styles.acceptButton : styles.friendStatusBadge,
+        pressed && styles.acceptButtonPressed,
+        isActionDisabled && styles.acceptButtonDisabled,
       ]}
     >
-      {statusContent}
+      {actionContent}
     </Pressable>
-  ) : (
-    <View style={isRequest ? styles.requestStatusPill : styles.friendStatusPill}>
-      {statusContent}
+  ) : actionContent ? (
+    <View style={isFriendRequest ? styles.acceptButton : styles.friendStatusBadge}>
+      {actionContent}
     </View>
-  );
+  ) : null;
+
+  const deleteAction = onDeletePress ? (
+    <Pressable
+      accessibilityLabel={deleteAccessibilityLabel}
+      accessibilityRole="button"
+      accessibilityState={{ disabled: isDeleteDisabled === true }}
+      disabled={isDeleteDisabled}
+      onPress={onDeletePress}
+      style={({ pressed }) => [
+        styles.deleteFriendButton,
+        pressed && styles.deleteFriendButtonPressed,
+        isDeleteDisabled && styles.deleteFriendButtonDisabled,
+      ]}
+    >
+      <SymbolView
+        name={{
+          ios: 'trash',
+          android: 'delete',
+        }}
+        tintColor={colors.paperCard}
+        size={16}
+      />
+    </Pressable>
+  ) : null;
+
+  const rowActions = rowPrimaryAction || deleteAction ? (
+    <View style={styles.friendRowActions}>
+      {rowPrimaryAction}
+      {deleteAction}
+    </View>
+  ) : null;
 
   return (
     <View
@@ -112,7 +149,7 @@ function FriendRow({
         </Text>
       </View>
 
-      {statusPill}
+      {rowActions}
     </View>
   );
 }
@@ -130,6 +167,8 @@ export default function ProfileScreen() {
   const [friendships, setFriendships] = useState<Friendship[]>([]);
   const [isFriendshipsLoading, setIsFriendshipsLoading] = useState(false);
   const [friendshipsError, setFriendshipsError] = useState<string | null>(null);
+  const [friendshipActionError, setFriendshipActionError] = useState<string | null>(null);
+  const [deletingFriendshipId, setDeletingFriendshipId] = useState<string | null>(null);
 
   const username = profile?.username ?? 'username';
   const nickname = profile?.nickname ?? 'NightLog user';
@@ -142,8 +181,7 @@ export default function ProfileScreen() {
   );
 
   // TODO Friends v1 polish:
-  // 1. Add request management: decline incoming, cancel outgoing, and remove accepted friends.
-  // 2. Decide outgoing request UX: Sent Requests section or Pending label in Friend Requests.
+  // 1. Render outgoing requests and wire cancel action.
   const outgoingFriendRequests = friendships.filter(
     (friendship) => friendship.status === 'pending' && friendship.direction === 'outgoing'
   );
@@ -221,6 +259,8 @@ export default function ProfileScreen() {
   };
 
   const handleAcceptFriendRequest = async (friendshipId: string) => {
+    setFriendshipActionError(null);
+
     try {
       await acceptFriendRequest(friendshipId);
       await refreshFriendships();
@@ -229,7 +269,25 @@ export default function ProfileScreen() {
         ? caughtError.message
         : 'Could not accept friend request.';
 
-      setFriendshipsError(message);
+      setFriendshipActionError(message);
+    }
+  };
+
+  const handleDeleteFriend = async (friendshipId: string) => {
+    setFriendshipActionError(null);
+    setDeletingFriendshipId(friendshipId);
+
+    try {
+      await deleteFriendship(friendshipId);
+      await refreshFriendships();
+    } catch (caughtError) {
+      const message = caughtError instanceof Error
+        ? caughtError.message
+        : 'Could not delete friendship.';
+
+      setFriendshipActionError(message);
+    } finally {
+      setDeletingFriendshipId(null);
     }
   };
 
@@ -329,6 +387,14 @@ export default function ProfileScreen() {
           </View>
         ) : (
           <>
+            {!!friendshipActionError && (
+              <View style={[styles.actionErrorCard, styles.errorStateCard]}>
+                <Text selectable style={styles.actionErrorText}>
+                  {friendshipActionError}
+                </Text>
+              </View>
+            )}
+
             <View style={styles.friendsSection}>
               <View style={styles.sectionHeader}>
                 <Text style={styles.sectionLabel}>Friend requests</Text>
@@ -345,6 +411,9 @@ export default function ProfileScreen() {
                       statusLabel="Accept"
                       actionLabel="Accept"
                       onActionPress={() => handleAcceptFriendRequest(request.id)}
+                      onDeletePress={() => handleDeleteFriend(request.id)}
+                      isDeleteDisabled={deletingFriendshipId === request.id}
+                      deleteAccessibilityLabel={`Delete friend request from ${request.displayName}`}
                       statusVariant="request"
                     />
                   ))}
@@ -381,7 +450,9 @@ export default function ProfileScreen() {
                       friend={friend}
                       index={index}
                       isLast={index === friendPreviews.length - 1}
-                      statusLabel="Friend"
+                      onDeletePress={() => handleDeleteFriend(friend.id)}
+                      isDeleteDisabled={deletingFriendshipId === friend.id}
+                      deleteAccessibilityLabel={`Delete ${friend.displayName}`}
                     />
                   ))}
                 </View>
@@ -650,9 +721,10 @@ const styles = StyleSheet.create({
     lineHeight: type.bodyS.lineHeight,
     color: colors.inkSoft,
   },
-  friendStatusPill: {
-    minHeight: 30,
-    borderRadius: radius.pill,
+  friendStatusBadge: {
+    minHeight: 44,
+    minWidth: 64,
+    borderRadius: radius.s,
     borderWidth: 1,
     borderColor: colors.paperEdge,
     paddingHorizontal: spacing.s3,
@@ -660,7 +732,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     backgroundColor: colors.paper,
   },
-  friendStatusText: {
+  friendStatusBadgeText: {
     fontFamily: fonts.label,
     fontSize: type.micro.fontSize,
     lineHeight: type.micro.lineHeight,
@@ -668,9 +740,10 @@ const styles = StyleSheet.create({
     textTransform: type.micro.textTransform,
     color: colors.inkMid,
   },
-  requestStatusPill: {
-    minHeight: 30,
-    borderRadius: radius.pill,
+  acceptButton: {
+    minHeight: 44,
+    minWidth: 70,
+    borderRadius: radius.s,
     borderWidth: 1,
     borderColor: colors.terracottaSoft,
     paddingHorizontal: spacing.s3,
@@ -678,22 +751,60 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     backgroundColor: colors.paper,
   },
-  requestStatusPillPressed: {
+  acceptButtonPressed: {
     borderColor: colors.terracotta,
     backgroundColor: colors.terracottaSoft,
     transform: [{ scale: 0.98 }],
   },
-  requestStatusPillDisabled: {
+  acceptButtonDisabled: {
     borderColor: colors.paperEdge,
     backgroundColor: colors.paperDeep,
     opacity: 0.65,
   },
-  requestStatusText: {
+  acceptButtonText: {
     fontFamily: fonts.label,
     fontSize: type.micro.fontSize,
     lineHeight: type.micro.lineHeight,
     letterSpacing: type.micro.letterSpacing,
     textTransform: type.micro.textTransform,
+    color: colors.terracottaDeep,
+  },
+  friendRowActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.s2,
+    flexShrink: 0,
+  },
+  deleteFriendButton: {
+    width: 44,
+    height: 44,
+    borderRadius: radius.s,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors.terracotta,
+  },
+  deleteFriendButtonPressed: {
+    borderColor: colors.terracottaSoft,
+    backgroundColor: colors.terracottaSoft,
+    transform: [{ scale: 0.98 }],
+  },
+  deleteFriendButtonDisabled: {
+    borderColor: colors.paperEdge,
+    backgroundColor: colors.paperDeep,
+    opacity: 0.65,
+  },
+  actionErrorCard: {
+    borderRadius: radius.l,
+    borderWidth: 1,
+    borderColor: colors.terracottaSoft,
+    backgroundColor: colors.paperCard,
+    padding: layout.cardPadding,
+    boxShadow: shadows.card,
+  },
+  actionErrorText: {
+    fontFamily: fonts.bodyStrong,
+    fontSize: type.bodyS.fontSize,
+    lineHeight: type.bodyS.lineHeight,
     color: colors.terracottaDeep,
   },
   emptyStateCard: {
