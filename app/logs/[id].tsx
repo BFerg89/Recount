@@ -2,6 +2,7 @@ import { View, StyleSheet, Text, ScrollView, Pressable, useWindowDimensions } fr
 import { SymbolView } from 'expo-symbols';
 import { recountTheme } from '@/constants/RecountTheme';
 import { useLocalSearchParams, router } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { PersonPill } from '@/components/people/PersonPill';
 import { useLogs } from '@/context/LogsContext';
@@ -34,6 +35,7 @@ export default function ViewLogScreen() {
   const { id } = useLocalSearchParams();
   const { logs } = useLogs();
   const { width } = useWindowDimensions();
+  const insets = useSafeAreaInsets();
   const noteCardWidth = Math.min(
     336,
     Math.max(292, width - layout.mobileGutter * 2 - spacing.s6)
@@ -67,7 +69,11 @@ export default function ViewLogScreen() {
 
   return (
     <View style={styles.screen}>
-      <ScrollView>
+      <ScrollView
+        contentContainerStyle={[
+          styles.scrollContent,
+          { paddingBottom: insets.bottom + spacing.s8 },
+        ]}>
         <View style={styles.content}>
           <View style={styles.header}>
             <Pressable
@@ -158,6 +164,9 @@ const styles = StyleSheet.create({
   },
   content: {
     gap: layout.sectionSpacing,
+  },
+  scrollContent: {
+    flexGrow: 1,
   },
   sectionLabel: {
     fontFamily: fonts.label,
