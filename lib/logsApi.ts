@@ -170,6 +170,7 @@ export async function createLog(input: CreateLogInput): Promise<LogEntry> {
       .map((person) => ({
         log_id: log.id,
         display_name: person.displayName.trim(),
+        user_id: person.userId ?? null,
       }))
       .filter((person) => person.display_name.length > 0);
 

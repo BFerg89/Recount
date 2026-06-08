@@ -207,6 +207,7 @@ export default function CreateScreen() {
         {
           id: personId,
           displayName: friend.displayName.trim() || friend.username,
+          userId: friend.id,
         },
       ];
     });
