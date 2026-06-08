@@ -21,6 +21,7 @@ type LogRow = {
 
 type LogPersonRow = {
   id: string;
+  user_id: string | null;
   log_id: string;
   display_name: string;
   created_at: string;
@@ -73,6 +74,7 @@ const toError = (error: unknown, fallbackMessage = 'Unknown log API error.') => 
 const mapLogPerson = (row: LogPersonRow): LogPerson => {
   return {
     id: row.id,
+    userId: row.user_id,
     logId: row.log_id,
     displayName: row.display_name,
     createdAt: row.created_at,
@@ -175,7 +177,7 @@ export async function createLog(input: CreateLogInput): Promise<LogEntry> {
       ? await supabase
         .from('log_people')
         .insert(peoplePayload)
-        .select('id, log_id, display_name, created_at, updated_at')
+        .select('id, user_id, log_id, display_name, created_at, updated_at')
       : { data: [], error: null };
 
     if (peopleError) {
@@ -256,6 +258,7 @@ export async function fetchLogs(): Promise<LogEntry[]> {
       updated_at,
       log_people (
         id,
+        user_id,
         log_id,
         display_name,
         created_at,

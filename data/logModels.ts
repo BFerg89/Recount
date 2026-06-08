@@ -13,6 +13,7 @@ export type CreateLogInput = {
 
 export type LogPerson = {
   id: string;
+  userId: string | null;
   logId: string;
   displayName: string;
   createdAt: string;

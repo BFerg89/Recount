@@ -1,13 +1,13 @@
 import DateTimePicker from '@expo/ui/datetimepicker';
 import { SymbolView } from 'expo-symbols';
-import { useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Keyboard, Pressable, ScrollView, StyleSheet, Text, TextInput, useWindowDimensions, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import BottomSheet from '@gorhom/bottom-sheet';
 import { router } from 'expo-router';
 
 import { AddMomentSheet } from '@/components/create/AddMomentSheet';
-import { AddPersonSheet } from '@/components/create/AddPersonSheet';
+import { AddPersonSheet, type AddPersonFriend } from '@/components/create/AddPersonSheet';
 import { PersonPill } from '@/components/people/PersonPill';
 import { PrimaryButton } from '@/components/ui/PrimaryButton';
 
@@ -18,6 +18,7 @@ import { createEmptyPromptedNoteAnswers, promptedNoteDefinitions } from '@/data/
 import type { CreateTimelineEventInput } from '@/data/timelineMoments';
 
 import { useLogs } from '@/context/LogsContext';
+import { fetchFriendships, type Friendship } from '@/lib/friendsApi';
 
 const { colors, fonts, layout, radius, shadows, spacing, type } = recountTheme;
 
@@ -25,6 +26,9 @@ const gridGap = spacing.s4;
 const notSignedInSaveError = 'You need to be logged in to save a log.';
 const networkSaveError = 'Could not connect. Check your connection and try again.';
 const genericSaveError = 'Unable to save log. Please try again.';
+const friendPersonIdPrefix = 'friend-profile-';
+
+const getFriendPersonId = (profileId: string) => `${friendPersonIdPrefix}${profileId}`;
 
 const getSaveErrorMessage = (caughtError: unknown) => {
   if (!(caughtError instanceof Error)) {
@@ -72,6 +76,9 @@ export default function CreateScreen() {
   const [newMomentTime, setNewMomentTime] = useState('');
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
+  const [friendships, setFriendships] = useState<Friendship[]>([]);
+  const [isFriendshipsLoading, setIsFriendshipsLoading] = useState(false);
+  const [friendshipsError, setFriendshipsError] = useState<string | null>(null);
 
   const addPeopleSheetRef = useRef<BottomSheet>(null);
   const addMomentSheetRef = useRef<BottomSheet>(null);
@@ -88,6 +95,54 @@ export default function CreateScreen() {
     title.trim().length > 0 &&
     location.trim().length > 0 &&
     !isSaving;
+
+  const refreshFriendships = useCallback(async () => {
+    setIsFriendshipsLoading(true);
+    setFriendshipsError(null);
+
+    try {
+      const fetchedFriendships = await fetchFriendships();
+      setFriendships(fetchedFriendships);
+    } catch (caughtError) {
+      const message = caughtError instanceof Error
+        ? caughtError.message
+        : 'Unable to load friends.';
+
+      setFriendships([]);
+      setFriendshipsError(message);
+    } finally {
+      setIsFriendshipsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    refreshFriendships();
+  }, [refreshFriendships]);
+
+  const acceptedFriends = useMemo<AddPersonFriend[]>(() => {
+    return friendships
+      .filter((friendship) => friendship.status === 'accepted')
+      .map((friendship) => {
+        const { otherProfile } = friendship;
+        const displayName = otherProfile.nickname.trim() || otherProfile.username;
+
+        return {
+          id: otherProfile.id,
+          displayName,
+          username: otherProfile.username,
+        };
+      });
+  }, [friendships]);
+
+  const addedFriendIds = useMemo(() => {
+    return people.reduce<string[]>((selectedFriendIds, person) => {
+      if (person.id.startsWith(friendPersonIdPrefix)) {
+        selectedFriendIds.push(person.id.slice(friendPersonIdPrefix.length));
+      }
+
+      return selectedFriendIds;
+    }, []);
+  }, [people]);
 
   const resetCreateForm = () => {
     setDate(new Date());
@@ -133,6 +188,29 @@ export default function CreateScreen() {
     setPeople((currentPeople) => [...currentPeople, newPerson]);
     clearSaveError();
     setNewPersonName('');
+    addPeopleSheetRef.current?.close();
+  };
+
+  const handleAddFriendPerson = (friend: AddPersonFriend) => {
+    const personId = getFriendPersonId(friend.id);
+
+    Keyboard.dismiss();
+    setPeople((currentPeople) => {
+      const isAlreadyAdded = currentPeople.some((person) => person.id === personId);
+
+      if (isAlreadyAdded) {
+        return currentPeople;
+      }
+
+      return [
+        ...currentPeople,
+        {
+          id: personId,
+          displayName: friend.displayName.trim() || friend.username,
+        },
+      ];
+    });
+    clearSaveError();
     addPeopleSheetRef.current?.close();
   };
 
@@ -358,6 +436,11 @@ export default function CreateScreen() {
       <AddPersonSheet
         sheetRef={addPeopleSheetRef}
         bottomInset={insets.bottom}
+        friends={acceptedFriends}
+        addedFriendIds={addedFriendIds}
+        isFriendsLoading={isFriendshipsLoading}
+        friendsError={friendshipsError}
+        onAddFriendPerson={handleAddFriendPerson}
         newPersonName={newPersonName}
         onChangeNewPersonName={(text) => {
           setNewPersonName(text);
