@@ -4,7 +4,8 @@ import { useRouter } from 'expo-router';
 
 import { recountTheme } from '@/constants/RecountTheme';
 import { useLogs } from '@/context/LogsContext';
-import { parseStoredDate, type LogEntry } from '@/data/logModels';
+import { parseStoredDate } from '@/features/logs/logDate';
+import type { LogEntry } from '@/features/logs/logTypes';
 
 const { colors, fonts, layout, radius, shadows, spacing, type } = recountTheme;
 

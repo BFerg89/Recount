@@ -2,7 +2,8 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useState } 
 import type { PropsWithChildren } from 'react';
 
 import { useAuth } from '@/context/AuthContext';
-import { fetchCurrentProfile, type UserProfile } from '@/lib/profilesApi';
+import { fetchCurrentProfile } from '@/features/profile/profilesApi';
+import type { UserProfile } from '@/features/profile/profileTypes';
 
 type ProfileContextValue = {
   profile: UserProfile | null;

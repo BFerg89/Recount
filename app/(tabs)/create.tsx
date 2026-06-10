@@ -13,12 +13,12 @@ import { PrimaryButton } from '@/components/ui/PrimaryButton';
 
 import { recountTheme } from '@/constants/RecountTheme';
 
-import type { CreatePersonInput } from '@/data/people';
-import { createEmptyPromptedNoteAnswers, promptedNoteDefinitions } from '@/data/promptedNotes';
-import type { CreateTimelineEventInput } from '@/data/timelineMoments';
+import { createEmptyPromptedNoteAnswers, promptedNoteDefinitions } from '@/features/logs/promptedNotes';
+import type { CreatePersonInput, CreateTimelineEventInput } from '@/features/logs/logTypes';
 
 import { useLogs } from '@/context/LogsContext';
-import { fetchFriendships, type Friendship } from '@/lib/friendsApi';
+import { fetchFriendships } from '@/features/friends/friendsApi';
+import type { Friendship } from '@/features/friends/friendTypes';
 
 const { colors, fonts, layout, radius, shadows, spacing, type } = recountTheme;
 

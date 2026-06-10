@@ -6,8 +6,8 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { PersonPill } from '@/components/people/PersonPill';
 import { useLogs } from '@/context/LogsContext';
-import { parseStoredDate } from '@/data/logModels';
-import { promptedNoteDefinitions } from '@/data/promptedNotes';
+import { parseStoredDate } from '@/features/logs/logDate';
+import { promptedNoteDefinitions } from '@/features/logs/promptedNotes';
 
 const { colors, fonts, layout, radius, shadows, spacing, type } = recountTheme;
 const gridGap = spacing.s4;

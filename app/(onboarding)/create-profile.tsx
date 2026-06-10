@@ -3,7 +3,7 @@ import { StyleSheet, Text, type TextInput } from 'react-native';
 
 import { router } from 'expo-router';
 import { useProfile } from '@/context/ProfileContext';
-import { createProfile } from '@/lib/profilesApi';
+import { createProfile } from '@/features/profile/profilesApi';
 
 import { AuthFormScreen } from '@/components/auth/AuthFormScreen';
 import { AuthTextInput } from '@/components/auth/AuthTextInput';

@@ -9,7 +9,8 @@ import { useAuth } from '@/context/AuthContext';
 import { useLogs } from '@/context/LogsContext';
 import { useProfile } from '@/context/ProfileContext';
 import { AddFriendSheet } from '@/components/profile/AddFriendSheet';
-import { acceptFriendRequest, deleteFriendship, fetchFriendships, sendFriendRequest, type Friendship } from '@/lib/friendsApi';
+import { acceptFriendRequest, deleteFriendship, fetchFriendships, sendFriendRequest } from '@/features/friends/friendsApi';
+import type { Friendship } from '@/features/friends/friendTypes';
 
 const { colors, fonts, layout, radius, shadows, spacing, type } = recountTheme;
 

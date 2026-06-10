@@ -2,11 +2,11 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useState } 
 import type { PropsWithChildren } from 'react';
 
 import { useAuth } from '@/context/AuthContext';
-import type { CreateLogInput, LogEntry } from '@/data/logModels';
+import type { CreateLogInput, LogEntry } from '@/features/logs/logTypes';
 import {
   createLog as createLogApi,
   fetchLogs,
-} from '@/lib/logsApi';
+} from '@/features/logs/logsApi';
 
 type LogsContextValue = {
   logs: LogEntry[];

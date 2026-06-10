@@ -1,17 +1,6 @@
 import { supabase } from '@/lib/supabase';
 
-export type Friendship = {
-  id: string;
-  status: 'pending' | 'accepted';
-  direction: 'incoming' | 'outgoing';
-  otherProfile: {
-    id: string;
-    username: string;
-    nickname: string;
-  };
-  createdAt: string;
-  updatedAt: string;
-};
+import type { FriendProfile, Friendship } from './friendTypes';
 
 type FriendshipRow = {
   friendship_id: string;
@@ -22,12 +11,6 @@ type FriendshipRow = {
   other_nickname: string;
   created_at: string;
   updated_at: string;
-};
-
-export type FriendProfile = {
-  id: string;
-  username: string;
-  nickname: string;
 };
 
 const toError = (error: unknown, fallbackMessage = 'Unknown Friends API error.') => {
@@ -124,7 +107,7 @@ export async function acceptFriendRequest(friendshipId: string): Promise<void> {
     .eq('id', friendshipId)
     .select('id')
     .maybeSingle();
-  
+
   if (error) {
     throw toError(error, 'Could not accept friend request.');
   }

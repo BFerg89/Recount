@@ -1,17 +1,6 @@
 import { supabase } from '@/lib/supabase';
 
-export type UserProfile = {
-  id: string;
-  username: string;
-  nickname: string;
-  createdAt: string;
-  updatedAt: string;
-};
-
-export type CreateProfileInput = {
-  username: string;
-  nickname: string;
-};
+import type { CreateProfileInput, UserProfile } from './profileTypes';
 
 type ProfileRow = {
   id: string;
@@ -89,7 +78,7 @@ export async function createProfile(input: CreateProfileInput): Promise<UserProf
     ) {
       throw new Error('Username is already taken.');
     }
-    
+
     throw toError(profileError, 'Could not create profile.');
   }
 

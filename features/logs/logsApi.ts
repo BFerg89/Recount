@@ -1,12 +1,12 @@
-import { promptedNoteDefinitions } from '@/data/promptedNotes';
-import {
-  formatDateForStorage,
-  type CreateLogInput,
-  type LogEntry,
-  type LogNote,
-  type LogPerson,
-  type TimelineEvent,
-} from '@/data/logModels';
+import { formatDateForStorage } from '@/features/logs/logDate';
+import { promptedNoteDefinitions } from '@/features/logs/promptedNotes';
+import type {
+  CreateLogInput,
+  LogEntry,
+  LogNote,
+  LogPerson,
+  TimelineEvent,
+} from '@/features/logs/logTypes';
 import { supabase } from '@/lib/supabase';
 
 type LogRow = {
