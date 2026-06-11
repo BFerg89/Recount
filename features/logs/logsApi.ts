@@ -9,6 +9,15 @@ import type {
 } from '@/features/logs/logTypes';
 import { supabase } from '@/lib/supabase';
 
+type CreateLogRpcPayload = {
+  title: string;
+  date: string;
+  general_location: string;
+  people: { display_name: string; user_id: string | null }[];
+  timeline_events: { title: string; approx_time: string | null }[];
+  notes: { prompt_type: LogNote['promptType']; text: string }[];
+};
+
 type LogRow = {
   id: string;
   creator_id: string | null;
@@ -145,95 +154,42 @@ export async function createLog(input: CreateLogInput): Promise<LogEntry> {
     throw new Error('You must be signed in to create a log.');
   }
 
-  const { data: logData, error: logError } = await supabase
-    .from('logs')
-    .insert({
-      title: input.title.trim(),
-      date: formatDateForStorage(input.date),
-      general_location: input.generalLocation.trim(),
-    })
-    .select('id, creator_id, title, date, general_location, created_at, updated_at')
-    .single();
+  const payload: CreateLogRpcPayload = {
+    title: input.title.trim(),
+    date: formatDateForStorage(input.date),
+    general_location: input.generalLocation.trim(),
+    people: input.people.map((person) => ({
+      display_name: person.displayName.trim(),
+      user_id: person.userId ?? null,
+    })).filter((person) => person.display_name.length > 0),
+    timeline_events: input.moments.map((moment) => ({
+      title: moment.title.trim(),
+      approx_time: moment.approxTime?.trim() || null,
+    })).filter((moment) => moment.title.length > 0),
+    notes: promptedNoteDefinitions.map((prompt) => ({
+      prompt_type: prompt.promptType,
+      text: (input.noteAnswers[prompt.promptType] ?? '').trim(),
+    })).filter((note) => note.text.length > 0),
+  };
 
-  if (logError) {
-    throw toError(logError);
+  const { data, error } = await supabase.rpc('create_log', { payload });
+
+  if (error) {
+    throw toError(error);
   }
 
-  if (!logData) {
+  if (!data) {
     throw new Error('Log was not returned after creation.');
   }
 
-  const log = logData as LogRow;
+  const createdLog = data as LogWithChildrenRow;
 
-  try {
-    const peoplePayload = input.people
-      .map((person) => ({
-        log_id: log.id,
-        display_name: person.displayName.trim(),
-        user_id: person.userId ?? null,
-      }))
-      .filter((person) => person.display_name.length > 0);
-
-    const { data: peopleData, error: peopleError } = peoplePayload.length > 0
-      ? await supabase
-        .from('log_people')
-        .insert(peoplePayload)
-        .select('id, user_id, log_id, display_name, created_at, updated_at')
-      : { data: [], error: null };
-
-    if (peopleError) {
-      throw toError(peopleError);
-    }
-
-    const timelineEventsPayload = input.moments
-      .map((moment, index) => ({
-        log_id: log.id,
-        title: moment.title.trim(),
-        approx_time: moment.approxTime?.trim() || null,
-        sort_order: index,
-      }))
-      .filter((moment) => moment.title.length > 0);
-
-    const { data: timelineEventsData, error: timelineEventsError } = timelineEventsPayload.length > 0
-      ? await supabase
-        .from('timeline_events')
-        .insert(timelineEventsPayload)
-        .select('id, log_id, title, approx_time, sort_order, created_at, updated_at')
-      : { data: [], error: null };
-
-    if (timelineEventsError) {
-      throw toError(timelineEventsError);
-    }
-
-    const notesPayload = promptedNoteDefinitions
-      .map((prompt) => ({
-        log_id: log.id,
-        prompt_type: prompt.promptType,
-        text: (input.noteAnswers[prompt.promptType] ?? '').trim(),
-      }))
-      .filter((note) => note.text.length > 0);
-
-    const { data: notesData, error: notesError } = notesPayload.length > 0
-      ? await supabase
-        .from('notes')
-        .insert(notesPayload)
-        .select('id, log_id, prompt_type, text, created_at, updated_at')
-      : { data: [], error: null };
-
-    if (notesError) {
-      throw toError(notesError);
-    }
-
-    return mapLog(
-      log,
-      peopleData as LogPersonRow[],
-      timelineEventsData as TimelineEventRow[],
-      notesData as NoteRow[]
-    );
-  } catch (error) {
-    await rollbackCreatedLog(log.id);
-    throw error;
-  }
+  return mapLog(
+    createdLog,
+    createdLog.log_people ?? [],
+    createdLog.timeline_events ?? [],
+    createdLog.notes ?? []
+  );
 }
 
 export async function fetchLogs(): Promise<LogEntry[]> {
