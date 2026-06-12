@@ -18,6 +18,7 @@ type AddFriendSheetProps = {
   bottomInset: number;
   friendUsername: string;
   errorMessage?: string | null;
+  isAddingFriend: boolean;
   onChangeFriendUsername: (username: string) => void;
   onAddFriend: () => void;
 };
@@ -27,6 +28,7 @@ export function AddFriendSheet({
   bottomInset,
   friendUsername,
   errorMessage,
+  isAddingFriend,
   onChangeFriendUsername,
   onAddFriend,
 }: AddFriendSheetProps) {
@@ -44,6 +46,7 @@ export function AddFriendSheet({
         <PrimaryButton
           label="Add friend"
           onPress={onAddFriend}
+          disabled={isAddingFriend}
           icon={(
             <SymbolView
               name={{
@@ -68,7 +71,8 @@ export function AddFriendSheet({
             autoComplete="username"
             textContentType="username"
             returnKeyType="done"
-            onSubmitEditing={onAddFriend}
+            editable={!isAddingFriend}
+            onSubmitEditing={isAddingFriend ? undefined : onAddFriend}
           />
         </SheetField>
       </SheetForm>

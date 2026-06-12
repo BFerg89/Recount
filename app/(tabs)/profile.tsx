@@ -161,14 +161,18 @@ export default function ProfileScreen() {
   const { logs } = useLogs();
 
   const addFriendSheetRef = useRef<BottomSheet>(null);
+  const isAddingFriendRef = useRef(false);
+  const acceptingFriendshipIdRef = useRef<string | null>(null);
   const insets = useSafeAreaInsets();
   const [friendUsername, setFriendUsername] = useState('');
   const [addFriendError, setAddFriendError] = useState<string | null>(null);
+  const [isAddingFriend, setIsAddingFriend] = useState(false);
 
   const [friendships, setFriendships] = useState<Friendship[]>([]);
   const [isFriendshipsLoading, setIsFriendshipsLoading] = useState(false);
   const [friendshipsError, setFriendshipsError] = useState<string | null>(null);
   const [friendshipActionError, setFriendshipActionError] = useState<string | null>(null);
+  const [acceptingFriendshipId, setAcceptingFriendshipId] = useState<string | null>(null);
   const [deletingFriendshipId, setDeletingFriendshipId] = useState<string | null>(null);
 
   const username = profile?.username ?? 'username';
@@ -243,7 +247,13 @@ export default function ProfileScreen() {
   };
 
   const handleAddFriend = async () => {
+    if (isAddingFriendRef.current) {
+      return;
+    }
+
+    isAddingFriendRef.current = true;
     setAddFriendError(null);
+    setIsAddingFriend(true);
 
     try {
       await sendFriendRequest(friendUsername);
@@ -256,11 +266,20 @@ export default function ProfileScreen() {
         : 'Could not send friend request.';
 
       setAddFriendError(message);
+    } finally {
+      isAddingFriendRef.current = false;
+      setIsAddingFriend(false);
     }
   };
 
   const handleAcceptFriendRequest = async (friendshipId: string) => {
+    if (acceptingFriendshipIdRef.current === friendshipId || deletingFriendshipId === friendshipId) {
+      return;
+    }
+
+    acceptingFriendshipIdRef.current = friendshipId;
     setFriendshipActionError(null);
+    setAcceptingFriendshipId(friendshipId);
 
     try {
       await acceptFriendRequest(friendshipId);
@@ -271,6 +290,11 @@ export default function ProfileScreen() {
         : 'Could not accept friend request.';
 
       setFriendshipActionError(message);
+    } finally {
+      if (acceptingFriendshipIdRef.current === friendshipId) {
+        acceptingFriendshipIdRef.current = null;
+        setAcceptingFriendshipId(null);
+      }
     }
   };
 
@@ -412,8 +436,9 @@ export default function ProfileScreen() {
                       statusLabel="Accept"
                       actionLabel="Accept"
                       onActionPress={() => handleAcceptFriendRequest(request.id)}
+                      isActionDisabled={acceptingFriendshipId === request.id || deletingFriendshipId === request.id}
                       onDeletePress={() => handleDeleteFriend(request.id)}
-                      isDeleteDisabled={deletingFriendshipId === request.id}
+                      isDeleteDisabled={deletingFriendshipId === request.id || acceptingFriendshipId === request.id}
                       deleteAccessibilityLabel={`Delete friend request from ${request.displayName}`}
                       statusVariant="request"
                     />
@@ -499,6 +524,7 @@ export default function ProfileScreen() {
         bottomInset={insets.bottom}
         friendUsername={friendUsername}
         errorMessage={addFriendError}
+        isAddingFriend={isAddingFriend}
         onChangeFriendUsername={(username) => {
           setFriendUsername(username);
           setAddFriendError(null);
