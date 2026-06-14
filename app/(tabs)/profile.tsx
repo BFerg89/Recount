@@ -158,7 +158,7 @@ function FriendRow({
 export default function ProfileScreen() {
   const { user, signOut } = useAuth();
   const { profile } = useProfile();
-  const { logs } = useLogs();
+  const { logSummaries } = useLogs();
 
   const addFriendSheetRef = useRef<BottomSheet>(null);
   const isAddingFriendRef = useRef(false);
@@ -382,7 +382,7 @@ export default function ProfileScreen() {
           </View>
           <View style={styles.statDivider} />
           <View style={styles.statItem}>
-            <Text style={styles.statNumber}>{logs.length}</Text>
+            <Text style={styles.statNumber}>{logSummaries.length}</Text>
             <Text style={styles.statLabel}>Logs</Text>
           </View>
         </View>

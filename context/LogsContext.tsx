@@ -2,14 +2,14 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useState } 
 import type { PropsWithChildren } from 'react';
 
 import { useAuth } from '@/context/AuthContext';
-import type { CreateLogInput, LogEntry } from '@/features/logs/logTypes';
+import type { CreateLogInput, LogEntry, LogSummary } from '@/features/logs/logTypes';
 import {
   createLog as createLogApi,
-  fetchLogs,
+  fetchLogSummaries,
 } from '@/features/logs/logsApi';
 
 type LogsContextValue = {
-  logs: LogEntry[];
+  logSummaries: LogSummary[];
   isLoading: boolean;
   error: string | null;
   refreshLogs: () => Promise<void>;
@@ -18,10 +18,20 @@ type LogsContextValue = {
 
 const LogsContext = createContext<LogsContextValue | null>(null);
 
+const toLogSummary = (log: LogEntry): LogSummary => ({
+  id: log.id,
+  creatorId: log.creatorId,
+  title: log.title,
+  date: log.date,
+  generalLocation: log.generalLocation,
+  createdAt: log.createdAt,
+  updatedAt: log.updatedAt,
+});
+
 export function LogsProvider({ children }: PropsWithChildren) {
   const { user, isLoading: isAuthLoading } = useAuth();
 
-  const [logs, setLogs] = useState<LogEntry[]>([]);
+  const [logSummaries, setLogSummaries] = useState<LogSummary[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -31,7 +41,7 @@ export function LogsProvider({ children }: PropsWithChildren) {
     }
 
     if (!user) {
-      setLogs([]);
+      setLogSummaries([]);
       setError(null);
       setIsLoading(false);
       return;
@@ -41,14 +51,14 @@ export function LogsProvider({ children }: PropsWithChildren) {
     setError(null);
 
     try {
-      const fetchedLogs = await fetchLogs();
-      setLogs(fetchedLogs);
+      const fetchedLogSummaries = await fetchLogSummaries();
+      setLogSummaries(fetchedLogSummaries);
     } catch (caughtError) {
       const message = caughtError instanceof Error
         ? caughtError.message
         : 'Unable to load logs.';
       setError(message);
-      setLogs([]);
+      setLogSummaries([]);
     } finally {
       setIsLoading(false);
     }
@@ -63,9 +73,9 @@ export function LogsProvider({ children }: PropsWithChildren) {
 
     const createdLog = await createLogApi(input);
 
-    setLogs((currentLogs) => [
-      createdLog,
-      ...currentLogs.filter((log) => log.id !== createdLog.id),
+    setLogSummaries((currentLogSummaries) => [
+      toLogSummary(createdLog),
+      ...currentLogSummaries.filter((log) => log.id !== createdLog.id),
     ]);
 
     return createdLog;
@@ -73,13 +83,13 @@ export function LogsProvider({ children }: PropsWithChildren) {
 
   const value = useMemo<LogsContextValue>(() => {
     return {
-      logs,
+      logSummaries,
       isLoading,
       error,
       refreshLogs,
       createLog,
     };
-  }, [logs, isLoading, error, refreshLogs, createLog]);
+  }, [logSummaries, isLoading, error, refreshLogs, createLog]);
 
   return (
     <LogsContext.Provider value={value}>

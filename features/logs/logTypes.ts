@@ -61,3 +61,13 @@ export type LogEntry = {
   timelineEvents: TimelineEvent[];
   notes: LogNote[];
 };
+
+export type LogSummary = {
+  id: string;
+  creatorId: string | null;
+  title: string;
+  date: string;
+  generalLocation: string;
+  createdAt: string;
+  updatedAt: string;
+}

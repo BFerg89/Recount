@@ -1,12 +1,13 @@
+import { useEffect, useState } from 'react';
 import { View, StyleSheet, Text, ScrollView, Pressable, useWindowDimensions } from 'react-native';
 import { SymbolView } from 'expo-symbols';
 import { recountTheme } from '@/constants/RecountTheme';
 import { useLocalSearchParams, router } from 'expo-router';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { PersonPill } from '@/components/people/PersonPill';
-import { useLogs } from '@/context/LogsContext';
 import { parseStoredDate } from '@/features/logs/logDate';
+import { fetchLogById } from '@/features/logs/logsApi';
+import type { LogEntry } from '@/features/logs/logTypes';
 import { promptedNoteDefinitions } from '@/features/logs/promptedNotes';
 
 const { colors, fonts, layout, radius, shadows, spacing, type } = recountTheme;
@@ -33,16 +34,62 @@ function handleback() {
 
 export default function ViewLogScreen() {
   const { id } = useLocalSearchParams();
-  const { logs } = useLogs();
   const { width } = useWindowDimensions();
-  const insets = useSafeAreaInsets();
   const noteCardWidth = Math.min(
     336,
     Math.max(292, width - layout.mobileGutter * 2 - spacing.s6)
   ) / 2.2;
 
   const selectedLogId = Array.isArray(id) ? id[0] : id;
-  const log = logs.find((log) => log.id === selectedLogId);
+  const [log, setLog] = useState<LogEntry | null>(null);
+  const [isLogLoading, setIsLogLoading] = useState(true);
+  const [logError, setLogError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let isActive = true;
+
+    async function loadLog() {
+      if (!selectedLogId) {
+        setLog(null);
+        setLogError('Log not found.');
+        setIsLogLoading(false);
+        return;
+      }
+
+      setIsLogLoading(true);
+      setLog(null);
+      setLogError(null);
+
+      try {
+        const fetchedLog = await fetchLogById(selectedLogId);
+
+        if (!isActive) {
+          return;
+        }
+
+        setLog(fetchedLog);
+        setLogError(fetchedLog ? null : 'Log not found.');
+      } catch {
+        if (!isActive) {
+          return;
+        }
+
+        setLog(null);
+        setLogError('Unable to load this log.');
+      } finally {
+        if (isActive) {
+          setIsLogLoading(false);
+        }
+      }
+    }
+
+    void loadLog();
+
+    return () => {
+      isActive = false;
+    };
+  }, [selectedLogId]);
+
   const date = log ? parseStoredDate(log.date) : null;
   const weekday = date?.toLocaleDateString('en-US', { weekday: 'long' });
   const monthTitle = date?.toLocaleDateString('en-US', {
@@ -66,6 +113,9 @@ export default function ViewLogScreen() {
     { length: Math.ceil(answeredNotes.length / 2) },
     (_, index) => answeredNotes.slice(index * 2, index * 2 + 2)
   );
+  const dateLine = weekday && monthTitle ? `${weekday} · ${monthTitle}` : '';
+  const titleText = log?.title ?? (isLogLoading ? 'Loading...' : 'Log unavailable');
+  const stateMessage = isLogLoading ? 'Loading log...' : logError ?? 'Log not found.';
 
   return (
     <View style={styles.screen}>
@@ -90,64 +140,72 @@ export default function ViewLogScreen() {
               size={35}/>
             </Pressable>
             <View style={styles.titleSection}>
-              <Text style={styles.subTitle}>{weekday} · {monthTitle}</Text>
+              <Text style={styles.subTitle}>{dateLine}</Text>
               <Text
                 style={styles.title}
                 numberOfLines={2}
                 ellipsizeMode="tail">
-                {log?.title}
+                {titleText}
               </Text>
               <Text style={styles.subTitle}>{log?.generalLocation}</Text>
             </View>
           </View>
-          <View style={styles.peopleSection}>
-            <Text style={styles.sectionLabel}>With · {log?.people.length} Friends</Text>
-            <View style={styles.peopleGrid}>
-              {people?.map((person) => (
-                <PersonPill
-                  key={person.id}
-                  displayName={person.displayName}
-                />
-              ))}
+          {!log ? (
+            <View style={styles.stateSection}>
+              <Text style={styles.stateText}>{stateMessage}</Text>
             </View>
-          </View>
-          <View style={styles.timelineSection}>
-            <View style={styles.timelineHeader}>
-              <Text style={styles.sectionLabel}>Moments</Text>
-              <Text style={styles.sectionLabel}>{moments?.length ?? 0} added</Text>
-            </View>
-            <View style={styles.momentListCard}>
-              {moments?.map((moment) => (
-                <View
-                  key={moment.id}
-                  style={styles.momentRow}>
-                  <Text style={styles.momentTime}>{moment.approxTime}</Text>
-                  <Text style={styles.momentTitle}>{moment.title}</Text>
+          ) : (
+            <>
+              <View style={styles.peopleSection}>
+                <Text style={styles.sectionLabel}>With · {log.people.length} Friends</Text>
+                <View style={styles.peopleGrid}>
+                  {people?.map((person) => (
+                    <PersonPill
+                      key={person.id}
+                      displayName={person.displayName}
+                    />
+                  ))}
                 </View>
-              ))}
-            </View>
-          </View>
-          {answeredNotes.length > 0 && (
-            <View style={styles.notesSection}>
-              <ScrollView
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                style={styles.noteCardsScroll}
-                contentContainerStyle={styles.noteCardsContent}>
-                {noteColumns.map((column) => (
-                  <View
-                    key={column.map((note) => note.id).join('-')}
-                    style={styles.noteColumn}>
-                    {column.map((note) => (
-                      <View key={note.id} style={[styles.noteCard, { width: noteCardWidth }]}>
-                        <Text style={styles.notePrompt}>{note.label}</Text>
-                        <Text style={styles.noteAnswer}>{note.text}</Text>
+              </View>
+              <View style={styles.timelineSection}>
+                <View style={styles.timelineHeader}>
+                  <Text style={styles.sectionLabel}>Moments</Text>
+                  <Text style={styles.sectionLabel}>{moments.length} added</Text>
+                </View>
+                <View style={styles.momentListCard}>
+                  {moments.map((moment) => (
+                    <View
+                      key={moment.id}
+                      style={styles.momentRow}>
+                      <Text style={styles.momentTime}>{moment.approxTime}</Text>
+                      <Text style={styles.momentTitle}>{moment.title}</Text>
+                    </View>
+                  ))}
+                </View>
+              </View>
+              {answeredNotes.length > 0 && (
+                <View style={styles.notesSection}>
+                  <ScrollView
+                    horizontal
+                    showsHorizontalScrollIndicator={false}
+                    style={styles.noteCardsScroll}
+                    contentContainerStyle={styles.noteCardsContent}>
+                    {noteColumns.map((column) => (
+                      <View
+                        key={column.map((note) => note.id).join('-')}
+                        style={styles.noteColumn}>
+                        {column.map((note) => (
+                          <View key={note.id} style={[styles.noteCard, { width: noteCardWidth }]}>
+                            <Text style={styles.notePrompt}>{note.label}</Text>
+                            <Text style={styles.noteAnswer}>{note.text}</Text>
+                          </View>
+                        ))}
                       </View>
                     ))}
-                  </View>
-                ))}
-              </ScrollView>
-            </View>
+                  </ScrollView>
+                </View>
+              )}
+            </>
           )}
         </View>
       </ScrollView>
@@ -175,6 +233,19 @@ const styles = StyleSheet.create({
     letterSpacing: type.label.letterSpacing,
     textTransform: type.label.textTransform,
     color: colors.inkMid,
+  },
+  stateSection: {
+    minHeight: 160,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: spacing.s6,
+  },
+  stateText: {
+    fontFamily: fonts.bodyStrong,
+    fontSize: type.body.fontSize,
+    lineHeight: type.body.lineHeight,
+    color: colors.inkMid,
+    textAlign: 'center',
   },
   header: {
     flexDirection: 'row',

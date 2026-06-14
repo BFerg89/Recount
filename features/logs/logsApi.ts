@@ -5,6 +5,7 @@ import type {
   LogEntry,
   LogNote,
   LogPerson,
+  LogSummary,
   TimelineEvent,
 } from '@/features/logs/logTypes';
 import { supabase } from '@/lib/supabase';
@@ -114,6 +115,20 @@ const mapLogNote = (row: NoteRow): LogNote => {
   };
 };
 
+const mapLogSummary = (
+  row: LogRow
+): LogSummary => {
+  return {
+    id: row.id,
+    creatorId: row.creator_id,
+    title: row.title,
+    date: row.date,
+    generalLocation: row.general_location,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+  };
+};
+
 const mapLog = (
   row: LogRow,
   people: LogPersonRow[],
@@ -192,7 +207,7 @@ export async function createLog(input: CreateLogInput): Promise<LogEntry> {
   );
 }
 
-export async function fetchLogs(): Promise<LogEntry[]> {
+export async function fetchLogSummaries(): Promise<LogSummary[]> {
   const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
 
   if (sessionError) {
@@ -201,6 +216,40 @@ export async function fetchLogs(): Promise<LogEntry[]> {
 
   if (!sessionData.session) {
     return [];
+  }
+
+  const { data, error } = await supabase
+    .from('logs')
+    .select(`
+      id,
+      creator_id,
+      title,
+      date,
+      general_location,
+      created_at,
+      updated_at
+    `)
+    .order('date', { ascending: false })
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    throw toError(error);
+  }
+
+  const rows = (data ?? []) as LogRow[];
+
+  return rows.map((row) => mapLogSummary(row));
+}
+
+export async function fetchLogById(logId: string): Promise<LogEntry | null> {
+  const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+
+  if (sessionError) {
+    throw toError(sessionError);
+  }
+
+  if (!sessionData.session) {
+    return null;
   }
 
   const { data, error } = await supabase
@@ -239,21 +288,23 @@ export async function fetchLogs(): Promise<LogEntry[]> {
         updated_at
       )
     `)
-    .order('date', { ascending: false })
-    .order('created_at', { ascending: false });
+    .eq('id', logId)
+    .maybeSingle();
 
   if (error) {
     throw toError(error);
   }
 
-  const rows = (data ?? []) as LogWithChildrenRow[];
+  if (!data) {
+    return null;
+  }
 
-  return rows.map((row) =>
-    mapLog(
-      row,
-      row.log_people ?? [],
-      row.timeline_events ?? [],
-      row.notes ?? []
-    )
+  const row = data as LogWithChildrenRow;
+
+  return mapLog(
+    row,
+    row.log_people ?? [],
+    row.timeline_events ?? [],
+    row.notes ?? []
   );
 }

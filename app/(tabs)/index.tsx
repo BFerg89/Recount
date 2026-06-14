@@ -5,7 +5,7 @@ import { useRouter } from 'expo-router';
 import { recountTheme } from '@/constants/RecountTheme';
 import { useLogs } from '@/context/LogsContext';
 import { parseStoredDate } from '@/features/logs/logDate';
-import type { LogEntry } from '@/features/logs/logTypes';
+import type { LogSummary } from '@/features/logs/logTypes';
 
 const { colors, fonts, layout, radius, shadows, spacing, type } = recountTheme;
 
@@ -32,17 +32,17 @@ const getCardRotation = (title: string) => {
 };
 
 export default function TabOneScreen() {
-  const { logs } = useLogs();
+  const { logSummaries } = useLogs();
   const insets = useSafeAreaInsets();
   const { width } = useWindowDimensions();
   const logCardWidth = (width - contentPadding * 2 - gridGap) / 2;
   const monthSections = Object.values(
-    [...logs]
+    [...logSummaries]
     .sort((a, b) => parseStoredDate(b.date).getTime() - parseStoredDate(a.date).getTime())
     .reduce<Record<string, {
       id: string;
       title: string;
-      logs: Array<LogEntry & ReturnType<typeof formatLogDate>>;
+      logs: Array<LogSummary & ReturnType<typeof formatLogDate>>;
     }>>((sections, log) => {
       const formattedDate = formatLogDate(parseStoredDate(log.date));
       const sectionId = formattedDate.monthTitle.toLowerCase().replace(' ', '-');
