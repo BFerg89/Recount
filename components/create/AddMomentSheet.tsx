@@ -11,6 +11,7 @@ import {
   SheetForm,
   SheetTextInput,
 } from '@/components/ui/BottomActionSheet';
+import { inputLimits } from '@/constants/input-limits';
 import { recountTheme } from '@/constants/RecountTheme';
 
 const { colors } = recountTheme;
@@ -66,6 +67,7 @@ export function AddMomentSheet({
             placeholder="What happened next?"
             autoCapitalize="sentences"
             returnKeyType="next"
+            maxLength={inputLimits.momentTitle}
             onSubmitEditing={() => momentTimeInputRef.current?.focus()}
           />
         </SheetField>
@@ -78,6 +80,7 @@ export function AddMomentSheet({
             placeholder="10:45 PM"
             keyboardType="numbers-and-punctuation"
             returnKeyType="done"
+            maxLength={inputLimits.momentApproxTime}
             onSubmitEditing={onAddMoment}
           />
         </SheetField>

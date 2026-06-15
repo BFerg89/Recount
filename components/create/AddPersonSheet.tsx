@@ -10,6 +10,7 @@ import {
   SheetForm,
   SheetTextInput,
 } from '@/components/ui/BottomActionSheet';
+import { inputLimits } from '@/constants/input-limits';
 import { recountTheme } from '@/constants/RecountTheme';
 
 const { colors, fonts, radius, spacing, type } = recountTheme;
@@ -223,6 +224,7 @@ export function AddPersonSheet({
                 placeholder="Name..."
                 autoCapitalize="words"
                 returnKeyType="done"
+                maxLength={inputLimits.personDisplayName}
                 onSubmitEditing={onAddPerson}
               />
             </SheetField>

@@ -11,6 +11,7 @@ import { AddPersonSheet, type AddPersonFriend } from '@/components/create/AddPer
 import { PersonPill } from '@/components/people/PersonPill';
 import { PrimaryButton } from '@/components/ui/PrimaryButton';
 
+import { inputLimits } from '@/constants/input-limits';
 import { recountTheme } from '@/constants/RecountTheme';
 
 import { createEmptyPromptedNoteAnswers, promptedNoteDefinitions } from '@/features/logs/promptedNotes';
@@ -288,6 +289,7 @@ export default function CreateScreen() {
             }}
             placeholder='Name this log...'
             returnKeyType="next"
+            maxLength={inputLimits.logTitle}
             onSubmitEditing={() => locationInputRef.current?.focus()}
             style={styles.titleInput}/>
           <View style={styles.dateRow}>
@@ -301,6 +303,7 @@ export default function CreateScreen() {
               style={styles.locationInput}
               placeholder='Location...'
               returnKeyType="done"
+              maxLength={inputLimits.logLocation}
               onSubmitEditing={Keyboard.dismiss}/>
             <View style={styles.datePickerGroup}>
               <Text style={styles.dateText}>When:</Text>
@@ -401,6 +404,7 @@ export default function CreateScreen() {
                       onFocus={handleNoteFocus}
                       placeholder="Enter note..."
                       multiline
+                      maxLength={inputLimits.promptedNoteAnswer}
                       style={styles.noteAnswer}/>
                   </View>
                 ))}

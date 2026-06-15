@@ -9,6 +9,7 @@ import {
   SheetField,
   SheetForm,
 } from '@/components/ui/BottomActionSheet';
+import { inputLimits } from '@/constants/input-limits';
 import { recountTheme } from '@/constants/RecountTheme';
 
 const { colors } = recountTheme;
@@ -71,6 +72,7 @@ export function AddFriendSheet({
             autoComplete="username"
             textContentType="username"
             returnKeyType="done"
+            maxLength={inputLimits.username}
             editable={!isAddingFriend}
             onSubmitEditing={isAddingFriend ? undefined : onAddFriend}
           />

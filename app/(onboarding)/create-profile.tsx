@@ -8,6 +8,7 @@ import { createProfile } from '@/features/profile/profilesApi';
 import { AuthFormScreen } from '@/components/auth/AuthFormScreen';
 import { AuthTextInput } from '@/components/auth/AuthTextInput';
 import { PrimaryButton } from '@/components/ui/PrimaryButton';
+import { inputLimits } from '@/constants/input-limits';
 import { recountTheme } from '@/constants/RecountTheme';
 
 const { colors, fonts, type } = recountTheme;
@@ -64,6 +65,7 @@ export default function CreateProfileScreen() {
         textContentType='username'
         placeholder='Username...'
         returnKeyType='next'
+        maxLength={inputLimits.username}
         onSubmitEditing={() => nicknameInputRef.current?.focus()}
       />
       <AuthTextInput
@@ -74,6 +76,7 @@ export default function CreateProfileScreen() {
         autoCorrect={false}
         placeholder='Nickname...'
         returnKeyType='done'
+        maxLength={inputLimits.nickname}
         onSubmitEditing={handleCreateProfile}
       />
       {(formError || profileError) && (
