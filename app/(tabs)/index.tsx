@@ -35,8 +35,9 @@ export default function TabOneScreen() {
   const { logSummaries } = useLogs();
   const insets = useSafeAreaInsets();
   const { width } = useWindowDimensions();
+  const hasLogs = logSummaries.length > 0;
   const logCardWidth = (width - contentPadding * 2 - gridGap) / 2;
-  const monthSections = Object.values(
+  const monthSections = hasLogs ? Object.values(
     [...logSummaries]
     .sort((a, b) => parseStoredDate(b.date).getTime() - parseStoredDate(a.date).getTime())
     .reduce<Record<string, {
@@ -62,15 +63,24 @@ export default function TabOneScreen() {
 
       return sections;
     }, {})
-  );
+  ) : [];
 
   const router = useRouter();
 
   return (
     <View style={styles.screen}>
       <Text style={styles.title}>Logs</Text>
-      <ScrollView style={styles.contentContainer} contentContainerStyle={styles.content}>
-        {monthSections.map((month) => (
+      <ScrollView
+        style={styles.contentContainer}
+        contentContainerStyle={[styles.content, !hasLogs && styles.emptyContent]}>
+        {!hasLogs ? (
+          <View style={styles.emptyState}>
+            <Text style={styles.emptyStateTitle}>Your first log will live here.</Text>
+            <Text style={styles.emptyStateText}>
+              Call your friends. Make some memories then come back and remember them here.
+            </Text>
+          </View>
+        ) : monthSections.map((month) => (
           <View key={month.id} style={styles.monthSection}>
             <Text style={styles.monthTitle}>{month.title}</Text>
             <View style={styles.logGrid}>
@@ -126,6 +136,10 @@ const styles = StyleSheet.create({
     paddingBottom: spacing.s7,
     gap: layout.sectionSpacing,
   },
+  emptyContent: {
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   monthSection: {
     gap: layout.verticalCardGap,
   },
@@ -141,6 +155,27 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
     gap: gridGap,
     backgroundColor: 'transparent',
+  },
+  emptyState: {
+    width: '100%',
+    maxWidth: 280,
+    alignItems: 'center',
+    gap: spacing.s2,
+  },
+  emptyStateTitle: {
+    fontFamily: fonts.display,
+    fontSize: type.displayS.fontSize,
+    lineHeight: type.displayS.lineHeight,
+    letterSpacing: type.displayS.letterSpacing,
+    textAlign: 'center',
+    color: colors.ink,
+  },
+  emptyStateText: {
+    fontFamily: fonts.body,
+    fontSize: type.body.fontSize,
+    lineHeight: type.body.lineHeight,
+    textAlign: 'center',
+    color: colors.inkMid,
   },
   logCard: {
     aspectRatio: 0.85,
