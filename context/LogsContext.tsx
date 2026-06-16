@@ -5,6 +5,7 @@ import { useAuth } from '@/context/AuthContext';
 import type { CreateLogInput, LogEntry, LogSummary } from '@/features/logs/logTypes';
 import {
   createLog as createLogApi,
+  deleteLog as deleteLogApi,
   fetchLogSummaries,
 } from '@/features/logs/logsApi';
 
@@ -14,6 +15,7 @@ type LogsContextValue = {
   error: string | null;
   refreshLogs: () => Promise<void>;
   createLog: (input: CreateLogInput) => Promise<LogEntry>;
+  deleteLog: (logId: string) => Promise<void>;
 };
 
 const LogsContext = createContext<LogsContextValue | null>(null);
@@ -81,6 +83,16 @@ export function LogsProvider({ children }: PropsWithChildren) {
     return createdLog;
   }, []);
 
+  const deleteLog = useCallback(async (logId: string) => {
+    setError(null);
+
+    await deleteLogApi(logId);
+
+    setLogSummaries((currentLogSummaries) =>
+      currentLogSummaries.filter((log) => log.id !== logId)
+    );
+  }, []);
+
   const value = useMemo<LogsContextValue>(() => {
     return {
       logSummaries,
@@ -88,8 +100,9 @@ export function LogsProvider({ children }: PropsWithChildren) {
       error,
       refreshLogs,
       createLog,
+      deleteLog,
     };
-  }, [logSummaries, isLoading, error, refreshLogs, createLog]);
+  }, [logSummaries, isLoading, error, refreshLogs, createLog, deleteLog]);
 
   return (
     <LogsContext.Provider value={value}>

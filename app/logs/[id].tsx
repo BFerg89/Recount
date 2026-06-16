@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react';
-import { View, StyleSheet, Text, ScrollView, Pressable, useWindowDimensions } from 'react-native';
+import { Alert, View, StyleSheet, Text, ScrollView, Pressable, useWindowDimensions } from 'react-native';
 import { SymbolView } from 'expo-symbols';
 import { recountTheme } from '@/constants/RecountTheme';
 import { useLocalSearchParams, router } from 'expo-router';
 
 import { PersonPill } from '@/components/people/PersonPill';
+import { useLogs } from '@/context/LogsContext';
 import { parseStoredDate } from '@/features/logs/logDate';
 import { fetchLogById } from '@/features/logs/logsApi';
 import type { LogEntry } from '@/features/logs/logTypes';
@@ -32,8 +33,16 @@ function handleback() {
   }
 }
 
+function handleEditLogPress() {
+  Alert.alert(
+    'Edit log',
+    'Log editing is frontend-only for now. The edit flow will be wired up later.'
+  );
+}
+
 export default function ViewLogScreen() {
   const { id } = useLocalSearchParams();
+  const { deleteLog } = useLogs();
   const { width } = useWindowDimensions();
   const noteCardWidth = Math.min(
     336,
@@ -44,6 +53,53 @@ export default function ViewLogScreen() {
   const [log, setLog] = useState<LogEntry | null>(null);
   const [isLogLoading, setIsLogLoading] = useState(true);
   const [logError, setLogError] = useState<string | null>(null);
+  const [isDeletingLog, setIsDeletingLog] = useState(false);
+
+  const confirmDeleteLog = async () => {
+    if (!selectedLogId || isDeletingLog) {
+      return;
+    }
+
+    setIsDeletingLog(true);
+
+    try {
+      await deleteLog(selectedLogId);
+      handleback();
+    } catch (caughtError) {
+      const message = caughtError instanceof Error
+        ? caughtError.message
+        : 'Could not delete log.';
+
+      Alert.alert('Could not delete log', message);
+    } finally {
+      setIsDeletingLog(false);
+    }
+  };
+
+  const handleDeleteLogPress = () => {
+    if (!selectedLogId || isDeletingLog) {
+      return;
+    }
+
+    Alert.alert(
+      'Delete log?',
+      'This permanently deletes this log and cannot be undone.',
+      [
+        {
+          text: 'Cancel',
+          style: 'cancel',
+        },
+        {
+          text: 'Delete log',
+          style: 'destructive',
+          onPress: () => {
+            void confirmDeleteLog();
+          },
+        },
+      ],
+      { cancelable: true }
+    );
+  };
 
   useEffect(() => {
     let isActive = true;
@@ -205,6 +261,41 @@ export default function ViewLogScreen() {
                   </ScrollView>
                 </View>
               )}
+              <View style={styles.logActionsSection}>
+                <Pressable
+                  accessibilityLabel="Edit log"
+                  accessibilityRole="button"
+                  style={({ pressed }) => [
+                    styles.editLogButton,
+                    pressed && styles.editLogButtonPressed,
+                  ]}
+                  onPress={handleEditLogPress}>
+                  <Text style={styles.editLogButtonText}>Edit log</Text>
+                </Pressable>
+                <Pressable
+                  accessibilityLabel="Delete log"
+                  accessibilityRole="button"
+                  accessibilityState={{ disabled: isDeletingLog }}
+                  disabled={isDeletingLog}
+                  style={({ pressed }) => [
+                    styles.deleteLogButton,
+                    pressed && styles.deleteLogButtonPressed,
+                    isDeletingLog && styles.deleteLogButtonDisabled,
+                  ]}
+                  onPress={handleDeleteLogPress}>
+                  <SymbolView
+                    name={{
+                      ios: 'trash',
+                      android: 'delete',
+                    }}
+                    tintColor={colors.paperCard}
+                    size={16}
+                  />
+                  <Text style={styles.deleteLogButtonText}>
+                    {isDeletingLog ? 'Deleting...' : 'Delete log'}
+                  </Text>
+                </Pressable>
+              </View>
             </>
           )}
         </View>
@@ -375,5 +466,54 @@ const styles = StyleSheet.create({
     lineHeight: type.body.lineHeight,
     color: colors.ink,
     paddingVertical: spacing.s2,
+  },
+  logActionsSection: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.s2,
+  },
+  editLogButton: {
+    flex: 1,
+    minHeight: 48,
+    borderRadius: radius.pill,
+    borderWidth: 1,
+    borderColor: colors.rule,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors.paperCard,
+    boxShadow: shadows.card,
+  },
+  editLogButtonPressed: {
+    backgroundColor: colors.paperEdge,
+    boxShadow: shadows.press,
+    transform: [{ scale: 0.99 }],
+  },
+  editLogButtonText: {
+    fontFamily: fonts.bodyStrong,
+    fontSize: type.body.fontSize,
+    lineHeight: type.body.lineHeight,
+    color: colors.terracottaDeep,
+  },
+  deleteLogButton: {
+    flex: 1,
+    minHeight: 52,
+    borderRadius: radius.pill,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: spacing.s2,
+    backgroundColor: colors.terracotta,
+  },
+  deleteLogButtonPressed: {
+    backgroundColor: colors.terracottaDeep,
+  },
+  deleteLogButtonDisabled: {
+    opacity: 0.65,
+  },
+  deleteLogButtonText: {
+    fontFamily: fonts.bodyStrong,
+    fontSize: type.body.fontSize,
+    lineHeight: type.body.lineHeight,
+    color: colors.paperCard,
   },
 });

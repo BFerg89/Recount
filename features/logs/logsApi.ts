@@ -151,13 +151,6 @@ const mapLog = (
   };
 };
 
-const rollbackCreatedLog = async (logId: string) => {
-  await supabase
-    .from('logs')
-    .delete()
-    .eq('id', logId);
-};
-
 export async function createLog(input: CreateLogInput): Promise<LogEntry> {
   const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
 
@@ -307,4 +300,31 @@ export async function fetchLogById(logId: string): Promise<LogEntry | null> {
     row.timeline_events ?? [],
     row.notes ?? []
   );
+}
+
+export async function deleteLog(logId: string): Promise<void> {
+  const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+
+  if (sessionError) {
+    throw toError(sessionError);
+  }
+
+  if (!sessionData.session) {
+    throw new Error('You must be signed in to delete a log.');
+  }
+
+  const { data, error } = await supabase
+    .from('logs')
+    .delete()
+    .eq('id', logId)
+    .select('id')
+    .maybeSingle();
+
+  if (error) {
+    throw toError(error, 'Could not delete log.');
+  }
+
+  if (!data) {
+    throw new Error('Log not found or you do not have permission to delete it.');
+  }
 }
