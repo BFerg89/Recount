@@ -5,7 +5,6 @@ import type { Session, User } from '@supabase/supabase-js';
 
 import { supabase } from '@/lib/supabase';
 
-// TODO: Fix error: if user account is deleted while user is logged in, after app refresh they are brought to onboarding not auth
 type SignUpResult = {
   needsEmailConfirmation: boolean;
 };
@@ -14,6 +13,7 @@ type AuthContextValue = {
   session: Session | null;
   user: User | null;
   isLoading: boolean;
+  clearLocalSession: () => Promise<void>;
   signIn: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
   signUp: (email: string, password: string) => Promise<SignUpResult>;
@@ -81,6 +81,15 @@ export function AuthProvider({ children }: PropsWithChildren) {
       session,
       user: session?.user ?? null,
       isLoading,
+      clearLocalSession: async () => {
+        const { error } = await supabase.auth.signOut({ scope: 'local' });
+
+        setSession(null);
+
+        if (error) {
+          console.log('Could not clear local Supabase session.', error.message);
+        }
+      },
       signIn: async (email, password) => {
         const { error } = await supabase.auth.signInWithPassword({
           email: email.trim(),

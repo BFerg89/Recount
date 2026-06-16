@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { SymbolView } from 'expo-symbols';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import BottomSheet from '@gorhom/bottom-sheet';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -11,6 +11,7 @@ import { useProfile } from '@/context/ProfileContext';
 import { AddFriendSheet } from '@/components/profile/AddFriendSheet';
 import { acceptFriendRequest, deleteFriendship, fetchFriendships, sendFriendRequest } from '@/features/friends/friendsApi';
 import type { Friendship } from '@/features/friends/friendTypes';
+import { deleteAccount } from '@/features/profile/profilesApi';
 
 const { colors, fonts, layout, radius, shadows, spacing, type } = recountTheme;
 
@@ -156,7 +157,7 @@ function FriendRow({
 }
 
 export default function ProfileScreen() {
-  const { user, signOut } = useAuth();
+  const { user, clearLocalSession, signOut } = useAuth();
   const { profile } = useProfile();
   const { logSummaries } = useLogs();
 
@@ -244,6 +245,38 @@ export default function ProfileScreen() {
     } catch {
       console.log('Could not sign out.');
     }
+  };
+
+  const handleConfirmDeleteAccount = async () => {
+    try {
+      await deleteAccount();
+      await clearLocalSession();
+    } catch (caughtError) {
+      const message = caughtError instanceof Error
+        ? caughtError.message
+        : 'Could not delete account.';
+
+      Alert.alert('Could not delete account', message);
+    }
+  };
+
+  const handleDeleteAccountPress = () => {
+    Alert.alert(
+      'Delete account?',
+      'This permanently deletes your account and account data. This cannot be undone.',
+      [
+        {
+          text: 'Cancel',
+          style: 'cancel',
+        },
+        {
+          text: 'Delete account',
+          style: 'destructive',
+          onPress: handleConfirmDeleteAccount,
+        },
+      ],
+      { cancelable: true }
+    );
   };
 
   const handleAddFriend = async () => {
@@ -515,6 +548,24 @@ export default function ProfileScreen() {
             ]}
             onPress={handleSignout}>
             <Text style={styles.signOutButtonText}>Sign out</Text>
+          </Pressable>
+          <Pressable
+            accessibilityLabel="Delete account"
+            accessibilityRole="button"
+            style={({ pressed }) => [
+              styles.deleteAccountButton,
+              pressed && styles.deleteAccountButtonPressed,
+            ]}
+            onPress={handleDeleteAccountPress}>
+            <SymbolView
+              name={{
+                ios: 'trash',
+                android: 'delete',
+              }}
+              tintColor={colors.paperCard}
+              size={16}
+            />
+            <Text style={styles.deleteAccountButtonText}>Delete account</Text>
           </Pressable>
         </View>
       </ScrollView>
@@ -903,5 +954,24 @@ const styles = StyleSheet.create({
     fontSize: type.body.fontSize,
     lineHeight: type.body.lineHeight,
     color: colors.terracottaDeep,
+  },
+  deleteAccountButton: {
+    minHeight: 52,
+    marginTop: spacing.s2,
+    borderRadius: radius.pill,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: spacing.s2,
+    backgroundColor: colors.terracotta,
+  },
+  deleteAccountButtonPressed: {
+    backgroundColor: colors.terracottaDeep,
+  },
+  deleteAccountButtonText: {
+    fontFamily: fonts.bodyStrong,
+    fontSize: type.body.fontSize,
+    lineHeight: type.body.lineHeight,
+    color: colors.paperCard,
   },
 });

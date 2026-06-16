@@ -116,3 +116,23 @@ export async function fetchCurrentProfile(): Promise<UserProfile | null> {
 
   return mapProfile(profileData as ProfileRow);
 }
+
+export async function deleteAccount(): Promise<void> {
+  const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+
+  if (sessionError) {
+    throw toError(sessionError);
+  }
+
+  if (!sessionData.session) {
+    throw new Error('You must be signed in to delete your account.');
+  }
+
+  const { error: deleteError } = await supabase.functions.invoke('delete-account', {
+    method: 'POST',
+  });
+
+  if (deleteError) {
+    throw toError(deleteError, 'Could not delete account.');
+  }
+}
