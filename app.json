@@ -28,7 +28,7 @@
         "expo-splash-screen",
         {
           "backgroundColor": "#F2EDE0",
-          "image": "./assets/images/recount-splash-wordmark.png",
+          "image": "./assets/images/recount-splash.png",
           "imageWidth": 260,
           "resizeMode": "contain"
         }
