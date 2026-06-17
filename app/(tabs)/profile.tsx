@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { SymbolView } from 'expo-symbols';
 import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import * as WebBrowser from 'expo-web-browser';
 import BottomSheet from '@gorhom/bottom-sheet';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -14,6 +15,7 @@ import type { Friendship } from '@/features/friends/friendTypes';
 import { deleteAccount } from '@/features/profile/profilesApi';
 
 const { colors, fonts, layout, radius, shadows, spacing, type } = recountTheme;
+const privacyPolicyUrl = 'https://getrecount.ca/privacy/';
 
 type FriendPreview = {
   id: string;
@@ -277,6 +279,14 @@ export default function ProfileScreen() {
       ],
       { cancelable: true }
     );
+  };
+
+  const handleOpenPrivacyPolicy = async () => {
+    try {
+      await WebBrowser.openBrowserAsync(privacyPolicyUrl);
+    } catch {
+      Alert.alert('Could not open privacy policy', `Visit ${privacyPolicyUrl} in your browser.`);
+    }
   };
 
   const handleAddFriend = async () => {
@@ -566,6 +576,17 @@ export default function ProfileScreen() {
               size={16}
             />
             <Text style={styles.deleteAccountButtonText}>Delete account</Text>
+          </Pressable>
+          <Pressable
+            accessibilityLabel="Open privacy policy"
+            accessibilityRole="link"
+            hitSlop={8}
+            style={({ pressed }) => [
+              styles.privacyPolicyLink,
+              pressed && styles.privacyPolicyLinkPressed,
+            ]}
+            onPress={handleOpenPrivacyPolicy}>
+            <Text style={styles.privacyPolicyLinkText}>Privacy Policy</Text>
           </Pressable>
         </View>
       </ScrollView>
@@ -973,5 +994,20 @@ const styles = StyleSheet.create({
     fontSize: type.body.fontSize,
     lineHeight: type.body.lineHeight,
     color: colors.paperCard,
+  },
+  privacyPolicyLink: {
+    alignSelf: 'center',
+    paddingHorizontal: spacing.s3,
+    paddingVertical: spacing.s2,
+  },
+  privacyPolicyLinkPressed: {
+    opacity: 0.55,
+  },
+  privacyPolicyLinkText: {
+    fontFamily: fonts.body,
+    fontSize: type.bodyS.fontSize,
+    lineHeight: type.bodyS.lineHeight,
+    color: colors.inkSoft,
+    textDecorationLine: 'underline',
   },
 });
