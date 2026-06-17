@@ -4,13 +4,13 @@
     "slug": "recount",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/recount-icon.png",
+    "icon": "./assets/images/recount-icon-bold.png",
     "scheme": "recount",
     "userInterfaceStyle": "light",
     "splash": {
-      "image": "./assets/images/splash-icon.png",
+      "image": "./assets/images/recount-splash.png",
       "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "#F2EDE0"
     },
     "ios": {
       "supportsTablet": false,
@@ -23,7 +23,16 @@
     "plugins": [
       "expo-router",
       "expo-sqlite",
-      "expo-secure-store"
+      "expo-secure-store",
+      [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#F2EDE0",
+          "image": "./assets/images/recount-splash-wordmark.png",
+          "imageWidth": 260,
+          "resizeMode": "contain"
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true
