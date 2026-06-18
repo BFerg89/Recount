@@ -1,5 +1,5 @@
 import type BottomSheet from '@gorhom/bottom-sheet';
-import { SymbolView } from 'expo-symbols';
+import { PathIcon } from 'phosphor-react-native';
 import { useRef } from 'react';
 import type { RefObject } from 'react';
 
@@ -48,14 +48,7 @@ export function AddMomentSheet({
           label="Add moment"
           onPress={onAddMoment}
           icon={(
-            <SymbolView
-              name={{
-                ios: 'plus.circle.fill',
-                android: 'add_circle',
-              }}
-              tintColor={colors.paperCard}
-              size={18}
-            />
+            <PathIcon color={colors.paperCard} size={18} weight="bold" />
           )}
         />
       )}>

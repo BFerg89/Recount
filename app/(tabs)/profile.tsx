@@ -1,5 +1,12 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { SymbolView } from 'expo-symbols';
+import {
+  HandshakeIcon,
+  HourglassSimpleMediumIcon,
+  TrashSimpleIcon,
+  UserPlusIcon,
+  UsersThreeIcon,
+  WarningCircleIcon,
+} from 'phosphor-react-native';
 import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import * as WebBrowser from 'expo-web-browser';
 import BottomSheet from '@gorhom/bottom-sheet';
@@ -107,14 +114,7 @@ function FriendRow({
         isDeleteDisabled && styles.deleteFriendButtonDisabled,
       ]}
     >
-      <SymbolView
-        name={{
-          ios: 'trash',
-          android: 'delete',
-        }}
-        tintColor={colors.paperCard}
-        size={16}
-      />
+      <TrashSimpleIcon color={colors.paperCard} size={16} weight="bold" />
     </Pressable>
   ) : null;
 
@@ -211,9 +211,9 @@ export default function ProfileScreen() {
     : friendshipsError
       ? 'Could not load friends'
       : null;
-  const friendshipStatusIconName = isFriendshipsLoading
-    ? ({ ios: 'hourglass', android: 'hourglass_empty' } as const)
-    : ({ ios: 'exclamationmark.circle', android: 'error_outline' } as const);
+  const FriendshipStatusIcon = isFriendshipsLoading
+    ? HourglassSimpleMediumIcon
+    : WarningCircleIcon;
   const friendshipStatusIconTint = isFriendshipsLoading
     ? colors.inkSoft
     : colors.terracottaDeep;
@@ -376,14 +376,7 @@ export default function ProfileScreen() {
               pressed && styles.addFriendButtonPressed,
             ]}
             onPress={() => addFriendSheetRef.current?.expand()}>
-            <SymbolView
-              name={{
-                ios: 'plus.circle.fill',
-                android: 'add_circle',
-              }}
-              tintColor={colors.terracotta}
-              size={18}
-            />
+            <UserPlusIcon color={colors.terracotta} size={18} weight="bold" />
             <Text style={styles.addFriendButtonText}>Add friend</Text>
           </Pressable>
         </View>
@@ -441,9 +434,8 @@ export default function ProfileScreen() {
                 styles.emptyStateIcon,
                 isFriendshipStatusError && styles.errorStateIcon,
               ]}>
-              <SymbolView
-                name={friendshipStatusIconName}
-                tintColor={friendshipStatusIconTint}
+              <FriendshipStatusIcon
+                color={friendshipStatusIconTint}
                 size={22}
               />
             </View>
@@ -490,14 +482,7 @@ export default function ProfileScreen() {
               ) : (
                 <View style={styles.emptyStateCard}>
                   <View style={styles.emptyStateIcon}>
-                    <SymbolView
-                      name={{
-                        ios: 'person.2',
-                        android: 'group',
-                      }}
-                      tintColor={colors.inkSoft}
-                      size={23}
-                    />
+                    <HandshakeIcon color={colors.inkSoft} size={23} />
                   </View>
                   <View style={styles.emptyStateCopy}>
                     <Text style={styles.emptyStateTitle}>No pending requests</Text>
@@ -528,14 +513,7 @@ export default function ProfileScreen() {
               ) : (
                 <View style={styles.emptyStateCard}>
                   <View style={styles.emptyStateIcon}>
-                    <SymbolView
-                      name={{
-                        ios: 'person.2',
-                        android: 'group',
-                      }}
-                      tintColor={colors.inkSoft}
-                      size={23}
-                    />
+                    <UsersThreeIcon color={colors.inkSoft} size={23} />
                   </View>
                   <View style={styles.emptyStateCopy}>
                     <Text style={styles.emptyStateTitle}>No friends yet</Text>
@@ -567,14 +545,7 @@ export default function ProfileScreen() {
               pressed && styles.deleteAccountButtonPressed,
             ]}
             onPress={handleDeleteAccountPress}>
-            <SymbolView
-              name={{
-                ios: 'trash',
-                android: 'delete',
-              }}
-              tintColor={colors.paperCard}
-              size={16}
-            />
+            <TrashSimpleIcon color={colors.paperCard} size={16} weight="bold" />
             <Text style={styles.deleteAccountButtonText}>Delete account</Text>
           </Pressable>
           <Pressable

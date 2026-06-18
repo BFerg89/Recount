@@ -1,21 +1,21 @@
 import { Tabs } from 'expo-router';
-import { SymbolView } from 'expo-symbols';
+import { NotebookIcon, PencilSimpleLineIcon, UserIcon } from 'phosphor-react-native';
 import React from 'react';
 
-import { useColorScheme } from '@/components/useColorScheme';
-import Colors from '@/constants/Colors';
+import { recountTheme } from '@/constants/RecountTheme';
+
+const { colors } = recountTheme;
 
 export default function TabLayout() {
-  const colorScheme = useColorScheme();
-
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme].tint,
+        tabBarActiveTintColor: colors.terracotta,
+        tabBarInactiveTintColor: colors.inkSoft,
         headerShown: false,
         tabBarStyle: {
-          backgroundColor: '#F5F2EA',
-          borderTopColor: '#d8d3c7',
+          backgroundColor: colors.paperCard,
+          borderTopColor: colors.rule,
           borderTopWidth: 1.5,
         }
       }}>
@@ -24,15 +24,7 @@ export default function TabLayout() {
         options={{
           title: 'Logs',
           tabBarIcon: ({ color }) => (
-            <SymbolView
-              name={{
-                ios: 'chevron.left.forwardslash.chevron.right',
-                android: 'code',
-                web: 'code',
-              }}
-              tintColor={color}
-              size={28}
-            />
+            <NotebookIcon color={color} size={28} />
           ),
         }}
       />
@@ -41,15 +33,7 @@ export default function TabLayout() {
         options={{
           title: 'Create Log',
           tabBarIcon: ({ color }) => (
-            <SymbolView
-              name={{
-                ios: 'chevron.left.forwardslash.chevron.right',
-                android: 'code',
-                web: 'code',
-              }}
-              tintColor={color}
-              size={28}
-            />
+            <PencilSimpleLineIcon color={color} size={28} />
           ),
         }}
       />
@@ -58,15 +42,7 @@ export default function TabLayout() {
         options={{
           title: 'Profile',
           tabBarIcon: ({ color }) => (
-            <SymbolView
-              name={{
-                ios: 'chevron.left.forwardslash.chevron.right',
-                android: 'code',
-                web: 'code',
-              }}
-              tintColor={color}
-              size={28}
-            />
+            <UserIcon color={color} size={28} />
           ),
         }}
       />

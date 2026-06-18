@@ -1,5 +1,5 @@
 import DateTimePicker from '@expo/ui/datetimepicker';
-import { SymbolView } from 'expo-symbols';
+import { PathIcon, TrayArrowDownIcon, UserPlusIcon } from 'phosphor-react-native';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Keyboard, Pressable, ScrollView, StyleSheet, Text, TextInput, useWindowDimensions, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -334,11 +334,7 @@ export default function CreateScreen() {
                   pressed && styles.addPersonButtonPressed,
                 ]}
                 onPress={handleOpenAddPeopleSheet}>
-                <SymbolView name={{
-                  ios: 'plus.circle',
-                  android: 'add',
-                }}
-                tintColor={colors.terracottaDeep}/>
+                <UserPlusIcon color={colors.terracottaDeep} size={16} />
                 <Text style={styles.addPersonText}>Add</Text>
               </Pressable>
             </View>
@@ -362,12 +358,10 @@ export default function CreateScreen() {
               onPress={handleOpenAddMomentSheet}>
               {({ pressed }) => (
                 <>
-                  <SymbolView name={{
-                    ios: 'plus.circle',
-                    android: 'add_circle',
-                  }}
-                  tintColor={pressed ? colors.terracottaSoft : colors.terracotta}
-                  size={18}/>
+                  <PathIcon
+                    color={pressed ? colors.terracottaSoft : colors.terracotta}
+                    size={18}
+                  />
                   <Text style={[styles.addMomentText, pressed && styles.addMomentTextPressed]}>
                     Add moment
                   </Text>
@@ -426,14 +420,7 @@ export default function CreateScreen() {
           disabled={!canCreateLog}
           onPress={handleCreateLog}
           icon={(
-            <SymbolView
-              name={{
-                ios: 'square.and.arrow.down',
-                android: 'save',
-              }}
-              tintColor={colors.paperCard}
-              size={18}
-            />
+            <TrayArrowDownIcon color={colors.paperCard} size={18} weight="bold" />
           )}
         />
       </View>

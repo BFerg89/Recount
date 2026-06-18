@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Alert, View, StyleSheet, Text, ScrollView, Pressable, useWindowDimensions } from 'react-native';
-import { SymbolView } from 'expo-symbols';
+import { ArrowLeftIcon, NotePencilIcon, TrashSimpleIcon } from 'phosphor-react-native';
 import { recountTheme } from '@/constants/RecountTheme';
 import { useLocalSearchParams, router } from 'expo-router';
 
@@ -188,12 +188,7 @@ export default function ViewLogScreen() {
                 pressed && styles.backButtonPressed,
               ]}
               onPress={handleback}>
-              <SymbolView name={{
-                ios: 'chevron.backward',
-                android: 'chevron_backward'
-              }}
-              tintColor={colors.ink}
-              size={35}/>
+              <ArrowLeftIcon color={colors.ink} size={28} />
             </Pressable>
             <View style={styles.titleSection}>
               <Text style={styles.subTitle}>{dateLine}</Text>
@@ -270,6 +265,7 @@ export default function ViewLogScreen() {
                     pressed && styles.editLogButtonPressed,
                   ]}
                   onPress={handleEditLogPress}>
+                  <NotePencilIcon color={colors.terracottaDeep} size={16} />
                   <Text style={styles.editLogButtonText}>Edit log</Text>
                 </Pressable>
                 <Pressable
@@ -283,14 +279,7 @@ export default function ViewLogScreen() {
                     isDeletingLog && styles.deleteLogButtonDisabled,
                   ]}
                   onPress={handleDeleteLogPress}>
-                  <SymbolView
-                    name={{
-                      ios: 'trash',
-                      android: 'delete',
-                    }}
-                    tintColor={colors.paperCard}
-                    size={16}
-                  />
+                  <TrashSimpleIcon color={colors.paperCard} size={16} weight="bold" />
                   <Text style={styles.deleteLogButtonText}>
                     {isDeletingLog ? 'Deleting...' : 'Delete log'}
                   </Text>
@@ -478,8 +467,10 @@ const styles = StyleSheet.create({
     borderRadius: radius.pill,
     borderWidth: 1,
     borderColor: colors.rule,
+    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
+    gap: spacing.s2,
     backgroundColor: colors.paperCard,
     boxShadow: shadows.card,
   },

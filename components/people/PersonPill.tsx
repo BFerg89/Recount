@@ -1,4 +1,4 @@
-import { SymbolView } from 'expo-symbols';
+import { UserCircleIcon } from 'phosphor-react-native';
 import { StyleSheet, Text, View, type StyleProp, type TextStyle, type ViewStyle } from 'react-native';
 
 import { recountTheme } from '@/constants/RecountTheme';
@@ -14,13 +14,7 @@ type PersonPillProps = {
 export function PersonPill({ displayName, style, textStyle }: PersonPillProps) {
   return (
     <View style={[styles.container, style]}>
-      <SymbolView
-        name={{
-          ios: 'person.circle',
-          android: 'person',
-        }}
-        tintColor={colors.ink}
-      />
+      <UserCircleIcon color={colors.ink} size={16} />
       <Text style={[styles.text, textStyle]}>{displayName}</Text>
     </View>
   );

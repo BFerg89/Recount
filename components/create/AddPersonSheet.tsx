@@ -1,5 +1,11 @@
 import type BottomSheet from '@gorhom/bottom-sheet';
-import { SymbolView } from 'expo-symbols';
+import {
+  HourglassSimpleMediumIcon,
+  UserCircleCheckIcon,
+  UserPlusIcon,
+  UsersThreeIcon,
+  WarningCircleIcon,
+} from 'phosphor-react-native';
 import type { RefObject } from 'react';
 import { Pressable, StyleSheet, Text, View, ScrollView } from 'react-native';
 
@@ -104,15 +110,11 @@ function FriendOptionRow({
       </View>
 
       <View style={styles.friendAction}>
-        <SymbolView
-          name={
-            isAdded
-              ? { ios: 'checkmark.circle.fill', android: 'check_circle' }
-              : { ios: 'plus.circle', android: 'add_circle' }
-          }
-          tintColor={isAdded ? colors.inkSoft : colors.terracotta}
-          size={20}
-        />
+        {isAdded ? (
+          <UserCircleCheckIcon color={colors.inkSoft} size={20} weight="fill" />
+        ) : (
+          <UserPlusIcon color={colors.terracotta} size={20} />
+        )}
       </View>
     </Pressable>
   );
@@ -139,11 +141,11 @@ export function AddPersonSheet({
       : hasFriends
         ? null
         : 'No friends yet';
-  const friendsStatusIconName = isFriendsLoading
-    ? ({ ios: 'hourglass', android: 'hourglass_empty' } as const)
+  const FriendsStatusIcon = isFriendsLoading
+    ? HourglassSimpleMediumIcon
     : friendsError
-      ? ({ ios: 'exclamationmark.circle', android: 'error_outline' } as const)
-      : ({ ios: 'person.2', android: 'group' } as const);
+      ? WarningCircleIcon
+      : UsersThreeIcon;
 
   return (
     <BottomActionSheet
@@ -156,14 +158,7 @@ export function AddPersonSheet({
           label="Add person"
           onPress={onAddPerson}
           icon={(
-            <SymbolView
-              name={{
-                ios: 'plus.circle.fill',
-                android: 'add_circle',
-              }}
-              tintColor={colors.paperCard}
-              size={18}
-            />
+            <UserPlusIcon color={colors.paperCard} size={18} weight="bold" />
           )}
         />
       )}>
@@ -174,9 +169,8 @@ export function AddPersonSheet({
           {friendsStatusMessage ? (
             <View style={styles.friendsStateCard}>
               <View style={styles.friendsStateIcon}>
-                <SymbolView
-                  name={friendsStatusIconName}
-                  tintColor={friendsError ? colors.terracottaDeep : colors.inkSoft}
+                <FriendsStatusIcon
+                  color={friendsError ? colors.terracottaDeep : colors.inkSoft}
                   size={20}
                 />
               </View>

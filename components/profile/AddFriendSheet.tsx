@@ -1,5 +1,5 @@
 import type BottomSheet from '@gorhom/bottom-sheet';
-import { SymbolView } from 'expo-symbols';
+import { UserPlusIcon } from 'phosphor-react-native';
 import type { RefObject } from 'react';
 
 import { PrimaryButton } from '@/components/ui/PrimaryButton';
@@ -49,14 +49,7 @@ export function AddFriendSheet({
           onPress={onAddFriend}
           disabled={isAddingFriend}
           icon={(
-            <SymbolView
-              name={{
-                ios: 'plus.circle.fill',
-                android: 'add_circle',
-              }}
-              tintColor={colors.paperCard}
-              size={18}
-            />
+            <UserPlusIcon color={colors.paperCard} size={18} weight="bold" />
           )}
         />
       )}>
