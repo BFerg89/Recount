@@ -266,61 +266,71 @@ export default function CreateScreen() {
   };
 
   return (
-    <View style={[styles.screen, { paddingTop: insets.top + 12 }]}>
-      <Text style={styles.title}>Create Log</Text>
+    <View style={styles.screen}>
       <ScrollView
         ref={scrollRef}
-        style={styles.contentContainer} 
+        style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
-        automaticallyAdjustKeyboardInsets={true}
+        automaticallyAdjustKeyboardInsets
         keyboardDismissMode="interactive"
-        keyboardShouldPersistTaps="handled">
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}>
         <View
           accessible={false}
           onResponderRelease={Keyboard.dismiss}
           onStartShouldSetResponder={(event) => event.target === event.currentTarget}
-          style={styles.content}>
-        <View style={styles.titleSection}>
-          <TextInput
-            value={title}
-            onChangeText={(text) => {
-              setTitle(text);
-              clearSaveError();
-            }}
-            placeholder='Name this log...'
-            returnKeyType="next"
-            maxLength={inputLimits.logTitle}
-            onSubmitEditing={() => locationInputRef.current?.focus()}
-            style={styles.titleInput}/>
-          <View style={styles.dateRow}>
-            <TextInput
-              ref={locationInputRef}
-              value={location}
-              onChangeText={(text) => {
-                setLocation(text);
-                clearSaveError();
-              }}
-              style={styles.locationInput}
-              placeholder='Location...'
-              returnKeyType="done"
-              maxLength={inputLimits.logLocation}
-              onSubmitEditing={Keyboard.dismiss}/>
-            <View style={styles.datePickerGroup}>
-              <Text style={styles.dateText}>When:</Text>
-              <DateTimePicker
-                value={date}
-                onValueChange={(_event, selectedDate) => {
-                  setDate(selectedDate);
+          style={[
+            styles.content,
+            {
+              paddingTop: insets.top + spacing.s3,
+              paddingBottom: spacing.s8,
+            },
+          ]}>
+          <View style={styles.headerSection}>
+            <Text style={styles.title}>Create Log</Text>
+            <View style={styles.titleSection}>
+              <TextInput
+                value={title}
+                onChangeText={(text) => {
+                  setTitle(text);
                   clearSaveError();
                 }}
-                mode="date"
-                display="compact"
-                style={styles.datePicker}/>
+                placeholder='Name this log...'
+                returnKeyType="next"
+                maxLength={inputLimits.logTitle}
+                onSubmitEditing={() => locationInputRef.current?.focus()}
+                style={styles.titleInput}/>
+              <View style={styles.dateRow}>
+                <TextInput
+                  ref={locationInputRef}
+                  value={location}
+                  onChangeText={(text) => {
+                    setLocation(text);
+                    clearSaveError();
+                  }}
+                  style={styles.locationInput}
+                  placeholder='Location...'
+                  returnKeyType="done"
+                  maxLength={inputLimits.logLocation}
+                  onSubmitEditing={Keyboard.dismiss}/>
+                <View style={styles.datePickerGroup}>
+                  <Text style={styles.dateText}>When:</Text>
+                  <DateTimePicker
+                    value={date}
+                    onValueChange={(_event, selectedDate) => {
+                      setDate(selectedDate);
+                      clearSaveError();
+                    }}
+                    mode="date"
+                    display="compact"
+                    style={styles.datePicker}/>
+                </View>
+              </View>
             </View>
           </View>
-        </View>
-        <View style={styles.peopleSection}>
-          <Text style={styles.sectionLabel}>Who was there · {people.length}</Text>
+
+          <View style={styles.peopleSection}>
+            <Text style={styles.sectionLabel}>Who was there · {people.length}</Text>
             <View style={styles.peopleGrid}>
               {people.map((person) => (
                 <PersonPill
@@ -338,75 +348,76 @@ export default function CreateScreen() {
                 <Text style={styles.addPersonText}>Add</Text>
               </Pressable>
             </View>
-        </View>        
-        <View style={styles.timelineSection}>
-          <View style={styles.timelineHeader}>
-            <Text style={styles.sectionLabel}>Moments</Text>
-            <Text style={styles.sectionLabel}>{moments.length} added</Text>
           </View>
-          <View style={styles.momentListCard}>
-            {moments.map((moment) => (
-              <View
-                key={moment.id}
-                style={styles.momentRow}>
-                <Text style={styles.momentTime}>{moment.approxTime}</Text>
-                <Text style={styles.momentTitle}>{moment.title}</Text>
-              </View>
-            ))}
-            <Pressable
-              style={styles.addMomentButton}
-              onPress={handleOpenAddMomentSheet}>
-              {({ pressed }) => (
-                <>
-                  <PathIcon
-                    color={pressed ? colors.terracottaSoft : colors.terracotta}
-                    size={18}
-                  />
-                  <Text style={[styles.addMomentText, pressed && styles.addMomentTextPressed]}>
-                    Add moment
-                  </Text>
-                </>
-              )}
-            </Pressable>
+
+          <View style={styles.timelineSection}>
+            <View style={styles.timelineHeader}>
+              <Text style={styles.sectionLabel}>Moments</Text>
+              <Text style={styles.sectionLabel}>{moments.length} added</Text>
+            </View>
+            <View style={styles.momentListCard}>
+              {moments.map((moment) => (
+                <View
+                  key={moment.id}
+                  style={styles.momentRow}>
+                  <Text style={styles.momentTime}>{moment.approxTime}</Text>
+                  <Text style={styles.momentTitle}>{moment.title}</Text>
+                </View>
+              ))}
+              <Pressable
+                style={styles.addMomentButton}
+                onPress={handleOpenAddMomentSheet}>
+                {({ pressed }) => (
+                  <>
+                    <PathIcon
+                      color={pressed ? colors.terracottaSoft : colors.terracotta}
+                      size={18}
+                    />
+                    <Text style={[styles.addMomentText, pressed && styles.addMomentTextPressed]}>
+                      Add moment
+                    </Text>
+                  </>
+                )}
+              </Pressable>
+            </View>
           </View>
-        </View>
-        <View style={styles.notesSection}>
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            style={styles.noteCardsScroll}
-            contentContainerStyle={styles.noteCardsContent}>
-            {notePromptColumns.map((column) => (
-              <View
-                key={column.map((prompt) => prompt.promptType).join('-')}
-                style={styles.noteColumn}>
-                {column.map((prompt) => (
-                  <View key={prompt.promptType} style={[styles.noteCard, { width: noteCardWidth }]}>
-                    <Text style={styles.notePrompt}>{prompt.label}</Text>
 
-                    <TextInput
-                      value={noteAnswers[prompt.promptType] ?? ''}
-                      onChangeText={(text) => {
-                        clearSaveError();
-                        setNoteAnswers((previousAnswers) => {
-                          return {
-                            ...previousAnswers,
-                            [prompt.promptType]: text,
-                          };
-                        });
-                      }}
-                      onFocus={handleNoteFocus}
-                      placeholder="Enter note..."
-                      multiline
-                      maxLength={inputLimits.promptedNoteAnswer}
-                      style={styles.noteAnswer}/>
-                  </View>
-                ))}
-              </View>
-            ))}
-          </ScrollView>
-        </View>
+          <View style={styles.notesSection}>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              style={styles.noteCardsScroll}
+              contentContainerStyle={styles.noteCardsContent}>
+              {notePromptColumns.map((column) => (
+                <View
+                  key={column.map((prompt) => prompt.promptType).join('-')}
+                  style={styles.noteColumn}>
+                  {column.map((prompt) => (
+                    <View key={prompt.promptType} style={[styles.noteCard, { width: noteCardWidth }]}>
+                      <Text style={styles.notePrompt}>{prompt.label}</Text>
 
+                      <TextInput
+                        value={noteAnswers[prompt.promptType] ?? ''}
+                        onChangeText={(text) => {
+                          clearSaveError();
+                          setNoteAnswers((previousAnswers) => {
+                            return {
+                              ...previousAnswers,
+                              [prompt.promptType]: text,
+                            };
+                          });
+                        }}
+                        onFocus={handleNoteFocus}
+                        placeholder="Enter note..."
+                        multiline
+                        maxLength={inputLimits.promptedNoteAnswer}
+                        style={styles.noteAnswer}/>
+                    </View>
+                  ))}
+                </View>
+              ))}
+            </ScrollView>
+          </View>
         </View>
       </ScrollView>
 
@@ -463,15 +474,13 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: colors.paper,
   },
-  contentContainer: {
+  scrollView: {
     flex: 1,
-    marginTop: spacing.s3,
   },
   scrollContent: {
     flexGrow: 1,
   },
   title: {
-    paddingHorizontal: layout.mobileGutter,
     fontFamily: fonts.display,
     fontSize: type.displayM.fontSize,
     lineHeight: type.displayM.lineHeight,
@@ -482,6 +491,9 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     paddingHorizontal: layout.mobileGutter,
     gap: layout.sectionSpacing,
+  },
+  headerSection: {
+    gap: spacing.s3,
   },
   titleSection: {
     gap: spacing.s3,
@@ -597,6 +609,7 @@ const styles = StyleSheet.create({
     alignItems: 'stretch',
     justifyContent: 'flex-start',
     minHeight: 360,
+    marginHorizontal: -layout.mobileGutter,
   },
   noteCardsScroll: {
     flex: 1,
@@ -605,6 +618,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'flex-start',
     gap: gridGap,
+    paddingHorizontal: layout.mobileGutter,
+    paddingVertical: spacing.s3,
   },
   noteColumn: {
     gap: gridGap,
@@ -681,6 +696,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: layout.mobileGutter,
     borderTopWidth: 1,
     borderTopColor: colors.paperEdge,
+    backgroundColor: colors.paper,
   },
   saveErrorText: {
     marginBottom: spacing.s2,
