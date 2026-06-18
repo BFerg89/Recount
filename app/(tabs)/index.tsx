@@ -1,5 +1,4 @@
 import { Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 
 import { recountTheme } from '@/constants/RecountTheme';
@@ -33,7 +32,6 @@ const getCardRotation = (title: string) => {
 
 export default function TabOneScreen() {
   const { logSummaries } = useLogs();
-  const insets = useSafeAreaInsets();
   const { width } = useWindowDimensions();
   const hasLogs = logSummaries.length > 0;
   const logCardWidth = (width - contentPadding * 2 - gridGap) / 2;
@@ -69,9 +67,11 @@ export default function TabOneScreen() {
 
   return (
     <View style={styles.screen}>
-      <Text style={styles.title}>Logs</Text>
+      <View style={styles.header}>
+        <Text style={styles.title}>Logs</Text>
+      </View>
       <ScrollView
-        style={styles.contentContainer}
+        style={styles.scrollView}
         contentContainerStyle={[styles.content, !hasLogs && styles.emptyContent]}>
         {!hasLogs ? (
           <View style={styles.emptyState}>
@@ -119,14 +119,16 @@ const styles = StyleSheet.create({
     backgroundColor: colors.paper,
     paddingTop: layout.statusBarSpace,
   },
-  title: {
+  header: {
     paddingHorizontal: layout.mobileGutter,
+  },
+  title: {
     fontFamily: fonts.display,
     fontSize: type.displayXl.fontSize,
     letterSpacing: type.displayXl.letterSpacing,
     color: colors.terracotta,
   },
-  contentContainer: {
+  scrollView: {
     flex: 1,
     backgroundColor: colors.paper,
   },

@@ -24,6 +24,11 @@ import type { Friendship } from '@/features/friends/friendTypes';
 const { colors, fonts, layout, radius, shadows, spacing, type } = recountTheme;
 
 const gridGap = spacing.s4;
+const noteCardMinHeight = 172;
+const noteRailTopPadding = spacing.s3;
+const noteRailBottomPadding = spacing.s7;
+const noteRailVerticalPadding = noteRailTopPadding + noteRailBottomPadding;
+const noteRailMinHeight = noteCardMinHeight * 2 + gridGap + noteRailVerticalPadding;
 const notSignedInSaveError = 'You need to be logged in to save a log.';
 const networkSaveError = 'Could not connect. Check your connection and try again.';
 const genericSaveError = 'Unable to save log. Please try again.';
@@ -608,8 +613,9 @@ const styles = StyleSheet.create({
   notesSection: {
     alignItems: 'stretch',
     justifyContent: 'flex-start',
-    minHeight: 360,
+    minHeight: noteRailMinHeight,
     marginHorizontal: -layout.mobileGutter,
+    marginBottom: -noteRailVerticalPadding,
   },
   noteCardsScroll: {
     flex: 1,
@@ -619,13 +625,14 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start',
     gap: gridGap,
     paddingHorizontal: layout.mobileGutter,
-    paddingVertical: spacing.s3,
+    paddingTop: noteRailTopPadding,
+    paddingBottom: noteRailBottomPadding,
   },
   noteColumn: {
     gap: gridGap,
   },
   noteCard: {
-    minHeight: 172,
+    minHeight: noteCardMinHeight,
     borderRadius: radius.l,
     borderWidth: 1,
     borderColor: colors.paperEdge,

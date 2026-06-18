@@ -366,8 +366,8 @@ export default function ProfileScreen() {
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
         style={styles.scrollView}
-        contentContainerStyle={[styles.content, { paddingBottom: spacing.s8 }]}>
-        <View style={styles.titleSection}>
+        contentContainerStyle={styles.content}>
+        <View style={styles.header}>
           <Text style={styles.titleText}>Profile</Text>
 
           <Pressable
@@ -589,9 +589,10 @@ const styles = StyleSheet.create({
   },
   content: {
     paddingHorizontal: layout.mobileGutter,
+    paddingBottom: spacing.s8,
     gap: layout.sectionSpacing,
   },
-  titleSection: {
+  header: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',

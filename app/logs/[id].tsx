@@ -13,6 +13,11 @@ import { promptedNoteDefinitions } from '@/features/logs/promptedNotes';
 
 const { colors, fonts, layout, radius, shadows, spacing, type } = recountTheme;
 const gridGap = spacing.s4;
+const noteCardMinHeight = 172;
+const noteRailTopPadding = spacing.s3;
+const noteRailBottomPadding = spacing.s7;
+const noteRailVerticalPadding = noteRailTopPadding + noteRailBottomPadding;
+const noteRailMinHeight = noteCardMinHeight * 2 + gridGap + noteRailVerticalPadding;
 
 const formatLogDate = (date: Date) => {
   return {
@@ -176,10 +181,8 @@ export default function ViewLogScreen() {
   return (
     <View style={styles.screen}>
       <ScrollView
-        contentContainerStyle={[
-          styles.scrollContent,
-          { paddingBottom: spacing.s8 },
-        ]}>
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollContent}>
         <View style={styles.content}>
           <View style={styles.header}>
             <Pressable
@@ -297,14 +300,18 @@ const styles = StyleSheet.create({
   screen: {
     flex: 1,
     backgroundColor: colors.paper,
-    paddingHorizontal: layout.mobileGutter,
-    paddingTop: layout.statusBarSpace,
+  },
+  scrollView: {
+    flex: 1,
   },
   content: {
     gap: layout.sectionSpacing,
+    paddingHorizontal: layout.mobileGutter,
+    paddingTop: layout.statusBarSpace,
   },
   scrollContent: {
     flexGrow: 1,
+    paddingBottom: spacing.s8,
   },
   sectionLabel: {
     fontFamily: fonts.label,
@@ -422,7 +429,9 @@ const styles = StyleSheet.create({
   notesSection: {
     alignItems: 'stretch',
     justifyContent: 'flex-start',
-    minHeight: 360,
+    minHeight: noteRailMinHeight,
+    marginHorizontal: -layout.mobileGutter,
+    marginBottom: -noteRailVerticalPadding,
   },
   noteCardsScroll: {
     flex: 1,
@@ -431,17 +440,21 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'flex-start',
     gap: gridGap,
+    paddingHorizontal: layout.mobileGutter,
+    paddingTop: noteRailTopPadding,
+    paddingBottom: noteRailBottomPadding,
   },
   noteColumn: {
     gap: gridGap,
   },
   noteCard: {
-    minHeight: 172,
+    minHeight: noteCardMinHeight,
     borderRadius: radius.l,
     borderWidth: 1,
     borderColor: colors.paperEdge,
     padding: layout.cardPadding,
     backgroundColor: colors.paperCard,
+    boxShadow: shadows.card,
   },
   notePrompt: {
     fontFamily: fonts.bodyStrong,
