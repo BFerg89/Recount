@@ -5,6 +5,7 @@ import { recountTheme } from '@/constants/RecountTheme';
 import { useLocalSearchParams, router } from 'expo-router';
 
 import { PersonPill } from '@/components/people/PersonPill';
+import { useAuth } from '@/context/AuthContext';
 import { useLogs } from '@/context/LogsContext';
 import { parseStoredDate } from '@/features/logs/logDate';
 import { fetchLogById } from '@/features/logs/logsApi';
@@ -47,7 +48,8 @@ function handleEditLogPress() {
 
 export default function ViewLogScreen() {
   const { id } = useLocalSearchParams();
-  const { deleteLog } = useLogs();
+  const { user } = useAuth();
+  const { deleteLog, leaveLog } = useLogs();
   const { width } = useWindowDimensions();
   const noteCardWidth = Math.min(
     336,
@@ -59,6 +61,28 @@ export default function ViewLogScreen() {
   const [isLogLoading, setIsLogLoading] = useState(true);
   const [logError, setLogError] = useState<string | null>(null);
   const [isDeletingLog, setIsDeletingLog] = useState(false);
+  const [isLeavingLog, setIsLeavingLog] = useState(false);
+
+  const confirmLeaveLog = async () => {
+    if (!selectedLogId || isLeavingLog) {
+      return;
+    }
+
+    setIsLeavingLog(true);
+
+    try {
+      await leaveLog(selectedLogId);
+      handleback();
+    } catch (caughtError) {
+      const message = caughtError instanceof Error
+        ? caughtError.message
+        : 'Could not leave log.';
+
+      Alert.alert('Could not leave log', message);
+    } finally {
+      setIsLeavingLog(false);
+    }
+  };
 
   const confirmDeleteLog = async () => {
     if (!selectedLogId || isDeletingLog) {
@@ -80,6 +104,31 @@ export default function ViewLogScreen() {
       setIsDeletingLog(false);
     }
   };
+
+  const handleLeaveLogPress = () => {
+    if (!selectedLogId || isLeavingLog) {
+      return;
+    }
+
+    Alert.alert(
+      'Leave log?',
+      'This removes your access this log and cannot be undone.',
+      [
+        {
+          text: 'Cancel',
+          style: 'cancel',
+        },
+        {
+          text: 'Leave log',
+          style: 'destructive',
+          onPress: () => {
+            void confirmLeaveLog();
+          },
+        },
+      ],
+      { cancelable: true }
+    );
+  }
 
   const handleDeleteLogPress = () => {
     if (!selectedLogId || isDeletingLog) {
@@ -177,6 +226,8 @@ export default function ViewLogScreen() {
   const dateLine = weekday && monthTitle ? `${weekday} · ${monthTitle}` : '';
   const titleText = log?.title ?? (isLogLoading ? 'Loading...' : 'Log unavailable');
   const stateMessage = isLogLoading ? 'Loading log...' : logError ?? 'Log not found.';
+  const currentUserId = user?.id;
+  const isLogCreator = Boolean(log && currentUserId && log.creatorId === currentUserId);
 
   return (
     <View style={styles.screen}>
@@ -271,22 +322,41 @@ export default function ViewLogScreen() {
                   <NotePencilIcon color={colors.terracottaDeep} size={16} />
                   <Text style={styles.editLogButtonText}>Edit log</Text>
                 </Pressable>
-                <Pressable
-                  accessibilityLabel="Delete log"
-                  accessibilityRole="button"
-                  accessibilityState={{ disabled: isDeletingLog }}
-                  disabled={isDeletingLog}
-                  style={({ pressed }) => [
-                    styles.deleteLogButton,
-                    pressed && styles.deleteLogButtonPressed,
-                    isDeletingLog && styles.deleteLogButtonDisabled,
-                  ]}
-                  onPress={handleDeleteLogPress}>
-                  <TrashSimpleIcon color={colors.paperCard} size={16} weight="bold" />
-                  <Text style={styles.deleteLogButtonText}>
-                    {isDeletingLog ? 'Deleting...' : 'Delete log'}
-                  </Text>
-                </Pressable>
+                {isLogCreator ? (
+                  <Pressable
+                    accessibilityLabel="Delete log"
+                    accessibilityRole="button"
+                    accessibilityState={{ disabled: isDeletingLog }}
+                    disabled={isDeletingLog}
+                    style={({ pressed }) => [
+                      styles.deleteLogButton,
+                      pressed && styles.deleteLogButtonPressed,
+                      isDeletingLog && styles.deleteLogButtonDisabled,
+                    ]}
+                    onPress={handleDeleteLogPress}>
+                    <TrashSimpleIcon color={colors.paperCard} size={16} weight="bold" />
+                    <Text style={styles.deleteLogButtonText}>
+                      {isDeletingLog ? 'Deleting...' : 'Delete log'}
+                    </Text>
+                  </Pressable>
+                ) : (
+                  <Pressable
+                    accessibilityLabel="Leave log"
+                    accessibilityRole="button"
+                    accessibilityState={{ disabled: isLeavingLog }}
+                    disabled={isLeavingLog}
+                    style={({ pressed }) => [
+                      styles.deleteLogButton,
+                      pressed && styles.deleteLogButtonPressed,
+                      isLeavingLog && styles.deleteLogButtonDisabled,
+                    ]}
+                    onPress={handleLeaveLogPress}>
+                    <TrashSimpleIcon color={colors.paperCard} size={16} weight="bold" />
+                    <Text style={styles.deleteLogButtonText}>
+                      {isLeavingLog ? 'Leaving...' : 'Leave log'}
+                    </Text>
+                  </Pressable>
+                )}
               </View>
             </>
           )}

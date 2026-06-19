@@ -302,6 +302,36 @@ export async function fetchLogById(logId: string): Promise<LogEntry | null> {
   );
 }
 
+export async function leaveLog(logId: string): Promise<void> {
+  const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+
+  if (sessionError) {
+    throw toError(sessionError);
+  }
+
+  if (!sessionData.session) {
+    throw new Error('You must be signed in to leave a log.');
+  }
+
+  const userId = sessionData.session.user.id;
+
+  const { data, error } = await supabase
+    .from('log_people')
+    .delete()
+    .eq('log_id', logId)
+    .eq('user_id', userId)
+    .select('id')
+    .maybeSingle();
+
+  if (error) {
+    throw toError(error, 'Could not leave log.');
+  }
+
+  if (!data) {
+    throw new Error('Log not found.');
+  }
+}
+
 export async function deleteLog(logId: string): Promise<void> {
   const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
 

@@ -6,6 +6,7 @@ import type { CreateLogInput, LogEntry, LogSummary } from '@/features/logs/logTy
 import {
   createLog as createLogApi,
   deleteLog as deleteLogApi,
+  leaveLog as leaveLogApi,
   fetchLogSummaries,
 } from '@/features/logs/logsApi';
 
@@ -16,6 +17,7 @@ type LogsContextValue = {
   refreshLogs: () => Promise<void>;
   createLog: (input: CreateLogInput) => Promise<LogEntry>;
   deleteLog: (logId: string) => Promise<void>;
+  leaveLog: (logId: string) => Promise<void>;
 };
 
 const LogsContext = createContext<LogsContextValue | null>(null);
@@ -93,6 +95,16 @@ export function LogsProvider({ children }: PropsWithChildren) {
     );
   }, []);
 
+  const leaveLog = useCallback(async (logId: string) => {
+    setError(null);
+
+    await leaveLogApi(logId);
+
+    setLogSummaries((currentLogSummaries) =>
+    currentLogSummaries.filter((log => log.id !== logId))
+    );
+  }, []);
+
   const value = useMemo<LogsContextValue>(() => {
     return {
       logSummaries,
@@ -101,8 +113,9 @@ export function LogsProvider({ children }: PropsWithChildren) {
       refreshLogs,
       createLog,
       deleteLog,
+      leaveLog,
     };
-  }, [logSummaries, isLoading, error, refreshLogs, createLog, deleteLog]);
+  }, [logSummaries, isLoading, error, refreshLogs, createLog, deleteLog, leaveLog]);
 
   return (
     <LogsContext.Provider value={value}>

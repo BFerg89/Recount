@@ -27,15 +27,22 @@ migrations and backend smoke-test notes.
 4. `migrations/202606110004_list_friendships_rpc.sql`
 5. `migrations/202606110005_rename_logs.sql`
 6. `migrations/202606110006_log_friend_tags.sql`
+7. `migrations/202606110007_create_log_rpc_and_text_limits.sql`
+8. `migrations/202606120001_validate_text_limit_constraints.sql`
+9. `migrations/20260619021219_shared_log_collaboration_rls.sql`
 
 ## Known backend state
 
 - `log_people.user_id` is present in the local tagged-friends migration.
 - The 2026-06-10 review handoff says live metadata also showed
   `log_people.user_id` and visible-log RLS.
-- v0.2 sharing is read-only for tagged accepted friends.
-- create-log is still client-orchestrated and not yet moved into a transaction
-  RPC.
+- Users added to a log through `log_people.user_id` can view and edit shared log
+  content once they have access through the tagged-friends rules.
+- Added users can leave a shared log by deleting only their own account-backed
+  `log_people` row.
+- Only the log creator can delete the parent `logs` row.
+- create-log is handled through `public.create_log(payload jsonb)` so parent and
+  child inserts happen in one transaction.
 
 ## Manual follow-up when Bennett is ready
 
