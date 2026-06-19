@@ -39,13 +39,6 @@ function handleback() {
   }
 }
 
-function handleEditLogPress() {
-  Alert.alert(
-    'Edit log',
-    'Log editing is frontend-only for now. The edit flow will be wired up later.'
-  );
-}
-
 export default function ViewLogScreen() {
   const { id } = useLocalSearchParams();
   const { user } = useAuth();
@@ -318,7 +311,7 @@ export default function ViewLogScreen() {
                     styles.editLogButton,
                     pressed && styles.editLogButtonPressed,
                   ]}
-                  onPress={handleEditLogPress}>
+                  onPress={() => router.push(`/logs/${selectedLogId}/edit`)}>
                   <NotePencilIcon color={colors.terracottaDeep} size={16} />
                   <Text style={styles.editLogButtonText}>Edit log</Text>
                 </Pressable>
