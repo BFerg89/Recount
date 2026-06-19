@@ -6,8 +6,9 @@ import type { CreateLogInput, LogEntry, LogSummary } from '@/features/logs/logTy
 import {
   createLog as createLogApi,
   deleteLog as deleteLogApi,
-  leaveLog as leaveLogApi,
+  fetchLogById,
   fetchLogSummaries,
+  leaveLog as leaveLogApi,
 } from '@/features/logs/logsApi';
 
 type LogsContextValue = {
@@ -15,6 +16,8 @@ type LogsContextValue = {
   isLoading: boolean;
   error: string | null;
   refreshLogs: () => Promise<void>;
+  getCachedLog: (logId: string) => LogEntry | null;
+  loadLog: (logId: string) => Promise<LogEntry | null>;
   createLog: (input: CreateLogInput) => Promise<LogEntry>;
   deleteLog: (logId: string) => Promise<void>;
   leaveLog: (logId: string) => Promise<void>;
@@ -36,6 +39,7 @@ export function LogsProvider({ children }: PropsWithChildren) {
   const { user, isLoading: isAuthLoading } = useAuth();
 
   const [logSummaries, setLogSummaries] = useState<LogSummary[]>([]);
+  const [fullLogsById, setFullLogsById] = useState<Record<string, LogEntry>>({});
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -46,6 +50,7 @@ export function LogsProvider({ children }: PropsWithChildren) {
 
     if (!user) {
       setLogSummaries([]);
+      setFullLogsById({});
       setError(null);
       setIsLoading(false);
       return;
@@ -56,7 +61,14 @@ export function LogsProvider({ children }: PropsWithChildren) {
 
     try {
       const fetchedLogSummaries = await fetchLogSummaries();
+      const visibleLogIds = new Set(fetchedLogSummaries.map((log) => log.id));
+
       setLogSummaries(fetchedLogSummaries);
+      setFullLogsById((currentLogs) => {
+        return Object.fromEntries(
+          Object.entries(currentLogs).filter(([logId]) => visibleLogIds.has(logId))
+        );
+      });
     } catch (caughtError) {
       const message = caughtError instanceof Error
         ? caughtError.message
@@ -72,6 +84,29 @@ export function LogsProvider({ children }: PropsWithChildren) {
     refreshLogs();
   }, [refreshLogs]);
 
+  const getCachedLog = useCallback((logId: string) => {
+    return fullLogsById[logId] ?? null;
+  }, [fullLogsById]);
+
+  const loadLog = useCallback(async (logId: string) => {
+    const cachedLog = fullLogsById[logId];
+
+    if (cachedLog) {
+      return cachedLog;
+    }
+
+    const fetchedLog = await fetchLogById(logId);
+
+    if (fetchedLog) {
+      setFullLogsById((currentLogs) => ({
+        ...currentLogs,
+        [fetchedLog.id]: fetchedLog,
+      }));
+    }
+
+    return fetchedLog;
+  }, [fullLogsById]);
+
   const createLog = useCallback(async (input: CreateLogInput) => {
     setError(null);
 
@@ -81,6 +116,10 @@ export function LogsProvider({ children }: PropsWithChildren) {
       toLogSummary(createdLog),
       ...currentLogSummaries.filter((log) => log.id !== createdLog.id),
     ]);
+    setFullLogsById((currentLogs) => ({
+      ...currentLogs,
+      [createdLog.id]: createdLog,
+    }));
 
     return createdLog;
   }, []);
@@ -93,6 +132,11 @@ export function LogsProvider({ children }: PropsWithChildren) {
     setLogSummaries((currentLogSummaries) =>
       currentLogSummaries.filter((log) => log.id !== logId)
     );
+    setFullLogsById((currentLogs) => {
+      const nextLogs = { ...currentLogs };
+      delete nextLogs[logId];
+      return nextLogs;
+    });
   }, []);
 
   const leaveLog = useCallback(async (logId: string) => {
@@ -101,8 +145,13 @@ export function LogsProvider({ children }: PropsWithChildren) {
     await leaveLogApi(logId);
 
     setLogSummaries((currentLogSummaries) =>
-    currentLogSummaries.filter((log => log.id !== logId))
+      currentLogSummaries.filter((log) => log.id !== logId)
     );
+    setFullLogsById((currentLogs) => {
+      const nextLogs = { ...currentLogs };
+      delete nextLogs[logId];
+      return nextLogs;
+    });
   }, []);
 
   const value = useMemo<LogsContextValue>(() => {
@@ -111,11 +160,23 @@ export function LogsProvider({ children }: PropsWithChildren) {
       isLoading,
       error,
       refreshLogs,
+      getCachedLog,
+      loadLog,
       createLog,
       deleteLog,
       leaveLog,
     };
-  }, [logSummaries, isLoading, error, refreshLogs, createLog, deleteLog, leaveLog]);
+  }, [
+    logSummaries,
+    isLoading,
+    error,
+    refreshLogs,
+    getCachedLog,
+    loadLog,
+    createLog,
+    deleteLog,
+    leaveLog,
+  ]);
 
   return (
     <LogsContext.Provider value={value}>

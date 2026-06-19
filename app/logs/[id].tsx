@@ -8,7 +8,6 @@ import { PersonPill } from '@/components/people/PersonPill';
 import { useAuth } from '@/context/AuthContext';
 import { useLogs } from '@/context/LogsContext';
 import { parseStoredDate } from '@/features/logs/logDate';
-import { fetchLogById } from '@/features/logs/logsApi';
 import type { LogEntry } from '@/features/logs/logTypes';
 import { promptedNoteDefinitions } from '@/features/logs/promptedNotes';
 
@@ -42,7 +41,7 @@ function handleback() {
 export default function ViewLogScreen() {
   const { id } = useLocalSearchParams();
   const { user } = useAuth();
-  const { deleteLog, leaveLog } = useLogs();
+  const { deleteLog, leaveLog, loadLog } = useLogs();
   const { width } = useWindowDimensions();
   const noteCardWidth = Math.min(
     336,
@@ -151,7 +150,7 @@ export default function ViewLogScreen() {
   useEffect(() => {
     let isActive = true;
 
-    async function loadLog() {
+    async function loadSelectedLog() {
       if (!selectedLogId) {
         setLog(null);
         setLogError('Log not found.');
@@ -164,7 +163,7 @@ export default function ViewLogScreen() {
       setLogError(null);
 
       try {
-        const fetchedLog = await fetchLogById(selectedLogId);
+        const fetchedLog = await loadLog(selectedLogId);
 
         if (!isActive) {
           return;
@@ -186,12 +185,12 @@ export default function ViewLogScreen() {
       }
     }
 
-    void loadLog();
+    void loadSelectedLog();
 
     return () => {
       isActive = false;
     };
-  }, [selectedLogId]);
+  }, [selectedLogId, loadLog]);
 
   const date = log ? parseStoredDate(log.date) : null;
   const weekday = date?.toLocaleDateString('en-US', { weekday: 'long' });

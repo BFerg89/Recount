@@ -1,7 +1,7 @@
 import DateTimePicker from '@expo/ui/datetimepicker';
 import BottomSheet from '@gorhom/bottom-sheet';
 import { ArrowLeftIcon, PathIcon, TrayArrowDownIcon, UserPlusIcon } from 'phosphor-react-native';
-import { useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Alert, Keyboard, Pressable, ScrollView, StyleSheet, Text, TextInput, useWindowDimensions, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router, useLocalSearchParams } from 'expo-router';
@@ -12,8 +12,10 @@ import { PersonPill } from '@/components/people/PersonPill';
 import { PrimaryButton } from '@/components/ui/PrimaryButton';
 import { inputLimits } from '@/constants/input-limits';
 import { recountTheme } from '@/constants/RecountTheme';
+import { useLogs } from '@/context/LogsContext';
+import { parseStoredDate } from '@/features/logs/logDate';
 import { createEmptyPromptedNoteAnswers, promptedNoteDefinitions } from '@/features/logs/promptedNotes';
-import type { CreatePersonInput, CreateTimelineEventInput } from '@/features/logs/logTypes';
+import type { CreatePersonInput, CreateTimelineEventInput, LogEntry } from '@/features/logs/logTypes';
 
 const { colors, fonts, layout, radius, shadows, spacing, type } = recountTheme;
 
@@ -27,6 +29,34 @@ const friendPersonIdPrefix = 'friend-profile-';
 
 const getFriendPersonId = (profileId: string) => `${friendPersonIdPrefix}${profileId}`;
 
+const getLogPeopleDraft = (log: LogEntry): CreatePersonInput[] => {
+  return log.people.map((person) => ({
+    id: person.id,
+    displayName: person.displayName,
+    userId: person.userId,
+  }));
+};
+
+const getLogMomentsDraft = (log: LogEntry): CreateTimelineEventInput[] => {
+  return [...log.timelineEvents]
+    .sort((a, b) => a.sortOrder - b.sortOrder)
+    .map((moment) => ({
+      id: moment.id,
+      title: moment.title,
+      approxTime: moment.approxTime,
+    }));
+};
+
+const getLogNoteAnswersDraft = (log: LogEntry) => {
+  const noteAnswers = createEmptyPromptedNoteAnswers();
+
+  log.notes.forEach((note) => {
+    noteAnswers[note.promptType] = note.text;
+  });
+
+  return noteAnswers;
+};
+
 function handleBack() {
   if (router.canGoBack()) {
     router.back();
@@ -38,6 +68,8 @@ function handleBack() {
 export default function EditLogScreen() {
   const { id } = useLocalSearchParams();
   const selectedLogId = Array.isArray(id) ? id[0] : id;
+  const { getCachedLog, loadLog } = useLogs();
+  const initialCachedLog = selectedLogId ? getCachedLog(selectedLogId) : null;
   const insets = useSafeAreaInsets();
   const { width } = useWindowDimensions();
   const noteCardWidth = Math.min(
@@ -49,15 +81,25 @@ export default function EditLogScreen() {
     (_, index) => promptedNoteDefinitions.slice(index * 2, index * 2 + 2)
   );
 
-  const [date, setDate] = useState(new Date());
-  const [title, setTitle] = useState('');
-  const [location, setLocation] = useState('');
-  const [noteAnswers, setNoteAnswers] = useState(createEmptyPromptedNoteAnswers);
-  const [people, setPeople] = useState<CreatePersonInput[]>([]);
+  const [date, setDate] = useState(() =>
+    initialCachedLog ? parseStoredDate(initialCachedLog.date) : new Date()
+  );
+  const [title, setTitle] = useState(() => initialCachedLog?.title ?? '');
+  const [location, setLocation] = useState(() => initialCachedLog?.generalLocation ?? '');
+  const [noteAnswers, setNoteAnswers] = useState(() =>
+    initialCachedLog ? getLogNoteAnswersDraft(initialCachedLog) : createEmptyPromptedNoteAnswers()
+  );
+  const [people, setPeople] = useState<CreatePersonInput[]>(() =>
+    initialCachedLog ? getLogPeopleDraft(initialCachedLog) : []
+  );
   const [newPersonName, setNewPersonName] = useState('');
-  const [moments, setMoments] = useState<CreateTimelineEventInput[]>([]);
+  const [moments, setMoments] = useState<CreateTimelineEventInput[]>(() =>
+    initialCachedLog ? getLogMomentsDraft(initialCachedLog) : []
+  );
   const [newMomentTitle, setNewMomentTitle] = useState('');
   const [newMomentTime, setNewMomentTime] = useState('');
+  const [isLogLoading, setIsLogLoading] = useState(() => Boolean(selectedLogId && !initialCachedLog));
+  const [logError, setLogError] = useState<string | null>(() => selectedLogId ? null : 'Log not found.');
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
 
@@ -65,6 +107,7 @@ export default function EditLogScreen() {
   const addMomentSheetRef = useRef<BottomSheet>(null);
   const scrollRef = useRef<ScrollView>(null);
   const locationInputRef = useRef<TextInput>(null);
+  const hydratedLogIdRef = useRef<string | null>(initialCachedLog?.id ?? null);
 
   const acceptedFriends = useMemo<AddPersonFriend[]>(() => [], []);
   const addedFriendIds = useMemo(() => {
@@ -86,7 +129,81 @@ export default function EditLogScreen() {
   const canSaveChanges =
     title.trim().length > 0 &&
     location.trim().length > 0 &&
+    !isLogLoading &&
+    !logError &&
     !isSaving;
+
+  const hydrateLogDraft = useCallback((log: LogEntry) => {
+    setDate(parseStoredDate(log.date));
+    setTitle(log.title);
+    setLocation(log.generalLocation);
+    setPeople(getLogPeopleDraft(log));
+    setMoments(getLogMomentsDraft(log));
+    setNoteAnswers(getLogNoteAnswersDraft(log));
+    setSaveError(null);
+  }, []);
+
+  useEffect(() => {
+    let isActive = true;
+
+    async function loadLogDraft() {
+      if (!selectedLogId) {
+        hydratedLogIdRef.current = null;
+        setLogError('Log not found.');
+        setIsLogLoading(false);
+        return;
+      }
+
+      if (hydratedLogIdRef.current === selectedLogId) {
+        return;
+      }
+
+      const cachedLog = getCachedLog(selectedLogId);
+
+      if (cachedLog) {
+        hydrateLogDraft(cachedLog);
+        hydratedLogIdRef.current = cachedLog.id;
+        setLogError(null);
+        setIsLogLoading(false);
+        return;
+      }
+
+      setIsLogLoading(true);
+      setLogError(null);
+
+      try {
+        const fetchedLog = await loadLog(selectedLogId);
+
+        if (!isActive) {
+          return;
+        }
+
+        if (!fetchedLog) {
+          hydratedLogIdRef.current = null;
+          setLogError('Log not found.');
+          return;
+        }
+
+        hydrateLogDraft(fetchedLog);
+        hydratedLogIdRef.current = fetchedLog.id;
+      } catch {
+        if (isActive) {
+          hydratedLogIdRef.current = null;
+          setLogError('Unable to load this log.');
+        }
+      } finally {
+        if (isActive) {
+          setIsLogLoading(false);
+        }
+      }
+    }
+
+    void loadLogDraft();
+
+    return () => {
+      isActive = false;
+    };
+  }, [getCachedLog, hydrateLogDraft, loadLog, selectedLogId]);
 
   const handleNoteFocus = () => {
     setTimeout(() => {
@@ -265,99 +382,111 @@ export default function EditLogScreen() {
             </View>
           </View>
 
-          <View style={styles.peopleSection}>
-            <Text style={styles.sectionLabel}>Who was there · {people.length}</Text>
-            <View style={styles.peopleGrid}>
-              {people.map((person) => (
-                <PersonPill
-                  key={person.id}
-                  displayName={person.displayName}
-                />
-              ))}
-              <Pressable
-                style={({ pressed }) => [
-                  styles.addPersonButton,
-                  pressed && styles.addPersonButtonPressed,
-                ]}
-                onPress={handleOpenAddPeopleSheet}>
-                <UserPlusIcon color={colors.terracottaDeep} size={16} />
-                <Text style={styles.addPersonText}>Add</Text>
-              </Pressable>
+          {isLogLoading || logError ? (
+            <View style={styles.stateSection}>
+              <Text style={styles.stateText}>{isLogLoading ? 'Loading log...' : logError}</Text>
             </View>
-          </View>
-
-          <View style={styles.timelineSection}>
-            <View style={styles.timelineHeader}>
-              <Text style={styles.sectionLabel}>Moments</Text>
-              <Text style={styles.sectionLabel}>{moments.length} added</Text>
-            </View>
-            <View style={styles.momentListCard}>
-              {moments.map((moment) => (
-                <View
-                  key={moment.id}
-                  style={styles.momentRow}>
-                  <Text style={styles.momentTime}>{moment.approxTime}</Text>
-                  <Text style={styles.momentTitle}>{moment.title}</Text>
-                </View>
-              ))}
-              <Pressable
-                style={styles.addMomentButton}
-                onPress={handleOpenAddMomentSheet}>
-                {({ pressed }) => (
-                  <>
-                    <PathIcon
-                      color={pressed ? colors.terracottaSoft : colors.terracotta}
-                      size={18}
+          ) : (
+            <>
+              <View style={styles.peopleSection}>
+                <Text style={styles.sectionLabel}>Who was there · {people.length}</Text>
+                <View style={styles.peopleGrid}>
+                  {people.map((person) => (
+                    <PersonPill
+                      key={person.id}
+                      displayName={person.displayName}
                     />
-                    <Text style={[styles.addMomentText, pressed && styles.addMomentTextPressed]}>
-                      Add moment
-                    </Text>
-                  </>
-                )}
-              </Pressable>
-            </View>
-          </View>
+                  ))}
+                  <Pressable
+                    style={({ pressed }) => [
+                      styles.addPersonButton,
+                      pressed && styles.addPersonButtonPressed,
+                    ]}
+                    onPress={handleOpenAddPeopleSheet}>
+                    <UserPlusIcon color={colors.terracottaDeep} size={16} />
+                    <Text style={styles.addPersonText}>Add</Text>
+                  </Pressable>
+                </View>
+              </View>
 
-          <View style={styles.notesSection}>
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              style={styles.noteCardsScroll}
-              contentContainerStyle={styles.noteCardsContent}>
-              {notePromptColumns.map((column) => (
-                <View
-                  key={column.map((prompt) => prompt.promptType).join('-')}
-                  style={styles.noteColumn}>
-                  {column.map((prompt) => (
-                    <View key={prompt.promptType} style={[styles.noteCard, { width: noteCardWidth }]}>
-                      <Text style={styles.notePrompt}>{prompt.label}</Text>
-
-                      <TextInput
-                        value={noteAnswers[prompt.promptType] ?? ''}
-                        onChangeText={(text) => {
-                          clearSaveError();
-                          setNoteAnswers((previousAnswers) => {
-                            return {
-                              ...previousAnswers,
-                              [prompt.promptType]: text,
-                            };
-                          });
-                        }}
-                        onFocus={handleNoteFocus}
-                        placeholder="Enter note..."
-                        multiline
-                        maxLength={inputLimits.promptedNoteAnswer}
-                        style={styles.noteAnswer}/>
+              <View style={styles.timelineSection}>
+                <View style={styles.timelineHeader}>
+                  <Text style={styles.sectionLabel}>Moments</Text>
+                  <Text style={styles.sectionLabel}>{moments.length} added</Text>
+                </View>
+                <View style={styles.momentListCard}>
+                  {moments.map((moment) => (
+                    <View
+                      key={moment.id}
+                      style={styles.momentRow}>
+                      <Text style={styles.momentTime}>{moment.approxTime}</Text>
+                      <Text style={styles.momentTitle}>{moment.title}</Text>
                     </View>
                   ))}
+                  <Pressable
+                    style={styles.addMomentButton}
+                    onPress={handleOpenAddMomentSheet}>
+                    {({ pressed }) => (
+                      <>
+                        <PathIcon
+                          color={pressed ? colors.terracottaSoft : colors.terracotta}
+                          size={18}
+                        />
+                        <Text style={[styles.addMomentText, pressed && styles.addMomentTextPressed]}>
+                          Add moment
+                        </Text>
+                      </>
+                    )}
+                  </Pressable>
                 </View>
-              ))}
-            </ScrollView>
-          </View>
+              </View>
+
+              <View style={styles.notesSection}>
+                <ScrollView
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
+                  style={styles.noteCardsScroll}
+                  contentContainerStyle={styles.noteCardsContent}>
+                  {notePromptColumns.map((column) => (
+                    <View
+                      key={column.map((prompt) => prompt.promptType).join('-')}
+                      style={styles.noteColumn}>
+                      {column.map((prompt) => (
+                        <View key={prompt.promptType} style={[styles.noteCard, { width: noteCardWidth }]}>
+                          <Text style={styles.notePrompt}>{prompt.label}</Text>
+
+                          <TextInput
+                            value={noteAnswers[prompt.promptType] ?? ''}
+                            onChangeText={(text) => {
+                              clearSaveError();
+                              setNoteAnswers((previousAnswers) => {
+                                return {
+                                  ...previousAnswers,
+                                  [prompt.promptType]: text,
+                                };
+                              });
+                            }}
+                            onFocus={handleNoteFocus}
+                            placeholder="Enter note..."
+                            multiline
+                            maxLength={inputLimits.promptedNoteAnswer}
+                            style={styles.noteAnswer}/>
+                        </View>
+                      ))}
+                    </View>
+                  ))}
+                </ScrollView>
+              </View>
+            </>
+          )}
         </View>
       </ScrollView>
 
-      <View style={styles.saveBar}>
+      <View
+        style={[
+          styles.saveBar,
+          { paddingBottom: insets.bottom },
+        ]}>
         {saveError && (
           <Text style={styles.saveErrorText}>{saveError}</Text>
         )}
@@ -646,8 +775,21 @@ const styles = StyleSheet.create({
     textTransform: type.label.textTransform,
     color: colors.inkMid,
   },
+  stateSection: {
+    minHeight: 160,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: spacing.s6,
+  },
+  stateText: {
+    fontFamily: fonts.bodyStrong,
+    fontSize: type.body.fontSize,
+    lineHeight: type.body.lineHeight,
+    color: colors.inkMid,
+    textAlign: 'center',
+  },
   saveBar: {
-    paddingVertical: layout.verticalCardGap,
+    paddingTop: layout.verticalCardGap,
     paddingHorizontal: layout.mobileGutter,
     borderTopWidth: 1,
     borderTopColor: colors.paperEdge,
