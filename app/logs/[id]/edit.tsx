@@ -8,10 +8,12 @@ import { router, useLocalSearchParams } from 'expo-router';
 
 import { AddMomentSheet } from '@/components/create/AddMomentSheet';
 import { AddPersonSheet, type AddPersonFriend } from '@/components/create/AddPersonSheet';
+import { EditMomentSheet } from '@/components/create/EditMomentSheet';
 import { PersonPill } from '@/components/people/PersonPill';
 import { PrimaryButton } from '@/components/ui/PrimaryButton';
 import { inputLimits } from '@/constants/input-limits';
 import { recountTheme } from '@/constants/RecountTheme';
+import { useAuth } from '@/context/AuthContext';
 import { useLogs } from '@/context/LogsContext';
 import { parseStoredDate } from '@/features/logs/logDate';
 import { createEmptyPromptedNoteAnswers, promptedNoteDefinitions } from '@/features/logs/promptedNotes';
@@ -68,6 +70,7 @@ function handleBack() {
 export default function EditLogScreen() {
   const { id } = useLocalSearchParams();
   const selectedLogId = Array.isArray(id) ? id[0] : id;
+  const { user } = useAuth();
   const { getCachedLog, loadLog } = useLogs();
   const initialCachedLog = selectedLogId ? getCachedLog(selectedLogId) : null;
   const insets = useSafeAreaInsets();
@@ -98,13 +101,18 @@ export default function EditLogScreen() {
   );
   const [newMomentTitle, setNewMomentTitle] = useState('');
   const [newMomentTime, setNewMomentTime] = useState('');
+  const [editingMomentId, setEditingMomentId] = useState<string | null>(null);
+  const [editMomentTitle, setEditMomentTitle] = useState('');
+  const [editMomentTime, setEditMomentTime] = useState('');
   const [isLogLoading, setIsLogLoading] = useState(() => Boolean(selectedLogId && !initialCachedLog));
   const [logError, setLogError] = useState<string | null>(() => selectedLogId ? null : 'Log not found.');
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
+  const [log, setLog] = useState<LogEntry | null>(() => initialCachedLog);
 
   const addPeopleSheetRef = useRef<BottomSheet>(null);
   const addMomentSheetRef = useRef<BottomSheet>(null);
+  const editMomentSheetRef = useRef<BottomSheet>(null);
   const scrollRef = useRef<ScrollView>(null);
   const locationInputRef = useRef<TextInput>(null);
   const hydratedLogIdRef = useRef<string | null>(initialCachedLog?.id ?? null);
@@ -132,14 +140,17 @@ export default function EditLogScreen() {
     !isLogLoading &&
     !logError &&
     !isSaving;
+  const currentUserId = user?.id;
+  const isLogCreator = Boolean(log && currentUserId && log.creatorId === currentUserId);
 
-  const hydrateLogDraft = useCallback((log: LogEntry) => {
-    setDate(parseStoredDate(log.date));
-    setTitle(log.title);
-    setLocation(log.generalLocation);
-    setPeople(getLogPeopleDraft(log));
-    setMoments(getLogMomentsDraft(log));
-    setNoteAnswers(getLogNoteAnswersDraft(log));
+  const hydrateLogDraft = useCallback((hydratedLog: LogEntry) => {
+    setLog(hydratedLog);
+    setDate(parseStoredDate(hydratedLog.date));
+    setTitle(hydratedLog.title);
+    setLocation(hydratedLog.generalLocation);
+    setPeople(getLogPeopleDraft(hydratedLog));
+    setMoments(getLogMomentsDraft(hydratedLog));
+    setNoteAnswers(getLogNoteAnswersDraft(hydratedLog));
     setSaveError(null);
   }, []);
 
@@ -149,6 +160,7 @@ export default function EditLogScreen() {
     async function loadLogDraft() {
       if (!selectedLogId) {
         hydratedLogIdRef.current = null;
+        setLog(null);
         setLogError('Log not found.');
         setIsLogLoading(false);
         return;
@@ -180,6 +192,7 @@ export default function EditLogScreen() {
 
         if (!fetchedLog) {
           hydratedLogIdRef.current = null;
+          setLog(null);
           setLogError('Log not found.');
           return;
         }
@@ -189,6 +202,7 @@ export default function EditLogScreen() {
       } catch {
         if (isActive) {
           hydratedLogIdRef.current = null;
+          setLog(null);
           setLogError('Unable to load this log.');
         }
       } finally {
@@ -215,6 +229,15 @@ export default function EditLogScreen() {
     Keyboard.dismiss();
     addPeopleSheetRef.current?.expand();
   };
+
+  const handleOpenEditMomentSheet = (moment: CreateTimelineEventInput) => {
+    setEditingMomentId(moment.id);
+    setEditMomentTitle(moment.title);
+    setEditMomentTime(moment.approxTime ?? '');
+
+    Keyboard.dismiss();
+    editMomentSheetRef.current?.expand();
+  }
 
   const handleOpenAddMomentSheet = () => {
     Keyboard.dismiss();
@@ -263,6 +286,33 @@ export default function EditLogScreen() {
     clearSaveError();
     addPeopleSheetRef.current?.close();
   };
+
+  const handleSaveMoment = () => {
+    const trimmedTitle = editMomentTitle.trim();
+    const trimmedTime = editMomentTime.trim();
+
+    if (!editingMomentId || !trimmedTitle) {
+      return;
+    }
+
+    setMoments((currentMoments) =>
+      currentMoments.map((moment) => 
+        moment.id === editingMomentId
+          ? {
+            ...moment,
+            title: trimmedTitle,
+            approxTime: trimmedTime
+          }
+          : moment
+      )
+    );
+
+    setEditingMomentId(null);
+    setEditMomentTitle('');
+    setEditMomentTime('');
+    Keyboard.dismiss();
+    editMomentSheetRef.current?.close();
+  }
 
   const handleAddMoment = () => {
     const trimmedTitle = newMomentTitle.trim();
@@ -397,15 +447,17 @@ export default function EditLogScreen() {
                       displayName={person.displayName}
                     />
                   ))}
-                  <Pressable
-                    style={({ pressed }) => [
-                      styles.addPersonButton,
-                      pressed && styles.addPersonButtonPressed,
-                    ]}
-                    onPress={handleOpenAddPeopleSheet}>
-                    <UserPlusIcon color={colors.terracottaDeep} size={16} />
-                    <Text style={styles.addPersonText}>Add</Text>
-                  </Pressable>
+                  {isLogCreator && (
+                    <Pressable
+                      style={({ pressed }) => [
+                        styles.addPersonButton,
+                        pressed && styles.addPersonButtonPressed,
+                      ]}
+                      onPress={handleOpenAddPeopleSheet}>
+                      <UserPlusIcon color={colors.terracottaDeep} size={16} />
+                      <Text style={styles.addPersonText}>Add</Text>
+                    </Pressable>
+                  )}
                 </View>
               </View>
 
@@ -416,12 +468,14 @@ export default function EditLogScreen() {
                 </View>
                 <View style={styles.momentListCard}>
                   {moments.map((moment) => (
-                    <View
+                    <Pressable
                       key={moment.id}
-                      style={styles.momentRow}>
+                      style={styles.momentRow} //Add pressed styling
+                      onPress={() => handleOpenEditMomentSheet(moment)} //Placeholder for now. Should open an edit moment sheet
+                    >
                       <Text style={styles.momentTime}>{moment.approxTime}</Text>
                       <Text style={styles.momentTitle}>{moment.title}</Text>
-                    </View>
+                    </Pressable>
                   ))}
                   <Pressable
                     style={styles.addMomentButton}
@@ -514,7 +568,8 @@ export default function EditLogScreen() {
           setNewPersonName(text);
           clearSaveError();
         }}
-        onAddPerson={handleAddPerson}/>
+        onAddPerson={handleAddPerson}
+      />
 
       <AddMomentSheet
         sheetRef={addMomentSheetRef}
@@ -529,7 +584,24 @@ export default function EditLogScreen() {
           setNewMomentTime(text);
           clearSaveError();
         }}
-        onAddMoment={handleAddMoment}/>
+        onAddMoment={handleAddMoment}
+      />
+
+      <EditMomentSheet
+        sheetRef={editMomentSheetRef}
+        bottomInset={insets.bottom}
+        momentTitle={editMomentTitle}
+        onChangeMomentTitle={(text) => {
+          setEditMomentTitle(text);
+          clearSaveError();
+        }}
+        momentTime={editMomentTime}
+        onChangeMomentTime={(text) => {
+          setEditMomentTime(text);
+          clearSaveError();
+        }}
+        onSaveMoment={handleSaveMoment}
+        />
     </View>
   );
 }
