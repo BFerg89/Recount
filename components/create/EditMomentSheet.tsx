@@ -45,7 +45,7 @@ export function EditMomentSheet({
       title="Edit moment"
       footer={(
         <PrimaryButton
-          label="Save moment"
+          label="Update moment"
           onPress={onSaveMoment}
           icon={(
             <PathIcon color={colors.paperCard} size={18} weight="bold" />

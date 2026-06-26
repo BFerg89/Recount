@@ -62,6 +62,15 @@ export type LogEntry = {
   notes: LogNote[];
 };
 
+export type UpdateLogInput = {
+  id: string;
+  title: string;
+  date: Date;
+  generalLocation: string;
+  moments: CreateTimelineEventInput[];
+  noteAnswers: PromptedNoteAnswers;
+};
+
 export type LogSummary = {
   id: string;
   creatorId: string | null;

@@ -301,7 +301,7 @@ export default function EditLogScreen() {
           ? {
             ...moment,
             title: trimmedTitle,
-            approxTime: trimmedTime
+            approxTime: trimmedTime || null
           }
           : moment
       )
@@ -310,6 +310,7 @@ export default function EditLogScreen() {
     setEditingMomentId(null);
     setEditMomentTitle('');
     setEditMomentTime('');
+    clearSaveError();
     Keyboard.dismiss();
     editMomentSheetRef.current?.close();
   }
@@ -447,7 +448,7 @@ export default function EditLogScreen() {
                       displayName={person.displayName}
                     />
                   ))}
-                  {isLogCreator && (
+                  {/*isLogCreator && (
                     <Pressable
                       style={({ pressed }) => [
                         styles.addPersonButton,
@@ -457,7 +458,9 @@ export default function EditLogScreen() {
                       <UserPlusIcon color={colors.terracottaDeep} size={16} />
                       <Text style={styles.addPersonText}>Add</Text>
                     </Pressable>
-                  )}
+                  )*/
+                  //No add button until the API supports it.
+                  }
                 </View>
               </View>
 
@@ -545,7 +548,7 @@ export default function EditLogScreen() {
           <Text style={styles.saveErrorText}>{saveError}</Text>
         )}
         <PrimaryButton
-          label={isSaving ? 'Saving...' : 'Save changes'}
+          label={isSaving ? 'Publishing...' : 'Publish changes'}
           variant="save"
           disabled={!canSaveChanges}
           onPress={handleSaveChanges}

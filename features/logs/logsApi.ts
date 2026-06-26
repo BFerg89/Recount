@@ -358,3 +358,137 @@ export async function deleteLog(logId: string): Promise<void> {
     throw new Error('Log not found or you do not have permission to delete it.');
   }
 }
+
+export async function updateLogMetadata(input: {
+  id: string;
+  title: string;
+  date: Date;
+  generalLocation: string;
+  expectedUpdatedAt: string;
+}): Promise<LogSummary> {
+  const { data, error } = await supabase.rpc('update_log_metadata', {
+    p_log_id: input.id,
+    p_title: input.title.trim(),
+    p_date: formatDateForStorage(input.date),
+    p_general_location: input.generalLocation.trim(),
+    p_expected_updated_at: input.expectedUpdatedAt,
+  });
+
+  if (error) {
+    throw toError(error);
+  }
+
+  if (!data) {
+    throw new Error('Log was not returned after update.');
+  }
+
+  return mapLogSummary(data as LogRow);
+}
+
+export async function createTimelineEvent(input: {
+  logId: string;
+  title: string;
+  approxTime: string | null;
+}) : Promise<TimelineEvent> {
+  const { data, error } = await supabase.rpc('create_timeline_event', {
+    p_log_id: input.logId,
+    p_title: input.title.trim(),
+    p_approx_time: input.approxTime?.trim() || null,
+  });
+
+  if (error) {
+    throw toError(error);
+  }
+
+  if (!data) {
+    throw new Error('Timeline event was not returned after creation');
+  }
+
+  return mapTimelineEvent(data as TimelineEventRow);
+}
+
+export async function updateTimelineEvent(input: {
+  id: string;
+  title: string;
+  approxTime: string | null;
+  expectedUpdatedAt: string;
+}) : Promise<TimelineEvent> {
+  const { data, error } = await supabase.rpc('update_timeline_event', {
+    p_timeline_event_id: input.id,
+    p_title: input.title.trim(),
+    p_approx_time: input.approxTime?.trim() || null,
+    p_expected_updated_at: input.expectedUpdatedAt,
+  });
+
+  if (error) {
+    throw toError(error);
+  }
+
+  if (!data) {
+    throw new Error('Timeline event was not returned after update.');
+  }
+
+  return mapTimelineEvent(data as TimelineEventRow);
+}
+
+export async function deleteTimelineEvent(input: {
+  id: string;
+  expectedUpdatedAt: string;
+}): Promise<void> {
+  const { data, error } = await supabase.rpc('delete_timeline_event', {
+    p_timeline_event_id: input.id,
+    p_expected_updated_at: input.expectedUpdatedAt,
+  });
+
+  if (error) {
+    throw toError(error);
+  }
+
+  if (!data) {
+    throw new Error('Timeline event was not returned after delete.');
+  }
+}
+
+export async function upsertLogNote(input: {
+  logId: string;
+  promptType: LogNote['promptType'];
+  text: string;
+  noteId?: string | null;
+  expectedUpdatedAt?: string | null;
+}): Promise<LogNote> {
+  const { data, error } = await supabase.rpc('upsert_log_note', {
+    p_log_id: input.logId,
+    p_prompt_type: input.promptType,
+    p_text: input.text.trim(),
+    p_note_id: input.noteId ?? null,
+    p_expected_updated_at: input.expectedUpdatedAt ?? null,
+  });
+
+  if (error) {
+    throw toError(error);
+  }
+
+  if (!data) {
+    throw new Error('Note was not returned after save.');
+  }
+
+  return mapLogNote(data as NoteRow);
+}
+
+export async function deleteLogNote(input: {
+  id: string;
+  expectedUpdatedAt: string;
+}): Promise<void> {
+  const { data, error } = await supabase.rpc('delete_log_note', {
+    p_note_id: input.id,
+    p_expected_updated_at: input.expectedUpdatedAt,
+  });
+
+  if (error) {
+    throw toError(error);
+  }
+
+  if (!data) {
+    throw new Error('Note was not returned after delete.');
+  }
+}

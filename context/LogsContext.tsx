@@ -2,14 +2,21 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useState } 
 import type { PropsWithChildren } from 'react';
 
 import { useAuth } from '@/context/AuthContext';
-import type { CreateLogInput, LogEntry, LogSummary } from '@/features/logs/logTypes';
+import type { CreateLogInput, LogEntry, LogSummary, UpdateLogInput } from '@/features/logs/logTypes';
+import { formatDateForStorage } from '@/features/logs/logDate';
 import {
   createLog as createLogApi,
   deleteLog as deleteLogApi,
   fetchLogById,
   fetchLogSummaries,
   leaveLog as leaveLogApi,
+  updateTimelineEvent,
+  createTimelineEvent,
+  upsertLogNote,
+  deleteLogNote,
+  updateLogMetadata,
 } from '@/features/logs/logsApi';
+import { promptedNoteDefinitions } from '@/features/logs/promptedNotes';
 
 type LogsContextValue = {
   logSummaries: LogSummary[];
@@ -21,6 +28,7 @@ type LogsContextValue = {
   createLog: (input: CreateLogInput) => Promise<LogEntry>;
   deleteLog: (logId: string) => Promise<void>;
   leaveLog: (logId: string) => Promise<void>;
+  updateLog: (input: UpdateLogInput) => Promise<LogEntry>;
 };
 
 const LogsContext = createContext<LogsContextValue | null>(null);
@@ -154,6 +162,134 @@ export function LogsProvider({ children }: PropsWithChildren) {
     });
   }, []);
 
+  const updateLog = useCallback(async (inputLog: UpdateLogInput) => {
+    setError(null);
+
+    const originalLog = fullLogsById[inputLog.id] ?? await fetchLogById(inputLog.id);
+
+    if (!originalLog) {
+      throw new Error('Log not found.');
+    }
+
+    const nextTitle = inputLog.title.trim();
+    const nextDate = formatDateForStorage(inputLog.date);
+    const nextGeneralLocation = inputLog.generalLocation.trim();
+
+    //Check/Update metadata
+    if (originalLog.title !== nextTitle || originalLog.date !== nextDate || originalLog.generalLocation !== nextGeneralLocation) {
+      await updateLogMetadata({
+        id: inputLog.id,
+        title: nextTitle,
+        date: inputLog.date,
+        generalLocation: nextGeneralLocation,
+        expectedUpdatedAt: originalLog.updatedAt,
+      });
+    }
+
+    //Check/Update moments
+    const originalMomentsById = new Map(
+      originalLog.timelineEvents.map((moment) => [moment.id, moment])
+    );
+
+    for (const moment of inputLog.moments) {
+      const title = moment.title.trim();
+      const approxTime = moment.approxTime?.trim() || null;
+      const isLocalMoment = moment.id.startsWith('local-timeline-event-');
+
+      if (!title) {
+        if (isLocalMoment) continue;
+        throw new Error('Timeline event title is required.');
+      }
+
+      if (isLocalMoment) {
+        await createTimelineEvent({
+          logId: inputLog.id,
+          title,
+          approxTime,
+        });
+        continue;
+      }
+
+      const originalMoment = originalMomentsById.get(moment.id);
+
+      if (!originalMoment) {
+        throw new Error('Timeline event no longer exists.');
+      }
+
+      if (title !== originalMoment.title || approxTime !== originalMoment.approxTime) {
+        await updateTimelineEvent({
+          id: moment.id,
+          title,
+          approxTime,
+          expectedUpdatedAt: originalMoment.updatedAt,
+        });
+      }
+    }
+
+    //Check/Update notes
+    const originalNotesByPromptType = new Map(
+      originalLog.notes.map((note) => [note.promptType, note])
+    );
+
+    for (const prompt of promptedNoteDefinitions) {
+      const nextText = (inputLog.noteAnswers[prompt.promptType] ?? '').trim();
+      const originalNote = originalNotesByPromptType.get(prompt.promptType);
+
+      if (!nextText && originalNote) {
+        await deleteLogNote({
+          id: originalNote.id,
+          expectedUpdatedAt: originalNote.updatedAt,
+        });
+        continue;
+      }
+
+      if (nextText && !originalNote) {
+        await upsertLogNote({
+          logId: inputLog.id,
+          promptType: prompt.promptType,
+          text: nextText,
+        })
+        continue;
+      }
+
+      if (nextText && originalNote && nextText !== originalNote.text) {
+        await upsertLogNote({
+          logId: inputLog.id,
+          promptType: prompt.promptType,
+          text: nextText,
+          noteId: originalNote.id,
+          expectedUpdatedAt: originalNote.updatedAt,
+        });
+      }
+    }
+
+    const updatedLog = await fetchLogById(inputLog.id);
+
+    if (!updatedLog) {
+      throw new Error('Log was not returned after update.');
+    }
+
+    setFullLogsById((currentLogs) => ({
+      ...currentLogs,
+      [updatedLog.id]: updatedLog,
+    }));
+
+    setLogSummaries((currentLogSummaries) => {
+      const updatedSummary = toLogSummary(updatedLog);
+      const hasSummary = currentLogSummaries.some((summary) => summary.id === updatedLog.id);
+
+      if (!hasSummary) {
+        return [updatedSummary, ...currentLogSummaries];
+      }
+
+      return currentLogSummaries.map((summary) =>
+        summary.id === updatedLog.id ? updatedSummary : summary
+      );
+    });
+
+    return updatedLog;
+  }, [fullLogsById]);
+
   const value = useMemo<LogsContextValue>(() => {
     return {
       logSummaries,
@@ -165,6 +301,7 @@ export function LogsProvider({ children }: PropsWithChildren) {
       createLog,
       deleteLog,
       leaveLog,
+      updateLog,
     };
   }, [
     logSummaries,
@@ -176,6 +313,7 @@ export function LogsProvider({ children }: PropsWithChildren) {
     createLog,
     deleteLog,
     leaveLog,
+    updateLog,
   ]);
 
   return (
