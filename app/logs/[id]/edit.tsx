@@ -2,7 +2,7 @@ import DateTimePicker from '@expo/ui/datetimepicker';
 import BottomSheet from '@gorhom/bottom-sheet';
 import { ArrowLeftIcon, PathIcon, TrayArrowDownIcon, UserPlusIcon } from 'phosphor-react-native';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Alert, Keyboard, Pressable, ScrollView, StyleSheet, Text, TextInput, useWindowDimensions, View } from 'react-native';
+import { Keyboard, Pressable, ScrollView, StyleSheet, Text, TextInput, useWindowDimensions, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router, useLocalSearchParams } from 'expo-router';
 
@@ -71,7 +71,7 @@ export default function EditLogScreen() {
   const { id } = useLocalSearchParams();
   const selectedLogId = Array.isArray(id) ? id[0] : id;
   const { user } = useAuth();
-  const { getCachedLog, loadLog } = useLogs();
+  const { getCachedLog, loadLog, updateLog } = useLogs();
   const initialCachedLog = selectedLogId ? getCachedLog(selectedLogId) : null;
   const insets = useSafeAreaInsets();
   const { width } = useWindowDimensions();
@@ -337,7 +337,7 @@ export default function EditLogScreen() {
     addMomentSheetRef.current?.close();
   };
 
-  const handleSaveChanges = () => {
+  const handleSaveChanges = async () => {
     if (!selectedLogId) {
       setSaveError('Log not found.');
       return;
@@ -349,11 +349,27 @@ export default function EditLogScreen() {
 
     setIsSaving(true);
     setSaveError(null);
-    Alert.alert(
-      'Frontend only',
-      'The edit screen is ready, but saving changes is not wired to the backend yet.'
-    );
-    setIsSaving(false);
+
+    try {
+      const updatedLog = await updateLog({
+        id: selectedLogId,
+        title,
+        date,
+        generalLocation: location,
+        moments,
+        noteAnswers,
+      });
+      hydrateLogDraft(updatedLog);
+      router.replace(`/logs/${updatedLog.id}`);
+    } catch (caughtError) {
+      setSaveError(
+        caughtError instanceof Error
+          ? caughtError.message
+          : 'Unable to save changes.'
+      );
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return (
