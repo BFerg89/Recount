@@ -4,7 +4,7 @@
     "slug": "recount",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/recount-icon-bold.png",
+    "icon": "./assets/images/recount-icon.png",
     "scheme": "recount",
     "userInterfaceStyle": "light",
     "splash": {
