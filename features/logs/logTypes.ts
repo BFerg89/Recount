@@ -68,6 +68,7 @@ export type UpdateLogInput = {
   date: Date;
   generalLocation: string;
   moments: CreateTimelineEventInput[];
+  deletedMomentIds?: string[];
   noteAnswers: PromptedNoteAnswers;
 };
 

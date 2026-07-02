@@ -2,7 +2,7 @@ import DateTimePicker from '@expo/ui/datetimepicker';
 import BottomSheet from '@gorhom/bottom-sheet';
 import { ArrowLeftIcon, PathIcon, TrayArrowDownIcon, UserPlusIcon } from 'phosphor-react-native';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Keyboard, Pressable, ScrollView, StyleSheet, Text, TextInput, useWindowDimensions, View } from 'react-native';
+import { Alert, Keyboard, Pressable, ScrollView, StyleSheet, Text, TextInput, useWindowDimensions, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router, useLocalSearchParams } from 'expo-router';
 
@@ -28,6 +28,7 @@ const noteRailBottomPadding = spacing.s7;
 const noteRailVerticalPadding = noteRailTopPadding + noteRailBottomPadding;
 const noteRailMinHeight = noteCardMinHeight * 2 + gridGap + noteRailVerticalPadding;
 const friendPersonIdPrefix = 'friend-profile-';
+const localTimelineEventIdPrefix = 'local-timeline-event-';
 
 const getFriendPersonId = (profileId: string) => `${friendPersonIdPrefix}${profileId}`;
 
@@ -99,6 +100,7 @@ export default function EditLogScreen() {
   const [moments, setMoments] = useState<CreateTimelineEventInput[]>(() =>
     initialCachedLog ? getLogMomentsDraft(initialCachedLog) : []
   );
+  const [deletedMomentIds, setDeletedMomentIds] = useState<string[]>([]);
   const [newMomentTitle, setNewMomentTitle] = useState('');
   const [newMomentTime, setNewMomentTime] = useState('');
   const [editingMomentId, setEditingMomentId] = useState<string | null>(null);
@@ -150,6 +152,7 @@ export default function EditLogScreen() {
     setLocation(hydratedLog.generalLocation);
     setPeople(getLogPeopleDraft(hydratedLog));
     setMoments(getLogMomentsDraft(hydratedLog));
+    setDeletedMomentIds([]);
     setNoteAnswers(getLogNoteAnswersDraft(hydratedLog));
     setSaveError(null);
   }, []);
@@ -237,7 +240,7 @@ export default function EditLogScreen() {
 
     Keyboard.dismiss();
     editMomentSheetRef.current?.expand();
-  }
+  };
 
   const handleOpenAddMomentSheet = () => {
     Keyboard.dismiss();
@@ -287,6 +290,13 @@ export default function EditLogScreen() {
     addPeopleSheetRef.current?.close();
   };
 
+  const clearEditMomentDraft = () => {
+    setEditingMomentId(null);
+    setEditMomentTitle('');
+    setEditMomentTime('');
+    editMomentSheetRef.current?.close();
+  };
+
   const handleSaveMoment = () => {
     const trimmedTitle = editMomentTitle.trim();
     const trimmedTime = editMomentTime.trim();
@@ -296,24 +306,68 @@ export default function EditLogScreen() {
     }
 
     setMoments((currentMoments) =>
-      currentMoments.map((moment) => 
+      currentMoments.map((moment) =>
         moment.id === editingMomentId
           ? {
             ...moment,
             title: trimmedTitle,
-            approxTime: trimmedTime || null
+            approxTime: trimmedTime || null,
           }
           : moment
       )
     );
 
-    setEditingMomentId(null);
-    setEditMomentTitle('');
-    setEditMomentTime('');
     clearSaveError();
     Keyboard.dismiss();
-    editMomentSheetRef.current?.close();
-  }
+    clearEditMomentDraft();
+  };
+
+  const deleteEditingMoment = () => {
+    if (!editingMomentId) {
+      return;
+    }
+
+    const momentIdToDelete = editingMomentId;
+
+    setMoments((currentMoments) =>
+      currentMoments.filter((moment) => moment.id !== momentIdToDelete)
+    );
+
+    if (!momentIdToDelete.startsWith(localTimelineEventIdPrefix)) {
+      setDeletedMomentIds((currentDeletedMomentIds) =>
+        currentDeletedMomentIds.includes(momentIdToDelete)
+          ? currentDeletedMomentIds
+          : [...currentDeletedMomentIds, momentIdToDelete]
+      );
+    }
+
+    clearSaveError();
+    Keyboard.dismiss();
+    clearEditMomentDraft();
+  };
+
+  const handleDeleteMoment = () => {
+    if (!editingMomentId) {
+      return;
+    }
+
+    Alert.alert(
+      'Delete moment?',
+      'This removes the moment from this draft. Publish changes to save the deletion.',
+      [
+        {
+          text: 'Cancel',
+          style: 'cancel',
+        },
+        {
+          text: 'Delete moment',
+          style: 'destructive',
+          onPress: deleteEditingMoment,
+        },
+      ],
+      { cancelable: true }
+    );
+  };
 
   const handleAddMoment = () => {
     const trimmedTitle = newMomentTitle.trim();
@@ -357,6 +411,7 @@ export default function EditLogScreen() {
         date,
         generalLocation: location,
         moments,
+        deletedMomentIds,
         noteAnswers,
       });
       hydrateLogDraft(updatedLog);
@@ -489,8 +544,11 @@ export default function EditLogScreen() {
                   {moments.map((moment) => (
                     <Pressable
                       key={moment.id}
-                      style={styles.momentRow} //Add pressed styling
-                      onPress={() => handleOpenEditMomentSheet(moment)} //Placeholder for now. Should open an edit moment sheet
+                      style={({ pressed }) => [
+                        styles.momentRow,
+                        pressed && styles.momentRowPressed,
+                      ]}
+                      onPress={() => handleOpenEditMomentSheet(moment)}
                     >
                       <Text style={styles.momentTime}>{moment.approxTime}</Text>
                       <Text style={styles.momentTitle}>{moment.title}</Text>
@@ -620,6 +678,7 @@ export default function EditLogScreen() {
           clearSaveError();
         }}
         onSaveMoment={handleSaveMoment}
+        onDeleteMoment={handleDeleteMoment}
         />
     </View>
   );
@@ -749,6 +808,10 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: colors.rule,
     paddingVertical: spacing.s1,
+  },
+  momentRowPressed: {
+    backgroundColor: colors.paperEdge,
+    boxShadow: shadows.press,
   },
   momentTitle: {
     fontFamily: fonts.italicAccent,

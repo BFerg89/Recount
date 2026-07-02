@@ -12,6 +12,7 @@ import {
   leaveLog as leaveLogApi,
   updateTimelineEvent,
   createTimelineEvent,
+  deleteTimelineEvent,
   upsertLogNote,
   deleteLogNote,
   updateLogMetadata,
@@ -190,6 +191,19 @@ export function LogsProvider({ children }: PropsWithChildren) {
     const originalMomentsById = new Map(
       originalLog.timelineEvents.map((moment) => [moment.id, moment])
     );
+
+    for (const deletedMomentId of inputLog.deletedMomentIds ?? []) {
+      const originalMoment = originalMomentsById.get(deletedMomentId);
+
+      if (!originalMoment) {
+        throw new Error('Timeline event no longer exists.');
+      }
+
+      await deleteTimelineEvent({
+        id: originalMoment.id,
+        expectedUpdatedAt: originalMoment.updatedAt,
+      });
+    }
 
     for (const moment of inputLog.moments) {
       const title = moment.title.trim();
