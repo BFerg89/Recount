@@ -1,5 +1,13 @@
-import { UserCircleIcon } from 'phosphor-react-native';
-import { StyleSheet, Text, View, type StyleProp, type TextStyle, type ViewStyle } from 'react-native';
+import { UserCircleIcon, XIcon } from 'phosphor-react-native';
+import {
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+  type StyleProp,
+  type TextStyle,
+  type ViewStyle,
+} from 'react-native';
 
 import { recountTheme } from '@/constants/RecountTheme';
 
@@ -7,15 +15,52 @@ const { colors, fonts, radius, spacing, type } = recountTheme;
 
 type PersonPillProps = {
   displayName: string;
+  showRemoveIcon?: boolean;
+  onPress?: () => void;
   style?: StyleProp<ViewStyle>;
   textStyle?: StyleProp<TextStyle>;
 };
 
-export function PersonPill({ displayName, style, textStyle }: PersonPillProps) {
+export function PersonPill({
+  displayName,
+  showRemoveIcon = false,
+  onPress,
+  style,
+  textStyle,
+}: PersonPillProps) {
+  const renderContent = (pressed = false) => (
+    <>
+      <UserCircleIcon color={pressed ? colors.terracottaDeep : colors.ink} size={16} />
+      <Text style={[styles.text, pressed && styles.textPressed, textStyle]}>{displayName}</Text>
+      {showRemoveIcon && (
+        <XIcon
+          color={pressed ? colors.terracottaDeep : colors.inkSoft}
+          size={12}
+          weight="bold"
+        />
+      )}
+    </>
+  );
+
+  if (onPress) {
+    return (
+      <Pressable
+        accessibilityRole="button"
+        onPress={onPress}
+        style={({ pressed }) => [
+          styles.container,
+          styles.containerPressable,
+          pressed && styles.containerPressed,
+          style,
+        ]}>
+        {({ pressed }) => renderContent(pressed)}
+      </Pressable>
+    );
+  }
+
   return (
     <View style={[styles.container, style]}>
-      <UserCircleIcon color={colors.ink} size={16} />
-      <Text style={[styles.text, textStyle]}>{displayName}</Text>
+      {renderContent()}
     </View>
   );
 }
@@ -34,10 +79,21 @@ const styles = StyleSheet.create({
     paddingRight: spacing.s2,
     minHeight: 32,
   },
+  containerPressable: {
+    paddingRight: spacing.s2,
+  },
+  containerPressed: {
+    backgroundColor: colors.terracottaSoft,
+    borderColor: colors.terracotta,
+    transform: [{ scale: 0.98 }],
+  },
   text: {
     fontFamily: fonts.label,
     fontSize: type.bodyS.fontSize,
     lineHeight: type.bodyS.lineHeight,
     color: colors.ink,
+  },
+  textPressed: {
+    color: colors.terracottaDeep,
   },
 });

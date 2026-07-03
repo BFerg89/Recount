@@ -67,6 +67,8 @@ export type UpdateLogInput = {
   title: string;
   date: Date;
   generalLocation: string;
+  people: CreatePersonInput[];
+  deletedPersonIds?: string[];
   moments: CreateTimelineEventInput[];
   deletedMomentIds?: string[];
   noteAnswers: PromptedNoteAnswers;

@@ -16,6 +16,8 @@ import {
   upsertLogNote,
   deleteLogNote,
   updateLogMetadata,
+  createLogPerson,
+  deleteLogPerson,
 } from '@/features/logs/logsApi';
 import { promptedNoteDefinitions } from '@/features/logs/promptedNotes';
 
@@ -185,6 +187,42 @@ export function LogsProvider({ children }: PropsWithChildren) {
         generalLocation: nextGeneralLocation,
         expectedUpdatedAt: originalLog.updatedAt,
       });
+    }
+
+    //Check/Update people
+    const originalPeopleById = new Map(
+      originalLog.people.map((person) => [person.id, person])
+    );
+
+    for (const deletedPersonId of inputLog.deletedPersonIds ?? []) {
+      const originalPerson = originalPeopleById.get(deletedPersonId);
+
+      if (!originalPerson) {
+        throw new Error('Person no longer exists.');
+      }
+
+      await deleteLogPerson({
+        id: originalPerson.id,
+        expectedUpdatedAt: originalPerson.updatedAt,
+      });
+    }
+    for (const person of inputLog.people) {
+      const displayName = person.displayName.trim();
+      const userId = person.userId ?? null;
+      const isNewPerson = !originalPeopleById.has(person.id);
+
+      if (!displayName) {
+        if (isNewPerson) continue;
+        throw new Error('Person name is required.');
+      }
+
+      if (isNewPerson) {
+        await createLogPerson({
+          logId: inputLog.id,
+          displayName,
+          userId,
+        });
+      }
     }
 
     //Check/Update moments

@@ -15,6 +15,8 @@ import { inputLimits } from '@/constants/input-limits';
 import { recountTheme } from '@/constants/RecountTheme';
 import { useAuth } from '@/context/AuthContext';
 import { useLogs } from '@/context/LogsContext';
+import { fetchFriendships } from '@/features/friends/friendsApi';
+import type { Friendship } from '@/features/friends/friendTypes';
 import { parseStoredDate } from '@/features/logs/logDate';
 import { createEmptyPromptedNoteAnswers, promptedNoteDefinitions } from '@/features/logs/promptedNotes';
 import type { CreatePersonInput, CreateTimelineEventInput, LogEntry } from '@/features/logs/logTypes';
@@ -96,6 +98,7 @@ export default function EditLogScreen() {
   const [people, setPeople] = useState<CreatePersonInput[]>(() =>
     initialCachedLog ? getLogPeopleDraft(initialCachedLog) : []
   );
+  const [deletedPersonIds, setDeletedPersonIds] = useState<string[]>([]);
   const [newPersonName, setNewPersonName] = useState('');
   const [moments, setMoments] = useState<CreateTimelineEventInput[]>(() =>
     initialCachedLog ? getLogMomentsDraft(initialCachedLog) : []
@@ -111,6 +114,9 @@ export default function EditLogScreen() {
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [log, setLog] = useState<LogEntry | null>(() => initialCachedLog);
+  const [friendships, setFriendships] = useState<Friendship[]>([]);
+  const [isFriendshipsLoading, setIsFriendshipsLoading] = useState(false);
+  const [friendshipsError, setFriendshipsError] = useState<string | null>(null);
 
   const addPeopleSheetRef = useRef<BottomSheet>(null);
   const addMomentSheetRef = useRef<BottomSheet>(null);
@@ -119,10 +125,59 @@ export default function EditLogScreen() {
   const locationInputRef = useRef<TextInput>(null);
   const hydratedLogIdRef = useRef<string | null>(initialCachedLog?.id ?? null);
 
-  const acceptedFriends = useMemo<AddPersonFriend[]>(() => [], []);
+  const currentUserId = user?.id;
+  const isLogCreator = Boolean(log && currentUserId && log.creatorId === currentUserId);
+
+  const refreshFriendships = useCallback(async () => {
+    if (!isLogCreator) {
+      setFriendships([]);
+      setFriendshipsError(null);
+      setIsFriendshipsLoading(false);
+      return;
+    }
+
+    setIsFriendshipsLoading(true);
+    setFriendshipsError(null);
+
+    try {
+      const fetchedFriendships = await fetchFriendships();
+      setFriendships(fetchedFriendships);
+    } catch (caughtError) {
+      const message = caughtError instanceof Error
+        ? caughtError.message
+        : 'Unable to load friends.';
+
+      setFriendships([]);
+      setFriendshipsError(message);
+    } finally {
+      setIsFriendshipsLoading(false);
+    }
+  }, [isLogCreator]);
+
+  useEffect(() => {
+    refreshFriendships();
+  }, [refreshFriendships]);
+
+  const acceptedFriends = useMemo<AddPersonFriend[]>(() => {
+    return friendships
+      .filter((friendship) => friendship.status === 'accepted')
+      .map((friendship) => {
+        const { otherProfile } = friendship;
+        const displayName = otherProfile.nickname.trim() || otherProfile.username;
+
+        return {
+          id: otherProfile.id,
+          displayName,
+          username: otherProfile.username,
+        };
+      });
+  }, [friendships]);
+
   const addedFriendIds = useMemo(() => {
     return people.reduce<string[]>((selectedFriendIds, person) => {
-      if (person.id.startsWith(friendPersonIdPrefix)) {
+      if (person.userId) {
+        selectedFriendIds.push(person.userId);
+      } else if (person.id.startsWith(friendPersonIdPrefix)) {
         selectedFriendIds.push(person.id.slice(friendPersonIdPrefix.length));
       }
 
@@ -142,15 +197,13 @@ export default function EditLogScreen() {
     !isLogLoading &&
     !logError &&
     !isSaving;
-  const currentUserId = user?.id;
-  const isLogCreator = Boolean(log && currentUserId && log.creatorId === currentUserId);
-
   const hydrateLogDraft = useCallback((hydratedLog: LogEntry) => {
     setLog(hydratedLog);
     setDate(parseStoredDate(hydratedLog.date));
     setTitle(hydratedLog.title);
     setLocation(hydratedLog.generalLocation);
     setPeople(getLogPeopleDraft(hydratedLog));
+    setDeletedPersonIds([]);
     setMoments(getLogMomentsDraft(hydratedLog));
     setDeletedMomentIds([]);
     setNoteAnswers(getLogNoteAnswersDraft(hydratedLog));
@@ -271,7 +324,9 @@ export default function EditLogScreen() {
 
     Keyboard.dismiss();
     setPeople((currentPeople) => {
-      const isAlreadyAdded = currentPeople.some((person) => person.id === personId);
+      const isAlreadyAdded = currentPeople.some((person) =>
+        person.id === personId || person.userId === friend.id
+      );
 
       if (isAlreadyAdded) {
         return currentPeople;
@@ -288,6 +343,44 @@ export default function EditLogScreen() {
     });
     clearSaveError();
     addPeopleSheetRef.current?.close();
+  };
+
+  const handlePressPersonPill = (person: CreatePersonInput) => {
+    Alert.alert(
+      `Remove ${person.displayName}?`,
+      `This removes ${person.displayName} from this draft. Publish changes to save the deletion.`,
+      [
+        {
+          text: 'Cancel',
+          style: 'cancel',
+        },
+        {
+          text: `Delete ${person.displayName}`,
+          style: 'destructive',
+          onPress: () => handleRemovePerson(person.id),
+        },
+      ],
+      { cancelable: true }
+    );
+
+    Keyboard.dismiss();
+  };
+
+  const handleRemovePerson = (personId: string) => {
+    setPeople((currentPeople) =>
+      currentPeople.filter((person) => person.id !== personId)
+    );
+
+    if (!personId.startsWith('local-person-') && !personId.startsWith(friendPersonIdPrefix)) {
+      setDeletedPersonIds((currentDeletedPersonIds) =>
+        currentDeletedPersonIds.includes(personId)
+          ? currentDeletedPersonIds
+          : [...currentDeletedPersonIds, personId]
+      );
+    }
+
+    clearSaveError();
+    Keyboard.dismiss();
   };
 
   const clearEditMomentDraft = () => {
@@ -410,6 +503,8 @@ export default function EditLogScreen() {
         title,
         date,
         generalLocation: location,
+        people,
+        deletedPersonIds,
         moments,
         deletedMomentIds,
         noteAnswers,
@@ -517,9 +612,11 @@ export default function EditLogScreen() {
                     <PersonPill
                       key={person.id}
                       displayName={person.displayName}
+                      showRemoveIcon={isLogCreator}
+                      onPress={isLogCreator ? () => handlePressPersonPill(person) : undefined}
                     />
                   ))}
-                  {/*isLogCreator && (
+                  {isLogCreator && (
                     <Pressable
                       style={({ pressed }) => [
                         styles.addPersonButton,
@@ -529,8 +626,7 @@ export default function EditLogScreen() {
                       <UserPlusIcon color={colors.terracottaDeep} size={16} />
                       <Text style={styles.addPersonText}>Add</Text>
                     </Pressable>
-                  )*/
-                  //No add button until the API supports it.
+                  )
                   }
                 </View>
               </View>
@@ -637,8 +733,8 @@ export default function EditLogScreen() {
         bottomInset={insets.bottom}
         friends={acceptedFriends}
         addedFriendIds={addedFriendIds}
-        isFriendsLoading={false}
-        friendsError={null}
+        isFriendsLoading={isFriendshipsLoading}
+        friendsError={friendshipsError}
         onAddFriendPerson={handleAddFriendPerson}
         newPersonName={newPersonName}
         onChangeNewPersonName={(text) => {

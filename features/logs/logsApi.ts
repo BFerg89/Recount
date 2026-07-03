@@ -492,3 +492,43 @@ export async function deleteLogNote(input: {
     throw new Error('Note was not returned after delete.');
   }
 }
+
+export async function createLogPerson(input: {
+  logId: string;
+  displayName: string;
+  userId: string | null;
+}) : Promise<LogPerson> {
+  const { data, error } = await supabase.rpc('create_log_person', {
+    p_log_id: input.logId,
+    p_display_name: input.displayName,
+    p_user_id: input.userId,
+  });
+
+  if (error) {
+    throw toError(error);
+  }
+
+  if (!data) {
+    throw new Error('Person was not returned after creation.');
+  }
+
+  return mapLogPerson(data as LogPersonRow);
+}
+
+export async function deleteLogPerson(input: {
+  id: string;
+  expectedUpdatedAt: string;
+}) : Promise<void> {
+  const { data, error } = await supabase.rpc('delete_log_person', {
+    p_log_person_id: input.id,
+    p_expected_updated_at: input.expectedUpdatedAt,
+  });
+
+  if (error) {
+    throw toError(error);
+  }
+
+  if (!data) {
+    throw new Error('Person was not returned after delete.');
+  }
+}
