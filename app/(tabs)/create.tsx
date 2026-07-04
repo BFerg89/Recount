@@ -1,7 +1,7 @@
 import DateTimePicker from '@expo/ui/datetimepicker';
 import { PathIcon, TrayArrowDownIcon, UserPlusIcon } from 'phosphor-react-native';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Keyboard, Pressable, ScrollView, StyleSheet, Text, TextInput, useWindowDimensions, View } from 'react-native';
+import { Alert, Keyboard, Pressable, ScrollView, StyleSheet, Text, TextInput, useWindowDimensions, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import BottomSheet from '@gorhom/bottom-sheet';
 import { router } from 'expo-router';
@@ -221,6 +221,36 @@ export default function CreateScreen() {
     addPeopleSheetRef.current?.close();
   };
 
+  const handlePressPersonPill = (person: CreatePersonInput) => {
+    Alert.alert(
+      `Remove ${person.displayName}?`,
+      `This removes ${person.displayName} from this draft.`,
+      [
+        {
+          text: 'Cancel',
+          style: 'cancel',
+        },
+        {
+          text: `Remove ${person.displayName}`,
+          style: 'destructive',
+          onPress: () => handleRemovePerson(person.id),
+        },
+      ],
+      { cancelable: true }
+    );
+
+    Keyboard.dismiss();
+  };
+
+  const handleRemovePerson = (personId: string) => {
+    setPeople((currentPeople) =>
+      currentPeople.filter((person) => person.id !== personId)
+    );
+
+    clearSaveError();
+    Keyboard.dismiss();
+  };
+
   const handleAddMoment = () => {
     const trimmedTitle = newMomentTitle.trim();
     const trimmedTime = newMomentTime.trim();
@@ -341,6 +371,8 @@ export default function CreateScreen() {
                 <PersonPill
                   key={person.id}
                   displayName={person.displayName}
+                  showRemoveIcon
+                  onPress={() => handlePressPersonPill(person)}
                 />
               ))}
               <Pressable
