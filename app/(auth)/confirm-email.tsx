@@ -3,8 +3,8 @@ import { recountColors, recountType } from '@/constants/RecountTheme';
 
 export default function ConfirmEmail() {
   return (
-    <View style={styles.screen}>
-      <Text style={styles.text}>Please Verify Email</Text>
+    <View testID="screen-confirm-email" style={styles.screen}>
+      <Text testID="confirm-email-message" style={styles.text}>Please Verify Email</Text>
     </View>
   )
 }

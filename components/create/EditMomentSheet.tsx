@@ -42,6 +42,7 @@ export function EditMomentSheet({
 
   return (
     <BottomActionSheet
+      testID="edit-moment-sheet"
       sheetRef={sheetRef}
       bottomInset={bottomInset}
       eyebrow="Timeline"
@@ -49,6 +50,7 @@ export function EditMomentSheet({
       footer={(
         <View style={styles.footer}>
           <PrimaryButton
+            testID="edit-moment-update-button"
             label="Update moment"
             onPress={onSaveMoment}
             icon={(
@@ -56,6 +58,7 @@ export function EditMomentSheet({
             )}
           />
           <Pressable
+            testID="edit-moment-delete-button"
             accessibilityLabel="Delete moment"
             accessibilityRole="button"
             style={({ pressed }) => [
@@ -84,6 +87,7 @@ export function EditMomentSheet({
       <SheetForm>
         <SheetField label="Title">
           <SheetTextInput
+            testID="edit-moment-title-input"
             value={momentTitle}
             onChangeText={onChangeMomentTitle}
             placeholder="What happened?"
@@ -96,6 +100,7 @@ export function EditMomentSheet({
 
         <SheetField label="Approx time">
           <SheetTextInput
+            testID="edit-moment-time-input"
             ref={momentTimeInputRef}
             value={momentTime}
             onChangeText={onChangeMomentTime}

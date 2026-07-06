@@ -8,11 +8,12 @@ const { colors, layout, spacing } = recountTheme;
 type AuthFormScreenProps = {
   children: ReactNode;
   footer?: ReactNode;
+  testID?: string;
 };
 
-export function AuthFormScreen({ children, footer }: AuthFormScreenProps) {
+export function AuthFormScreen({ children, footer, testID }: AuthFormScreenProps) {
   return (
-    <View style={styles.screen}>
+    <View testID={testID} style={styles.screen}>
       <View style={styles.content}>
         <View style={styles.formArea}>
           {children}

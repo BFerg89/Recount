@@ -54,8 +54,9 @@ export default function CreateProfileScreen() {
   };
 
   return (
-    <AuthFormScreen>
+    <AuthFormScreen testID="screen-create-profile">
       <AuthTextInput
+        testID="create-profile-username-input"
         prefix="@"
         value={username}
         onChangeText={setUsername}
@@ -69,6 +70,7 @@ export default function CreateProfileScreen() {
         onSubmitEditing={() => nicknameInputRef.current?.focus()}
       />
       <AuthTextInput
+        testID="create-profile-nickname-input"
         ref={nicknameInputRef}
         value={nickname}
         onChangeText={setNickname}
@@ -80,9 +82,10 @@ export default function CreateProfileScreen() {
         onSubmitEditing={handleCreateProfile}
       />
       {(formError || profileError) && (
-        <Text style={styles.errorText}>{formError ?? profileError}</Text>
+        <Text testID="create-profile-error-text" style={styles.errorText}>{formError ?? profileError}</Text>
       )}
       <PrimaryButton
+        testID="create-profile-submit-button"
         label="Create Profile"
         disabled={!hasRequiredFields || isSubmitting}
         onPress={handleCreateProfile}

@@ -18,6 +18,7 @@ type BottomActionSheetProps = {
   title: string;
   children: ReactNode;
   footer?: ReactNode;
+  testID?: string;
 };
 
 type SheetFieldProps = {
@@ -37,6 +38,7 @@ export function BottomActionSheet({
   title,
   children,
   footer,
+  testID,
 }: BottomActionSheetProps) {
   return (
     <BottomSheet
@@ -52,6 +54,7 @@ export function BottomActionSheet({
       handleIndicatorStyle={styles.sheetHandle}
     >
       <BottomSheetView
+        testID={testID}
         style={[styles.sheetContent, { paddingBottom: bottomInset + spacing.s6 }]}>
         <View style={styles.sheetHeader}>
           <Text style={styles.sheetEyebrow}>{eyebrow}</Text>

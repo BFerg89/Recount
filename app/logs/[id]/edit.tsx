@@ -523,7 +523,7 @@ export default function EditLogScreen() {
   };
 
   return (
-    <View style={styles.screen}>
+    <View testID="screen-edit-log" style={styles.screen}>
       <ScrollView
         ref={scrollRef}
         style={styles.scrollView}
@@ -546,6 +546,7 @@ export default function EditLogScreen() {
           <View style={styles.headerSection}>
             <View style={styles.headerRow}>
               <Pressable
+                testID="edit-log-back-button"
                 accessibilityLabel="Go back"
                 accessibilityRole="button"
                 style={({ pressed }) => [
@@ -560,6 +561,7 @@ export default function EditLogScreen() {
 
             <View style={styles.titleSection}>
               <TextInput
+                testID="edit-log-title-input"
                 value={title}
                 onChangeText={(text) => {
                   setTitle(text);
@@ -572,6 +574,7 @@ export default function EditLogScreen() {
                 style={styles.titleInput}/>
               <View style={styles.dateRow}>
                 <TextInput
+                  testID="edit-log-location-input"
                   ref={locationInputRef}
                   value={location}
                   onChangeText={(text) => {
@@ -583,7 +586,7 @@ export default function EditLogScreen() {
                   returnKeyType="done"
                   maxLength={inputLimits.logLocation}
                   onSubmitEditing={Keyboard.dismiss}/>
-                <View style={styles.datePickerGroup}>
+                <View testID="edit-log-date-field" style={styles.datePickerGroup}>
                   <Text style={styles.dateText}>When:</Text>
                   <DateTimePicker
                     value={date}
@@ -600,8 +603,8 @@ export default function EditLogScreen() {
           </View>
 
           {isLogLoading || logError ? (
-            <View style={styles.stateSection}>
-              <Text style={styles.stateText}>{isLogLoading ? 'Loading log...' : logError}</Text>
+            <View testID="edit-log-state" style={styles.stateSection}>
+              <Text testID="edit-log-state-text" style={styles.stateText}>{isLogLoading ? 'Loading log...' : logError}</Text>
             </View>
           ) : (
             <>
@@ -611,6 +614,7 @@ export default function EditLogScreen() {
                   {people.map((person) => (
                     <PersonPill
                       key={person.id}
+                      testID={`edit-log-person-pill-${person.id}`}
                       displayName={person.displayName}
                       showRemoveIcon={isLogCreator}
                       onPress={isLogCreator ? () => handlePressPersonPill(person) : undefined}
@@ -618,6 +622,7 @@ export default function EditLogScreen() {
                   ))}
                   {isLogCreator && (
                     <Pressable
+                      testID="edit-log-add-person-button"
                       style={({ pressed }) => [
                         styles.addPersonButton,
                         pressed && styles.addPersonButtonPressed,
@@ -640,6 +645,7 @@ export default function EditLogScreen() {
                   {moments.map((moment) => (
                     <Pressable
                       key={moment.id}
+                      testID={`edit-log-moment-row-${moment.id}`}
                       style={({ pressed }) => [
                         styles.momentRow,
                         pressed && styles.momentRowPressed,
@@ -651,6 +657,7 @@ export default function EditLogScreen() {
                     </Pressable>
                   ))}
                   <Pressable
+                    testID="edit-log-add-moment-button"
                     style={styles.addMomentButton}
                     onPress={handleOpenAddMomentSheet}>
                     {({ pressed }) => (
@@ -679,10 +686,14 @@ export default function EditLogScreen() {
                       key={column.map((prompt) => prompt.promptType).join('-')}
                       style={styles.noteColumn}>
                       {column.map((prompt) => (
-                        <View key={prompt.promptType} style={[styles.noteCard, { width: noteCardWidth }]}>
+                        <View
+                          key={prompt.promptType}
+                          testID={`edit-log-note-card-${prompt.promptType}`}
+                          style={[styles.noteCard, { width: noteCardWidth }]}>
                           <Text style={styles.notePrompt}>{prompt.label}</Text>
 
                           <TextInput
+                            testID={`edit-log-note-input-${prompt.promptType}`}
                             value={noteAnswers[prompt.promptType] ?? ''}
                             onChangeText={(text) => {
                               clearSaveError();
@@ -715,9 +726,10 @@ export default function EditLogScreen() {
           { paddingBottom: insets.bottom },
         ]}>
         {saveError && (
-          <Text style={styles.saveErrorText}>{saveError}</Text>
+          <Text testID="edit-log-save-error" style={styles.saveErrorText}>{saveError}</Text>
         )}
         <PrimaryButton
+          testID="edit-log-publish-button"
           label={isSaving ? 'Publishing...' : 'Publish changes'}
           variant="save"
           disabled={!canSaveChanges}

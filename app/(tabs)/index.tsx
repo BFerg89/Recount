@@ -66,7 +66,7 @@ export default function TabOneScreen() {
   const router = useRouter();
 
   return (
-    <View style={styles.screen}>
+    <View testID="screen-logs-home" style={styles.screen}>
       <View style={styles.header}>
         <Text style={styles.title}>Logs</Text>
       </View>
@@ -74,7 +74,7 @@ export default function TabOneScreen() {
         style={styles.scrollView}
         contentContainerStyle={[styles.content, !hasLogs && styles.emptyContent]}>
         {!hasLogs ? (
-          <View style={styles.emptyState}>
+          <View testID="home-empty-state" style={styles.emptyState}>
             <Text style={styles.emptyStateTitle}>Your first log will live here.</Text>
             <Text style={styles.emptyStateText}>
               Call your friends. Make some memories then come back and remember them here.
@@ -87,6 +87,7 @@ export default function TabOneScreen() {
               {month.logs.map((log) => (
                 <Pressable 
                   key={log.id}
+                  testID={`home-log-card-${log.id}`}
                   onPress={() => router.push(`/logs/${log.id}`)}
                   style={({ pressed }) => [
                     styles.logCard,

@@ -301,7 +301,7 @@ export default function CreateScreen() {
   };
 
   return (
-    <View style={styles.screen}>
+    <View testID="screen-create-log" style={styles.screen}>
       <ScrollView
         ref={scrollRef}
         style={styles.scrollView}
@@ -325,6 +325,7 @@ export default function CreateScreen() {
             <Text style={styles.title}>Create Log</Text>
             <View style={styles.titleSection}>
               <TextInput
+                testID="create-log-title-input"
                 value={title}
                 onChangeText={(text) => {
                   setTitle(text);
@@ -337,6 +338,7 @@ export default function CreateScreen() {
                 style={styles.titleInput}/>
               <View style={styles.dateRow}>
                 <TextInput
+                  testID="create-log-location-input"
                   ref={locationInputRef}
                   value={location}
                   onChangeText={(text) => {
@@ -348,7 +350,7 @@ export default function CreateScreen() {
                   returnKeyType="done"
                   maxLength={inputLimits.logLocation}
                   onSubmitEditing={Keyboard.dismiss}/>
-                <View style={styles.datePickerGroup}>
+                <View testID="create-log-date-field" style={styles.datePickerGroup}>
                   <Text style={styles.dateText}>When:</Text>
                   <DateTimePicker
                     value={date}
@@ -370,12 +372,14 @@ export default function CreateScreen() {
               {people.map((person) => (
                 <PersonPill
                   key={person.id}
+                  testID={`create-person-pill-${person.id}`}
                   displayName={person.displayName}
                   showRemoveIcon
                   onPress={() => handlePressPersonPill(person)}
                 />
               ))}
               <Pressable
+                testID="create-add-person-button"
                 style={({ pressed }) => [
                   styles.addPersonButton,
                   pressed && styles.addPersonButtonPressed,
@@ -396,12 +400,14 @@ export default function CreateScreen() {
               {moments.map((moment) => (
                 <View
                   key={moment.id}
+                  testID={`create-moment-row-${moment.id}`}
                   style={styles.momentRow}>
                   <Text style={styles.momentTime}>{moment.approxTime}</Text>
                   <Text style={styles.momentTitle}>{moment.title}</Text>
                 </View>
               ))}
               <Pressable
+                testID="create-add-moment-button"
                 style={styles.addMomentButton}
                 onPress={handleOpenAddMomentSheet}>
                 {({ pressed }) => (
@@ -430,10 +436,14 @@ export default function CreateScreen() {
                   key={column.map((prompt) => prompt.promptType).join('-')}
                   style={styles.noteColumn}>
                   {column.map((prompt) => (
-                    <View key={prompt.promptType} style={[styles.noteCard, { width: noteCardWidth }]}>
+                    <View
+                      key={prompt.promptType}
+                      testID={`create-note-card-${prompt.promptType}`}
+                      style={[styles.noteCard, { width: noteCardWidth }]}>
                       <Text style={styles.notePrompt}>{prompt.label}</Text>
 
                       <TextInput
+                        testID={`create-note-input-${prompt.promptType}`}
                         value={noteAnswers[prompt.promptType] ?? ''}
                         onChangeText={(text) => {
                           clearSaveError();
@@ -460,9 +470,10 @@ export default function CreateScreen() {
 
       <View style={styles.saveBar}>
         {saveError && (
-          <Text style={styles.saveErrorText}>{saveError}</Text>
+          <Text testID="create-log-save-error" style={styles.saveErrorText}>{saveError}</Text>
         )}
         <PrimaryButton
+          testID="create-log-save-button"
           label="Save"
           variant="save"
           disabled={!canCreateLog}

@@ -42,8 +42,10 @@ export default function LoginScreen() {
 
   return (
     <AuthFormScreen
+      testID="screen-login"
       footer={(
         <Pressable
+          testID="login-sign-up-link"
           style={styles.signUpButton}
           onPress={() => router.replace('/sign-up')}
         >
@@ -60,6 +62,7 @@ export default function LoginScreen() {
         </Pressable>
       )}>
       <AuthTextInput
+        testID="login-email-input"
         value={email}
         onChangeText={setEmail}
         keyboardType='email-address'
@@ -72,6 +75,7 @@ export default function LoginScreen() {
         onSubmitEditing={() => passwordInputRef.current?.focus()}
       />
       <AuthTextInput
+        testID="login-password-input"
         ref={passwordInputRef}
         value={password}
         onChangeText={setPassword}
@@ -85,9 +89,10 @@ export default function LoginScreen() {
         onSubmitEditing={handleLogin}
       />
       {authError && (
-        <Text style={styles.errorText}>{authError}</Text>
+        <Text testID="login-error-text" style={styles.errorText}>{authError}</Text>
       )}
       <PrimaryButton
+        testID="login-submit-button"
         label={isSubmitting ? 'Logging in...' : 'Login'}
         disabled={!canSubmit || isSubmitting}
         onPress={handleLogin}

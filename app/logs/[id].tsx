@@ -222,13 +222,14 @@ export default function ViewLogScreen() {
   const isLogCreator = Boolean(log && currentUserId && log.creatorId === currentUserId);
 
   return (
-    <View style={styles.screen}>
+    <View testID="screen-log-detail" style={styles.screen}>
       <ScrollView
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}>
         <View style={styles.content}>
           <View style={styles.header}>
             <Pressable
+              testID="log-detail-back-button"
               style={({ pressed }) => [
                 styles.backButton,
                 pressed && styles.backButtonPressed,
@@ -248,8 +249,8 @@ export default function ViewLogScreen() {
             </View>
           </View>
           {!log ? (
-            <View style={styles.stateSection}>
-              <Text style={styles.stateText}>{stateMessage}</Text>
+            <View testID="log-detail-state" style={styles.stateSection}>
+              <Text testID="log-detail-state-text" style={styles.stateText}>{stateMessage}</Text>
             </View>
           ) : (
             <>
@@ -259,6 +260,7 @@ export default function ViewLogScreen() {
                   {people?.map((person) => (
                     <PersonPill
                       key={person.id}
+                      testID={`log-detail-person-pill-${person.id}`}
                       displayName={person.displayName}
                     />
                   ))}
@@ -273,6 +275,7 @@ export default function ViewLogScreen() {
                   {moments.map((moment) => (
                     <View
                       key={moment.id}
+                      testID={`log-detail-moment-row-${moment.id}`}
                       style={styles.momentRow}>
                       <Text style={styles.momentTime}>{moment.approxTime}</Text>
                       <Text style={styles.momentTitle}>{moment.title}</Text>
@@ -292,7 +295,10 @@ export default function ViewLogScreen() {
                         key={column.map((note) => note.id).join('-')}
                         style={styles.noteColumn}>
                         {column.map((note) => (
-                          <View key={note.id} style={[styles.noteCard, { width: noteCardWidth }]}>
+                          <View
+                            key={note.id}
+                            testID={`log-detail-note-card-${note.id}`}
+                            style={[styles.noteCard, { width: noteCardWidth }]}>
                             <Text style={styles.notePrompt}>{note.label}</Text>
                             <Text style={styles.noteAnswer}>{note.text}</Text>
                           </View>
@@ -304,6 +310,7 @@ export default function ViewLogScreen() {
               )}
               <View style={styles.logActionsSection}>
                 <Pressable
+                  testID="log-detail-edit-button"
                   accessibilityLabel="Edit log"
                   accessibilityRole="button"
                   style={({ pressed }) => [
@@ -316,6 +323,7 @@ export default function ViewLogScreen() {
                 </Pressable>
                 {isLogCreator ? (
                   <Pressable
+                    testID="log-detail-delete-button"
                     accessibilityLabel="Delete log"
                     accessibilityRole="button"
                     accessibilityState={{ disabled: isDeletingLog }}
@@ -333,6 +341,7 @@ export default function ViewLogScreen() {
                   </Pressable>
                 ) : (
                   <Pressable
+                    testID="log-detail-leave-button"
                     accessibilityLabel="Leave log"
                     accessibilityRole="button"
                     accessibilityState={{ disabled: isLeavingLog }}

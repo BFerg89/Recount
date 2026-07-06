@@ -39,12 +39,14 @@ export function AddMomentSheet({
 
   return (
     <BottomActionSheet
+      testID="add-moment-sheet"
       sheetRef={sheetRef}
       bottomInset={bottomInset}
       eyebrow="Timeline"
       title="Add moment"
       footer={(
         <PrimaryButton
+          testID="add-moment-submit-button"
           label="Add moment"
           onPress={onAddMoment}
           icon={(
@@ -55,6 +57,7 @@ export function AddMomentSheet({
       <SheetForm>
         <SheetField label="Title">
           <SheetTextInput
+            testID="add-moment-title-input"
             value={newMomentTitle}
             onChangeText={onChangeNewMomentTitle}
             placeholder="What happened next?"
@@ -67,6 +70,7 @@ export function AddMomentSheet({
 
         <SheetField label="Approx time">
           <SheetTextInput
+            testID="add-moment-time-input"
             ref={momentTimeInputRef}
             value={newMomentTime}
             onChangeText={onChangeNewMomentTime}

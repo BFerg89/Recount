@@ -39,12 +39,14 @@ export function AddFriendSheet({
 
   return (
     <BottomActionSheet
+      testID="add-friend-sheet"
       sheetRef={sheetRef}
       bottomInset={bottomInset}
       eyebrow="Profile"
       title="Add friend"
       footer={(
         <PrimaryButton
+          testID="add-friend-submit-button"
           label="Add friend"
           onPress={onAddFriend}
           disabled={isAddingFriend}
@@ -56,6 +58,7 @@ export function AddFriendSheet({
       <SheetForm>
         <SheetField label="Username" errorMessage={errorMessage}>
           <PrefixedSheetTextInput
+            testID="add-friend-username-input"
             prefix="@"
             value={friendUsername}
             onChangeText={handleChangeFriendUsername}

@@ -61,6 +61,7 @@ type FriendOptionRowProps = {
   isAdded: boolean;
   isLast: boolean;
   onPress: () => void;
+  testID?: string;
 };
 
 function FriendOptionRow({
@@ -69,9 +70,11 @@ function FriendOptionRow({
   isAdded,
   isLast,
   onPress,
+  testID,
 }: FriendOptionRowProps) {
   return (
     <Pressable
+      testID={testID}
       accessibilityLabel={
         isAdded
           ? `${friend.displayName} already added`
@@ -149,12 +152,14 @@ export function AddPersonSheet({
 
   return (
     <BottomActionSheet
+      testID="add-person-sheet"
       sheetRef={sheetRef}
       bottomInset={bottomInset}
       eyebrow="People"
       title="Add person"
       footer={(
         <PrimaryButton
+          testID="add-person-submit-button"
           label="Add person"
           onPress={onAddPerson}
           icon={(
@@ -167,7 +172,7 @@ export function AddPersonSheet({
           <Text style={styles.sectionLabel}>Friends</Text>
 
           {friendsStatusMessage ? (
-            <View style={styles.friendsStateCard}>
+            <View testID="add-person-friends-state" style={styles.friendsStateCard}>
               <View style={styles.friendsStateIcon}>
                 <FriendsStatusIcon
                   color={friendsError ? colors.terracottaDeep : colors.inkSoft}
@@ -186,6 +191,7 @@ export function AddPersonSheet({
           ) : (
             <View style={styles.friendsListCard}>
               <ScrollView
+                testID="add-person-friends-list"
                 nestedScrollEnabled
                 showsVerticalScrollIndicator={false}
                 style={styles.friendsListScroll}
@@ -196,6 +202,7 @@ export function AddPersonSheet({
                   return (
                     <FriendOptionRow
                       key={friend.id}
+                      testID={`add-person-friend-option-${friend.id}`}
                       friend={friend}
                       index={index}
                       isAdded={isAdded}
@@ -213,6 +220,7 @@ export function AddPersonSheet({
           <SheetForm>
             <SheetField label="Add someone else">
               <SheetTextInput
+                testID="add-person-name-input"
                 value={newPersonName}
                 onChangeText={onChangeNewPersonName}
                 placeholder="Name..."

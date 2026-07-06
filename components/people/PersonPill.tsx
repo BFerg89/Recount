@@ -18,6 +18,7 @@ type PersonPillProps = {
   showRemoveIcon?: boolean;
   onPress?: () => void;
   style?: StyleProp<ViewStyle>;
+  testID?: string;
   textStyle?: StyleProp<TextStyle>;
 };
 
@@ -26,6 +27,7 @@ export function PersonPill({
   showRemoveIcon = false,
   onPress,
   style,
+  testID,
   textStyle,
 }: PersonPillProps) {
   const renderContent = (pressed = false) => (
@@ -45,6 +47,7 @@ export function PersonPill({
   if (onPress) {
     return (
       <Pressable
+        testID={testID}
         accessibilityRole="button"
         onPress={onPress}
         style={({ pressed }) => [
@@ -59,7 +62,7 @@ export function PersonPill({
   }
 
   return (
-    <View style={[styles.container, style]}>
+    <View testID={testID} style={[styles.container, style]}>
       {renderContent()}
     </View>
   );

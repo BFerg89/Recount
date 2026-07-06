@@ -35,6 +35,7 @@ type FriendRowProps = {
   friend: FriendPreview;
   index: number;
   isLast: boolean;
+  testID?: string;
   statusLabel?: string;
   statusVariant?: 'default' | 'request';
   actionLabel?: string;
@@ -64,6 +65,7 @@ function FriendRow({
   friend,
   index,
   isLast,
+  testID,
   statusLabel,
   statusVariant = 'default',
   actionLabel,
@@ -83,6 +85,7 @@ function FriendRow({
 
   const rowPrimaryAction = onActionPress ? (
     <Pressable
+      testID={testID ? `${testID}-action-button` : undefined}
       accessibilityRole="button"
       accessibilityState={{ disabled: isActionDisabled === true }}
       disabled={isActionDisabled}
@@ -103,6 +106,7 @@ function FriendRow({
 
   const deleteAction = onDeletePress ? (
     <Pressable
+      testID={testID ? `${testID}-delete-button` : undefined}
       accessibilityLabel={deleteAccessibilityLabel}
       accessibilityRole="button"
       accessibilityState={{ disabled: isDeleteDisabled === true }}
@@ -127,6 +131,7 @@ function FriendRow({
 
   return (
     <View
+      testID={testID}
       style={[
         styles.friendRow,
         isLast && styles.lastFriendRow,
@@ -360,7 +365,7 @@ export default function ProfileScreen() {
   };
 
   return (
-    <View style={styles.screen}>
+    <View testID="screen-profile" style={styles.screen}>
       <ScrollView
         contentInsetAdjustmentBehavior="automatic"
         showsVerticalScrollIndicator={false}
@@ -371,6 +376,7 @@ export default function ProfileScreen() {
           <Text style={styles.titleText}>Profile</Text>
 
           <Pressable
+            testID="profile-add-friend-button"
             style={({ pressed }) => [
               styles.addFriendButton,
               pressed && styles.addFriendButtonPressed,
@@ -381,13 +387,14 @@ export default function ProfileScreen() {
           </Pressable>
         </View>
 
-        <View style={styles.userCard}>
+        <View testID="profile-user-card" style={styles.userCard}>
           <View style={styles.profileAvatar}>
             <Text style={styles.profileAvatarText}>{profileInitials}</Text>
           </View>
 
           <View style={styles.userCardDetails}>
             <Text
+              testID="profile-nickname"
               numberOfLines={1}
               style={[
                 styles.nicknameText,
@@ -395,36 +402,37 @@ export default function ProfileScreen() {
               ]}>
               {nickname}
             </Text>
-            <Text selectable numberOfLines={1} style={styles.usernameText}>
+            <Text testID="profile-username" selectable numberOfLines={1} style={styles.usernameText}>
               @{username}
             </Text>
             {!!user?.email && (
-              <Text selectable numberOfLines={1} style={styles.emailText}>
+              <Text testID="profile-email" selectable numberOfLines={1} style={styles.emailText}>
                 {user.email}
               </Text>
             )}
           </View>
         </View>
 
-        <View style={styles.statsCard}>
+        <View testID="profile-stats-card" style={styles.statsCard}>
           <View style={styles.statItem}>
-            <Text style={styles.statNumber}>{friendPreviews.length}</Text>
+            <Text testID="profile-friends-count" style={styles.statNumber}>{friendPreviews.length}</Text>
             <Text style={styles.statLabel}>Friends</Text>
           </View>
           <View style={styles.statDivider} />
           <View style={styles.statItem}>
-            <Text style={styles.statNumber}>{pendingFriendRequests.length}</Text>
+            <Text testID="profile-requests-count" style={styles.statNumber}>{pendingFriendRequests.length}</Text>
             <Text style={styles.statLabel}>Requests</Text>
           </View>
           <View style={styles.statDivider} />
           <View style={styles.statItem}>
-            <Text style={styles.statNumber}>{logSummaries.length}</Text>
+            <Text testID="profile-logs-count" style={styles.statNumber}>{logSummaries.length}</Text>
             <Text style={styles.statLabel}>Logs</Text>
           </View>
         </View>
 
         {friendshipStatusMessage ? (
           <View
+            testID={isFriendshipStatusError ? 'profile-friends-error-state' : 'profile-friends-loading-state'}
             style={[
               styles.emptyStateCard,
               isFriendshipStatusError && styles.errorStateCard,
@@ -449,7 +457,7 @@ export default function ProfileScreen() {
           <>
             {!!friendshipActionError && (
               <View style={[styles.actionErrorCard, styles.errorStateCard]}>
-                <Text selectable style={styles.actionErrorText}>
+                <Text testID="profile-friend-action-error" selectable style={styles.actionErrorText}>
                   {friendshipActionError}
                 </Text>
               </View>
@@ -465,6 +473,7 @@ export default function ProfileScreen() {
                   {pendingFriendRequests.map((request, index) => (
                     <FriendRow
                       key={request.id}
+                      testID={`profile-friend-request-row-${request.id}`}
                       friend={request}
                       index={index}
                       isLast={index === pendingFriendRequests.length - 1}
@@ -501,6 +510,7 @@ export default function ProfileScreen() {
                   {friendPreviews.map((friend, index) => (
                     <FriendRow
                       key={friend.id}
+                      testID={`profile-friend-row-${friend.id}`}
                       friend={friend}
                       index={index}
                       isLast={index === friendPreviews.length - 1}
@@ -530,6 +540,7 @@ export default function ProfileScreen() {
         <View style={styles.accountSection}>
           <Text style={styles.sectionLabel}>Account</Text>
           <Pressable
+            testID="profile-sign-out-button"
             style={({ pressed }) => [
               styles.signOutButton,
               pressed && styles.signOutButtonPressed,
@@ -538,6 +549,7 @@ export default function ProfileScreen() {
             <Text style={styles.signOutButtonText}>Sign out</Text>
           </Pressable>
           <Pressable
+            testID="profile-delete-account-button"
             accessibilityLabel="Delete account"
             accessibilityRole="button"
             style={({ pressed }) => [
@@ -549,6 +561,7 @@ export default function ProfileScreen() {
             <Text style={styles.deleteAccountButtonText}>Delete account</Text>
           </Pressable>
           <Pressable
+            testID="profile-privacy-policy-link"
             accessibilityLabel="Open privacy policy"
             accessibilityRole="link"
             hitSlop={8}

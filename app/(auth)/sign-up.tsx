@@ -119,8 +119,10 @@ export default function SignUpScreen() {
 
   return (
     <AuthFormScreen
+      testID="screen-sign-up"
       footer={(
         <Pressable
+          testID="sign-up-login-link"
           onPress={() => router.replace('/login')}
           style={styles.loginButton}
         >
@@ -137,6 +139,7 @@ export default function SignUpScreen() {
         </Pressable>
       )}>
       <AuthTextInput
+        testID="sign-up-email-input"
         value={email}
         onChangeText={handleEmailChange}
         keyboardType='email-address'
@@ -148,6 +151,7 @@ export default function SignUpScreen() {
         returnKeyType='next'
       />
       <AuthTextInput
+        testID="sign-up-password-input"
         value={password}
         onChangeText={handlePasswordChange}
         secureTextEntry
@@ -159,6 +163,7 @@ export default function SignUpScreen() {
         returnKeyType='next'
       />
       <AuthTextInput
+        testID="sign-up-confirm-password-input"
         value={confirmPassword}
         onChangeText={handleConfirmPasswordChange}
         secureTextEntry
@@ -171,11 +176,12 @@ export default function SignUpScreen() {
         onSubmitEditing={handleSignUp}
       />
       {(formError || passwordMismatch || authError) && (
-        <Text style={styles.errorText}>
+        <Text testID="sign-up-error-text" style={styles.errorText}>
           {passwordMismatch ? 'Passwords do not match.' : formError ?? authError}
         </Text>
       )}
       <PrimaryButton
+        testID="sign-up-submit-button"
         label="Create Account"
         disabled={!canSubmit || isSubmitting}
         onPress={handleSignUp}

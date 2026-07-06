@@ -23,6 +23,7 @@ export default function TabLayout() {
         name="index"
         options={{
           title: 'Logs',
+          tabBarButtonTestID: 'tab-logs',
           tabBarIcon: ({ color }) => (
             <NotebookIcon color={color} size={28} />
           ),
@@ -32,6 +33,7 @@ export default function TabLayout() {
         name="create"
         options={{
           title: 'Create Log',
+          tabBarButtonTestID: 'tab-create-log',
           tabBarIcon: ({ color }) => (
             <PencilSimpleLineIcon color={color} size={28} />
           ),
@@ -41,6 +43,7 @@ export default function TabLayout() {
         name="profile"
         options={{
           title: 'Profile',
+          tabBarButtonTestID: 'tab-profile',
           tabBarIcon: ({ color }) => (
             <UserIcon color={color} size={28} />
           ),
