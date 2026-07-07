@@ -1,0 +1,151 @@
+appId: com.bferg89.recount
+name: "11 Friend flow destructive iOS"
+tags:
+  - ios
+  - friends
+  - destructive
+---
+- launchApp:
+    clearState: true
+    clearKeychain: true
+    stopApp: true
+- runFlow:
+    file: "helpers/open_dev_server.yaml"
+- extendedWaitUntil:
+    visible:
+      id: "screen-login"
+    timeout: 10000
+- tapOn:
+    id: "login-email-input"
+- inputText: "e2e.owner@recount.test"
+- tapOn:
+    id: "login-password-input"
+- inputText: "RecountE2E!2026"
+- tapOn:
+    id: "login-submit-button"
+- extendedWaitUntil:
+    visible:
+      id: "screen-logs-home"
+    timeout: 15000
+- tapOn:
+    id: "tab-profile"
+- extendedWaitUntil:
+    visible:
+      id: "screen-profile"
+    timeout: 10000
+- assertVisible: "E2E Friend"
+
+- tapOn:
+    id: "profile-add-friend-button"
+- extendedWaitUntil:
+    visible:
+      id: "add-friend-sheet"
+    timeout: 10000
+- tapOn:
+    id: "add-friend-username-input"
+- inputText: "ab"
+- tapOn:
+    id: "add-friend-submit-button"
+- extendedWaitUntil:
+    visible: "Invalid username."
+    timeout: 10000
+- tapOn:
+    id: "add-friend-username-input"
+- eraseText
+- inputText: "missing_recount_user"
+- tapOn:
+    id: "add-friend-submit-button"
+- extendedWaitUntil:
+    visible: "User not found."
+    timeout: 10000
+- tapOn:
+    id: "add-friend-username-input"
+- eraseText
+- inputText: "e2e_owner"
+- tapOn:
+    id: "add-friend-submit-button"
+- extendedWaitUntil:
+    visible: "You cannot add yourself."
+    timeout: 10000
+- tapOn:
+    id: "add-friend-username-input"
+- eraseText
+- inputText: "e2e_friend"
+- tapOn:
+    id: "add-friend-submit-button"
+- extendedWaitUntil:
+    visible: "Friend request already sent."
+    timeout: 10000
+
+- tapOn:
+    id: "add-friend-username-input"
+- eraseText
+- inputText: "e2e_stranger"
+- tapOn:
+    id: "add-friend-submit-button"
+    repeat: 2
+    delay: 100
+- extendedWaitUntil:
+    notVisible:
+      id: "add-friend-sheet"
+    timeout: 15000
+
+- scrollUntilVisible:
+    element:
+      id: "profile-sign-out-button"
+    direction: DOWN
+    timeout: 10000
+    visibilityPercentage: 60
+- tapOn:
+    id: "profile-sign-out-button"
+- extendedWaitUntil:
+    visible:
+      id: "screen-login"
+    timeout: 10000
+
+- tapOn:
+    id: "login-email-input"
+- inputText: "e2e.stranger@recount.test"
+- tapOn:
+    id: "login-password-input"
+- inputText: "RecountE2E!2026"
+- tapOn:
+    id: "login-submit-button"
+- extendedWaitUntil:
+    visible:
+      id: "screen-logs-home"
+    timeout: 15000
+- tapOn:
+    id: "tab-profile"
+- extendedWaitUntil:
+    visible:
+      id: "screen-profile"
+    timeout: 10000
+- assertVisible: "E2E Owner"
+- assertVisible: "Accept"
+- tapOn: "Accept"
+- extendedWaitUntil:
+    visible: "E2E Owner"
+    timeout: 15000
+- assertVisible: "@e2e_owner"
+- tapOn:
+    text: "E2E Owner"
+- assertVisible: "E2E Owner"
+- tapOn:
+    text: "Delete E2E Owner"
+    optional: true
+- runFlow:
+    when:
+      visible: "E2E Owner"
+    commands:
+      - tapOn:
+          id: "profile-friend-row-.*-delete-button"
+          optional: true
+- waitForAnimationToEnd:
+    timeout: 2000
+- extendedWaitUntil:
+    visible: "No friends yet"
+    timeout: 15000
+- assertNotVisible:
+    id: "profile-friend-action-error"
+    optional: true

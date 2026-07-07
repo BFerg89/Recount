@@ -1,0 +1,13 @@
+appId: com.bferg89.recount
+name: "Open Expo development server"
+tags:
+  - helper
+---
+- runFlow:
+    when:
+      visible: "Development Servers"
+    commands:
+      - tapOn: "Recount"
+      - extendedWaitUntil:
+          notVisible: "Development Servers"
+          timeout: 30000

@@ -1,0 +1,82 @@
+appId: com.bferg89.recount
+name: "12 Profile and session iOS"
+tags:
+  - ios
+  - profile
+  - session
+  - smoke
+---
+- launchApp:
+    clearState: true
+    clearKeychain: true
+    stopApp: true
+- runFlow:
+    file: "helpers/open_dev_server.yaml"
+- extendedWaitUntil:
+    visible:
+      id: "screen-login"
+    timeout: 10000
+- tapOn:
+    id: "login-email-input"
+- inputText: "e2e.owner@recount.test"
+- tapOn:
+    id: "login-password-input"
+- inputText: "RecountE2E!2026"
+- tapOn:
+    id: "login-submit-button"
+- extendedWaitUntil:
+    visible:
+      id: "screen-logs-home"
+    timeout: 15000
+- stopApp
+- launchApp:
+    clearState: false
+    clearKeychain: false
+    stopApp: false
+- runFlow:
+    file: "helpers/open_dev_server.yaml"
+- extendedWaitUntil:
+    visible:
+      id: "screen-logs-home"
+    timeout: 15000
+- tapOn:
+    id: "tab-profile"
+- extendedWaitUntil:
+    visible:
+      id: "screen-profile"
+    timeout: 10000
+- assertVisible:
+    id: "profile-user-card"
+- assertVisible: "E2E Owner"
+- assertVisible: "@e2e_owner"
+- assertVisible: "e2e.owner@recount.test"
+- assertVisible:
+    id: "profile-friends-count"
+- assertVisible:
+    id: "profile-logs-count"
+- takeScreenshot: "profile-owner"
+- scrollUntilVisible:
+    element:
+      id: "profile-sign-out-button"
+    direction: DOWN
+    timeout: 10000
+    visibilityPercentage: 60
+- tapOn:
+    id: "profile-sign-out-button"
+- extendedWaitUntil:
+    visible:
+      id: "screen-login"
+    timeout: 10000
+- stopApp
+- launchApp:
+    clearState: false
+    clearKeychain: false
+    stopApp: false
+- runFlow:
+    file: "helpers/open_dev_server.yaml"
+- extendedWaitUntil:
+    visible:
+      id: "screen-login"
+    timeout: 10000
+- assertNotVisible:
+    id: "screen-logs-home"

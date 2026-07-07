@@ -1,0 +1,220 @@
+appId: com.bferg89.recount
+name: "07 Shared collaboration iOS"
+tags:
+  - ios
+  - shared
+  - collaboration
+  - destructive
+---
+- evalScript: ${output.sharedTitle = 'Maestro Shared ' + Date.now()}
+- evalScript: ${output.sharedEditedTitle = 'Maestro Friend Edit ' + Date.now()}
+- launchApp:
+    clearState: true
+    clearKeychain: true
+    stopApp: true
+- runFlow:
+    file: "helpers/open_dev_server.yaml"
+- extendedWaitUntil:
+    visible:
+      id: "screen-login"
+    timeout: 10000
+- tapOn:
+    id: "login-email-input"
+- inputText: "e2e.owner@recount.test"
+- tapOn:
+    id: "login-password-input"
+- inputText: "RecountE2E!2026"
+- tapOn:
+    id: "login-submit-button"
+- extendedWaitUntil:
+    visible:
+      id: "screen-logs-home"
+    timeout: 15000
+- tapOn:
+    id: "tab-create-log"
+- extendedWaitUntil:
+    visible:
+      id: "screen-create-log"
+    timeout: 10000
+- tapOn:
+    id: "create-log-title-input"
+- inputText: ${output.sharedTitle}
+- tapOn:
+    id: "create-log-location-input"
+- inputText: "Shared City"
+- tapOn:
+    id: "create-add-person-button"
+- extendedWaitUntil:
+    visible: "E2E Friend"
+    timeout: 15000
+- tapOn: "E2E Friend"
+- extendedWaitUntil:
+    visible: "E2E Friend"
+    timeout: 10000
+- tapOn:
+    id: "create-add-moment-button"
+- extendedWaitUntil:
+    visible:
+      id: "add-moment-sheet"
+    timeout: 10000
+- tapOn:
+    id: "add-moment-title-input"
+- inputText: "Shared Original Moment"
+- tapOn:
+    id: "add-moment-submit-button"
+- extendedWaitUntil:
+    visible: "Shared Original Moment"
+    timeout: 10000
+- tapOn:
+    id: "create-log-save-button"
+- extendedWaitUntil:
+    visible:
+      id: "screen-log-detail"
+    timeout: 20000
+- assertVisible: ${output.sharedTitle}
+- tapOn:
+    id: "log-detail-back-button"
+- extendedWaitUntil:
+    visible:
+      id: "screen-logs-home"
+    timeout: 10000
+- tapOn:
+    id: "tab-profile"
+- scrollUntilVisible:
+    element:
+      id: "profile-sign-out-button"
+    direction: DOWN
+    timeout: 10000
+    visibilityPercentage: 60
+- tapOn:
+    id: "profile-sign-out-button"
+- extendedWaitUntil:
+    visible:
+      id: "screen-login"
+    timeout: 10000
+
+- tapOn:
+    id: "login-email-input"
+- inputText: "e2e.friend@recount.test"
+- tapOn:
+    id: "login-password-input"
+- inputText: "RecountE2E!2026"
+- tapOn:
+    id: "login-submit-button"
+- extendedWaitUntil:
+    visible: ${output.sharedTitle}
+    timeout: 20000
+- tapOn: ${output.sharedTitle}
+- extendedWaitUntil:
+    visible:
+      id: "screen-log-detail"
+    timeout: 10000
+- assertVisible:
+    id: "log-detail-leave-button"
+- assertNotVisible:
+    id: "log-detail-delete-button"
+- scrollUntilVisible:
+    element:
+      id: "log-detail-edit-button"
+    direction: DOWN
+    timeout: 10000
+    visibilityPercentage: 60
+- tapOn:
+    id: "log-detail-edit-button"
+- extendedWaitUntil:
+    visible:
+      id: "screen-edit-log"
+    timeout: 10000
+- assertNotVisible:
+    id: "edit-log-add-person-button"
+- tapOn:
+    id: "edit-log-title-input"
+- eraseText
+- inputText: ${output.sharedEditedTitle}
+- tapOn:
+    id: "edit-log-location-input"
+- eraseText
+- inputText: "Friend Edited City"
+- scrollUntilVisible:
+    element:
+      id: "edit-log-add-moment-button"
+    direction: DOWN
+    timeout: 10000
+    visibilityPercentage: 60
+- tapOn:
+    id: "edit-log-add-moment-button"
+- extendedWaitUntil:
+    visible:
+      id: "add-moment-sheet"
+    timeout: 10000
+- tapOn:
+    id: "add-moment-title-input"
+- inputText: "Friend Added Moment"
+- tapOn:
+    id: "add-moment-submit-button"
+- extendedWaitUntil:
+    visible: "Friend Added Moment"
+    timeout: 10000
+- scrollUntilVisible:
+    element:
+      id: "edit-log-note-input-highlight"
+    direction: DOWN
+    timeout: 10000
+    visibilityPercentage: 50
+- tapOn:
+    id: "edit-log-note-input-highlight"
+- inputText: "Friend added this note."
+- hideKeyboard
+- tapOn:
+    id: "edit-log-publish-button"
+- extendedWaitUntil:
+    visible:
+      id: "screen-log-detail"
+    timeout: 20000
+- assertVisible: ${output.sharedEditedTitle}
+- assertVisible: "Friend Edited City"
+- assertVisible: "Friend Added Moment"
+- scrollUntilVisible:
+    element: "Friend added this note."
+    direction: DOWN
+    timeout: 10000
+    visibilityPercentage: 40
+
+- tapOn:
+    id: "log-detail-back-button"
+- extendedWaitUntil:
+    visible:
+      id: "screen-logs-home"
+    timeout: 10000
+- tapOn:
+    id: "tab-profile"
+- scrollUntilVisible:
+    element:
+      id: "profile-sign-out-button"
+    direction: DOWN
+    timeout: 10000
+    visibilityPercentage: 60
+- tapOn:
+    id: "profile-sign-out-button"
+- extendedWaitUntil:
+    visible:
+      id: "screen-login"
+    timeout: 10000
+- tapOn:
+    id: "login-email-input"
+- inputText: "e2e.owner@recount.test"
+- tapOn:
+    id: "login-password-input"
+- inputText: "RecountE2E!2026"
+- tapOn:
+    id: "login-submit-button"
+- extendedWaitUntil:
+    visible: ${output.sharedEditedTitle}
+    timeout: 20000
+- tapOn: ${output.sharedEditedTitle}
+- extendedWaitUntil:
+    visible:
+      id: "screen-log-detail"
+    timeout: 10000
+- assertVisible: "Friend Edited City"
+- assertVisible: "Friend Added Moment"

@@ -1,0 +1,198 @@
+appId: com.bferg89.recount
+name: "04 Create log validation and draft iOS"
+tags:
+  - ios
+  - create
+  - destructive
+---
+- evalScript: ${output.createTitle = 'Maestro Create ' + Date.now()}
+- launchApp:
+    clearState: true
+    clearKeychain: true
+    stopApp: true
+- runFlow:
+    file: "helpers/open_dev_server.yaml"
+- extendedWaitUntil:
+    visible:
+      id: "screen-login"
+    timeout: 10000
+- tapOn:
+    id: "login-email-input"
+- inputText: "e2e.owner@recount.test"
+- tapOn:
+    id: "login-password-input"
+- inputText: "RecountE2E!2026"
+- tapOn:
+    id: "login-submit-button"
+- extendedWaitUntil:
+    visible:
+      id: "screen-logs-home"
+    timeout: 15000
+- tapOn:
+    id: "tab-create-log"
+- extendedWaitUntil:
+    visible:
+      id: "screen-create-log"
+    timeout: 10000
+- assertVisible:
+    id: "create-log-save-button"
+    enabled: false
+
+- tapOn:
+    id: "create-log-title-input"
+- inputText: "   "
+- tapOn:
+    id: "create-log-location-input"
+- inputText: "   "
+- assertVisible:
+    id: "create-log-save-button"
+    enabled: false
+- tapOn:
+    id: "create-log-title-input"
+- eraseText
+- inputText: "   "
+- inputText: ${output.createTitle}
+- tapOn:
+    id: "create-log-location-input"
+- eraseText
+- inputText: "   Vancouver   "
+
+- tapOn:
+    id: "create-add-person-button"
+- extendedWaitUntil:
+    visible:
+      id: "add-person-sheet"
+    timeout: 10000
+- tapOn:
+    id: "add-person-name-input"
+- inputText: "   "
+- tapOn:
+    id: "add-person-submit-button"
+- assertVisible:
+    id: "add-person-sheet"
+- tapOn:
+    id: "add-person-name-input"
+- eraseText
+- inputText: "Sam Maestro"
+- tapOn:
+    id: "add-person-submit-button"
+- extendedWaitUntil:
+    visible: "Sam Maestro"
+    timeout: 10000
+- tapOn: "Sam Maestro"
+- assertVisible: "Remove Sam Maestro?"
+- tapOn: "Cancel"
+- assertVisible: "Sam Maestro"
+- tapOn: "Sam Maestro"
+- assertVisible: "Remove Sam Maestro?"
+- tapOn: "Remove Sam Maestro"
+- assertNotVisible: "Sam Maestro"
+
+- tapOn:
+    id: "create-add-person-button"
+- extendedWaitUntil:
+    visible:
+      id: "add-person-sheet"
+    timeout: 10000
+- tapOn:
+    id: "add-person-name-input"
+- inputText: "Sam Maestro"
+- tapOn:
+    id: "add-person-submit-button"
+- extendedWaitUntil:
+    visible: "Sam Maestro"
+    timeout: 10000
+- tapOn:
+    id: "create-add-person-button"
+- extendedWaitUntil:
+    visible: "E2E Friend"
+    timeout: 15000
+- tapOn: "E2E Friend"
+- extendedWaitUntil:
+    visible: "E2E Friend"
+    timeout: 10000
+- tapOn:
+    id: "create-add-person-button"
+- extendedWaitUntil:
+    visible:
+      id: "add-person-sheet"
+    timeout: 10000
+- tapOn: "E2E Friend"
+- assertVisible:
+    id: "add-person-sheet"
+- swipe:
+    from:
+      id: "add-person-sheet"
+    direction: DOWN
+    duration: 500
+
+- tapOn:
+    id: "create-add-moment-button"
+- extendedWaitUntil:
+    visible:
+      id: "add-moment-sheet"
+    timeout: 10000
+- tapOn:
+    id: "add-moment-title-input"
+- inputText: "   "
+- tapOn:
+    id: "add-moment-submit-button"
+- assertVisible:
+    id: "add-moment-sheet"
+- tapOn:
+    id: "add-moment-title-input"
+- eraseText
+- inputText: "Walk through Gastown"
+- tapOn:
+    id: "add-moment-time-input"
+- eraseText
+- tapOn:
+    id: "add-moment-submit-button"
+- extendedWaitUntil:
+    visible: "Walk through Gastown"
+    timeout: 10000
+- assertNotVisible: "null"
+- assertNotVisible: "undefined"
+
+- tapOn:
+    id: "create-add-moment-button"
+- extendedWaitUntil:
+    visible:
+      id: "add-moment-sheet"
+    timeout: 10000
+- tapOn:
+    id: "add-moment-title-input"
+- inputText: "Discarded Moment"
+- swipe:
+    from:
+      id: "add-moment-sheet"
+    direction: DOWN
+    duration: 500
+- assertNotVisible: "Discarded Moment"
+
+- scrollUntilVisible:
+    element:
+      id: "create-note-input-highlight"
+    direction: DOWN
+    timeout: 10000
+    visibilityPercentage: 50
+- tapOn:
+    id: "create-note-input-highlight"
+- inputText: "A generated Maestro highlight."
+- hideKeyboard
+- tapOn:
+    id: "create-log-save-button"
+- extendedWaitUntil:
+    visible:
+      id: "screen-log-detail"
+    timeout: 20000
+- assertVisible: ${output.createTitle}
+- assertVisible: "Vancouver"
+- assertVisible: "Sam Maestro"
+- assertVisible: "E2E Friend"
+- assertVisible: "Walk through Gastown"
+- scrollUntilVisible:
+    element: "A generated Maestro highlight."
+    direction: DOWN
+    timeout: 10000
+    visibilityPercentage: 40

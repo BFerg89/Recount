@@ -1,0 +1,98 @@
+appId: com.bferg89.recount
+name: "03 Empty, stranger, and pending fixtures iOS"
+tags:
+  - ios
+  - fixtures
+---
+- launchApp:
+    clearState: true
+    clearKeychain: true
+    stopApp: true
+- runFlow:
+    file: "helpers/open_dev_server.yaml"
+- extendedWaitUntil:
+    visible:
+      id: "screen-login"
+    timeout: 10000
+- tapOn:
+    id: "login-email-input"
+- inputText: "e2e.empty@recount.test"
+- tapOn:
+    id: "login-password-input"
+- inputText: "RecountE2E!2026"
+- tapOn:
+    id: "login-submit-button"
+- extendedWaitUntil:
+    visible:
+      id: "home-empty-state"
+    timeout: 15000
+- assertVisible: "Your first log will live here."
+- assertNotVisible: "E2E Shared Night"
+
+- launchApp:
+    clearState: true
+    clearKeychain: true
+    stopApp: true
+- runFlow:
+    file: "helpers/open_dev_server.yaml"
+- extendedWaitUntil:
+    visible:
+      id: "screen-login"
+    timeout: 10000
+- tapOn:
+    id: "login-email-input"
+- inputText: "e2e.stranger@recount.test"
+- tapOn:
+    id: "login-password-input"
+- inputText: "RecountE2E!2026"
+- tapOn:
+    id: "login-submit-button"
+- extendedWaitUntil:
+    visible:
+      id: "home-empty-state"
+    timeout: 15000
+- assertVisible: "Your first log will live here."
+- assertNotVisible: "E2E Shared Night"
+- openLink: "recount://logs/00000000-0000-0000-0000-000000000000"
+- extendedWaitUntil:
+    visible:
+      id: "screen-log-detail"
+    timeout: 10000
+- assertVisible:
+    id: "log-detail-state-text"
+- assertNotVisible:
+    id: "log-detail-edit-button"
+- assertNotVisible:
+    id: "log-detail-delete-button"
+
+- launchApp:
+    clearState: true
+    clearKeychain: true
+    stopApp: true
+- runFlow:
+    file: "helpers/open_dev_server.yaml"
+- extendedWaitUntil:
+    visible:
+      id: "screen-login"
+    timeout: 10000
+- tapOn:
+    id: "login-email-input"
+- inputText: "e2e.pending@recount.test"
+- tapOn:
+    id: "login-password-input"
+- inputText: "RecountE2E!2026"
+- tapOn:
+    id: "login-submit-button"
+- extendedWaitUntil:
+    visible:
+      id: "screen-logs-home"
+    timeout: 15000
+- tapOn:
+    id: "tab-profile"
+- extendedWaitUntil:
+    visible:
+      id: "screen-profile"
+    timeout: 10000
+- assertVisible: "E2E Owner"
+- assertVisible: "@e2e_owner"
+- assertVisible: "Accept"

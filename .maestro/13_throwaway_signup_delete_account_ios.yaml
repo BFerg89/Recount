@@ -1,0 +1,150 @@
+appId: com.bferg89.recount
+name: "13 Throwaway signup and delete account iOS"
+tags:
+  - ios
+  - auth
+  - onboarding
+  - account-delete
+  - destructive
+  - requires-signup-enabled
+---
+- evalScript: ${output.throwawaySuffix = Date.now().toString().slice(-8)}
+- evalScript: ${output.throwawayEmail = 'e2e.maestro.' + output.throwawaySuffix + '@recount.test'}
+- evalScript: ${output.throwawayUsername = 'maestro_' + output.throwawaySuffix}
+- evalScript: ${output.throwawayNickname = 'Maestro ' + output.throwawaySuffix}
+- launchApp:
+    clearState: true
+    clearKeychain: true
+    stopApp: true
+- runFlow:
+    file: "helpers/open_dev_server.yaml"
+- extendedWaitUntil:
+    visible:
+      id: "screen-login"
+    timeout: 10000
+- tapOn:
+    text: "SIGN UP"
+- extendedWaitUntil:
+    visible:
+      id: "screen-sign-up"
+    timeout: 10000
+- tapOn:
+    id: "sign-up-email-input"
+- inputText: ${output.throwawayEmail}
+- tapOn:
+    id: "sign-up-password-input"
+- inputText: "RecountE2E!2026"
+- tapOn:
+    id: "sign-up-confirm-password-input"
+- inputText: "RecountE2E!2026"
+- tapOn:
+    id: "sign-up-submit-button"
+- extendedWaitUntil:
+    visible:
+      id: "screen-create-profile"
+    timeout: 15000
+    optional: true
+- assertVisible:
+    id: "screen-confirm-email"
+    optional: true
+- assertNotVisible:
+    id: "screen-sign-up"
+
+- runFlow:
+    when:
+      visible:
+        id: "screen-create-profile"
+    commands:
+      - tapOn:
+          id: "create-profile-submit-button"
+      - assertVisible:
+          id: "create-profile-submit-button"
+          enabled: false
+      - tapOn:
+          id: "create-profile-username-input"
+      - inputText: "ab"
+      - tapOn:
+          id: "create-profile-nickname-input"
+      - inputText: "Test"
+      - tapOn:
+          id: "create-profile-submit-button"
+      - extendedWaitUntil:
+          visible:
+            id: "create-profile-error-text"
+          timeout: 10000
+      - tapOn:
+          id: "create-profile-username-input"
+      - eraseText
+      - inputText: ${output.throwawayUsername}
+      - tapOn:
+          id: "create-profile-nickname-input"
+      - eraseText
+      - inputText: ${output.throwawayNickname}
+      - tapOn:
+          id: "create-profile-submit-button"
+      - extendedWaitUntil:
+          visible:
+            id: "screen-logs-home"
+          timeout: 15000
+      - stopApp
+      - launchApp:
+          clearState: false
+          clearKeychain: false
+          stopApp: false
+      - runFlow:
+          file: "helpers/open_dev_server.yaml"
+      - extendedWaitUntil:
+          visible:
+            id: "screen-logs-home"
+          timeout: 15000
+      - tapOn:
+          id: "tab-profile"
+      - extendedWaitUntil:
+          visible:
+            id: "screen-profile"
+          timeout: 10000
+      - assertVisible: ${output.throwawayNickname}
+      - assertVisible: ${output.throwawayUsername}
+      - scrollUntilVisible:
+          element:
+            id: "profile-delete-account-button"
+          direction: DOWN
+          timeout: 10000
+          visibilityPercentage: 60
+      - tapOn:
+          id: "profile-delete-account-button"
+      - assertVisible: "Delete account?"
+      - tapOn: "Cancel"
+      - assertVisible:
+          id: "screen-profile"
+      - tapOn:
+          id: "profile-delete-account-button"
+      - assertVisible: "Delete account?"
+      - tapOn: "Delete account"
+      - extendedWaitUntil:
+          visible:
+            id: "screen-login"
+          timeout: 20000
+      - stopApp
+      - launchApp:
+          clearState: false
+          clearKeychain: false
+          stopApp: false
+      - runFlow:
+          file: "helpers/open_dev_server.yaml"
+      - extendedWaitUntil:
+          visible:
+            id: "screen-login"
+          timeout: 10000
+      - tapOn:
+          id: "login-email-input"
+      - inputText: ${output.throwawayEmail}
+      - tapOn:
+          id: "login-password-input"
+      - inputText: "RecountE2E!2026"
+      - tapOn:
+          id: "login-submit-button"
+      - extendedWaitUntil:
+          visible:
+            id: "login-error-text"
+          timeout: 15000

@@ -1,0 +1,102 @@
+appId: com.bferg89.recount
+name: "05 Create input caps and layout iOS"
+tags:
+  - ios
+  - create
+  - layout
+  - destructive
+---
+- evalScript: ${output.capsTitle = 'Caps Title ' + Date.now()}
+- launchApp:
+    clearState: true
+    clearKeychain: true
+    stopApp: true
+- runFlow:
+    file: "helpers/open_dev_server.yaml"
+- extendedWaitUntil:
+    visible:
+      id: "screen-login"
+    timeout: 10000
+- tapOn:
+    id: "login-email-input"
+- inputText: "e2e.owner@recount.test"
+- tapOn:
+    id: "login-password-input"
+- inputText: "RecountE2E!2026"
+- tapOn:
+    id: "login-submit-button"
+- extendedWaitUntil:
+    visible:
+      id: "screen-logs-home"
+    timeout: 15000
+- tapOn:
+    id: "tab-create-log"
+- extendedWaitUntil:
+    visible:
+      id: "screen-create-log"
+    timeout: 10000
+
+- tapOn:
+    id: "create-log-title-input"
+- inputText: ${output.capsTitle}
+- inputText: " EXTRA_TEXT_PAST_CAP"
+- tapOn:
+    id: "create-log-location-input"
+- inputText: "Caps Location 123456789012345678901234567890 EXTRA"
+
+- tapOn:
+    id: "create-add-person-button"
+- extendedWaitUntil:
+    visible:
+      id: "add-person-sheet"
+    timeout: 10000
+- tapOn:
+    id: "add-person-name-input"
+- inputText: "Very Long Person Name 12345 EXTRA"
+- tapOn:
+    id: "add-person-submit-button"
+- extendedWaitUntil:
+    visible: "Very Long Person"
+    timeout: 10000
+
+- tapOn:
+    id: "create-add-moment-button"
+- extendedWaitUntil:
+    visible:
+      id: "add-moment-sheet"
+    timeout: 10000
+- tapOn:
+    id: "add-moment-title-input"
+- inputText: "Long moment title 1234567890123456789012345678901234567890 EXTRA"
+- tapOn:
+    id: "add-moment-time-input"
+- inputText: "12:34 PM EXTRA"
+- tapOn:
+    id: "add-moment-submit-button"
+- extendedWaitUntil:
+    visible: "Long moment title"
+    timeout: 10000
+
+- scrollUntilVisible:
+    element:
+      id: "create-note-input-highlight"
+    direction: DOWN
+    timeout: 10000
+    visibilityPercentage: 50
+- tapOn:
+    id: "create-note-input-highlight"
+- inputText: "This note intentionally runs past the prompted note cap so the field, save path, and detail display can prove that maximum length text stays usable on device without overlapping the surrounding controls or failing persistence in the generated Maestro layout pass."
+- inputText: " EXTRA_TEXT_PAST_CAP"
+- hideKeyboard
+- takeScreenshot: "create-input-caps-before-save"
+- tapOn:
+    id: "create-log-save-button"
+- extendedWaitUntil:
+    visible:
+      id: "screen-log-detail"
+    timeout: 20000
+- assertVisible: "Caps Title"
+- assertVisible: "Caps Location"
+- assertVisible: "Very Long Person"
+- assertVisible: "Long moment title"
+- takeScreenshot: "create-input-caps-detail"

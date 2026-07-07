@@ -1,0 +1,89 @@
+appId: com.bferg89.recount
+name: "10 Home and detail regression iOS"
+tags:
+  - ios
+  - home
+  - detail
+  - smoke
+---
+- launchApp:
+    clearState: true
+    clearKeychain: true
+    stopApp: true
+- runFlow:
+    file: "helpers/open_dev_server.yaml"
+- extendedWaitUntil:
+    visible:
+      id: "screen-login"
+    timeout: 10000
+- tapOn:
+    id: "login-email-input"
+- inputText: "e2e.owner@recount.test"
+- tapOn:
+    id: "login-password-input"
+- inputText: "RecountE2E!2026"
+- tapOn:
+    id: "login-submit-button"
+- extendedWaitUntil:
+    visible: "E2E Shared Night"
+    timeout: 15000
+- assertVisible:
+    id: "screen-logs-home"
+- assertVisible: "Logs"
+- assertVisible: "Jul 2026"
+- assertVisible: "E2E Shared Night"
+- assertVisible: "Vancouver"
+- assertVisible: "E2E Owner Private Log"
+- assertVisible: "Seattle"
+- takeScreenshot: "home-owner-fixtures"
+
+- tapOn: "E2E Shared Night"
+- extendedWaitUntil:
+    visible:
+      id: "screen-log-detail"
+    timeout: 10000
+- assertVisible: "E2E Shared Night"
+- assertVisible: "Vancouver"
+- assertVisible: "Pre-game at the apartment"
+- takeScreenshot: "detail-shared-night"
+- tapOn:
+    id: "log-detail-back-button"
+- extendedWaitUntil:
+    visible:
+      id: "screen-logs-home"
+    timeout: 10000
+
+- tapOn: "E2E Owner Private Log"
+- extendedWaitUntil:
+    visible:
+      id: "screen-log-detail"
+    timeout: 10000
+- assertVisible: "E2E Owner Private Log"
+- assertVisible: "Seattle"
+- tapOn:
+    id: "log-detail-back-button"
+- extendedWaitUntil:
+    visible:
+      id: "screen-logs-home"
+    timeout: 10000
+
+- scrollUntilVisible:
+    element: "E2E Minimal Log"
+    direction: DOWN
+    timeout: 10000
+    visibilityPercentage: 60
+- assertVisible: "Jun 2026"
+- tapOn: "E2E Minimal Log"
+- extendedWaitUntil:
+    visible:
+      id: "screen-log-detail"
+    timeout: 10000
+- assertVisible: "E2E Minimal Log"
+- assertVisible: "Victoria"
+- assertVisible: "0 added"
+- tapOn:
+    id: "log-detail-back-button"
+- extendedWaitUntil:
+    visible:
+      id: "screen-logs-home"
+    timeout: 10000

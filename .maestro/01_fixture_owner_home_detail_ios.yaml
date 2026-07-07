@@ -1,0 +1,86 @@
+appId: com.bferg89.recount
+name: "01 Owner fixture home and detail iOS"
+tags:
+  - ios
+  - fixtures
+  - smoke
+---
+- launchApp:
+    clearState: true
+    clearKeychain: true
+    stopApp: true
+- runFlow:
+    file: "helpers/open_dev_server.yaml"
+- extendedWaitUntil:
+    visible:
+      id: "screen-login"
+    timeout: 10000
+- tapOn:
+    id: "login-email-input"
+- inputText: "e2e.owner@recount.test"
+- tapOn:
+    id: "login-password-input"
+- inputText: "RecountE2E!2026"
+- tapOn:
+    id: "login-submit-button"
+- extendedWaitUntil:
+    visible: "E2E Shared Night"
+    timeout: 15000
+- assertVisible:
+    id: "screen-logs-home"
+- assertVisible: "E2E Shared Night"
+- assertVisible: "E2E Owner Private Log"
+- scrollUntilVisible:
+    element: "E2E Minimal Log"
+    direction: DOWN
+    timeout: 10000
+    visibilityPercentage: 60
+- assertVisible: "E2E Minimal Log"
+- assertNotVisible: "E2E Friend Untagged Log"
+
+- tapOn: "E2E Minimal Log"
+- extendedWaitUntil:
+    visible:
+      id: "screen-log-detail"
+    timeout: 10000
+- assertVisible: "E2E Minimal Log"
+- assertVisible: "Victoria"
+- assertVisible: "0 added"
+- assertVisible:
+    id: "log-detail-edit-button"
+- assertVisible:
+    id: "log-detail-delete-button"
+- assertNotVisible:
+    id: "log-detail-leave-button"
+- tapOn:
+    id: "log-detail-back-button"
+- extendedWaitUntil:
+    visible:
+      id: "screen-logs-home"
+    timeout: 10000
+
+- tapOn: "E2E Shared Night"
+- extendedWaitUntil:
+    visible:
+      id: "screen-log-detail"
+    timeout: 10000
+- assertVisible: "E2E Shared Night"
+- assertVisible: "Vancouver"
+- assertVisible: "E2E Owner"
+- assertVisible: "E2E Friend"
+- assertVisible: "Manual Guest"
+- assertVisible: "Pre-game at the apartment"
+- assertVisible: "Walked to the main stop"
+- assertVisible: "Late-night food"
+- scrollUntilVisible:
+    element: "Everyone arrived before the first round ended."
+    direction: DOWN
+    timeout: 10000
+    visibilityPercentage: 40
+- assertVisible: "We are calling this a strategy, not a detour."
+- assertVisible:
+    id: "log-detail-edit-button"
+- assertVisible:
+    id: "log-detail-delete-button"
+- assertNotVisible:
+    id: "log-detail-leave-button"

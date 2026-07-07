@@ -1,0 +1,76 @@
+appId: com.bferg89.recount
+name: "02 Friend fixture permissions iOS"
+tags:
+  - ios
+  - fixtures
+  - permissions
+  - smoke
+---
+- launchApp:
+    clearState: true
+    clearKeychain: true
+    stopApp: true
+- runFlow:
+    file: "helpers/open_dev_server.yaml"
+- extendedWaitUntil:
+    visible:
+      id: "screen-login"
+    timeout: 10000
+- tapOn:
+    id: "login-email-input"
+- inputText: "e2e.friend@recount.test"
+- tapOn:
+    id: "login-password-input"
+- inputText: "RecountE2E!2026"
+- tapOn:
+    id: "login-submit-button"
+- extendedWaitUntil:
+    visible: "E2E Shared Night"
+    timeout: 15000
+- assertVisible: "E2E Shared Night"
+- assertVisible: "E2E Friend Untagged Log"
+- assertNotVisible: "E2E Owner Private Log"
+
+- tapOn: "E2E Shared Night"
+- extendedWaitUntil:
+    visible:
+      id: "screen-log-detail"
+    timeout: 10000
+- assertVisible: "E2E Shared Night"
+- assertVisible: "E2E Friend"
+- assertVisible: "Manual Guest"
+- scrollUntilVisible:
+    element:
+      id: "log-detail-edit-button"
+    direction: DOWN
+    timeout: 10000
+    visibilityPercentage: 60
+- assertVisible:
+    id: "log-detail-edit-button"
+- assertVisible:
+    id: "log-detail-leave-button"
+- assertNotVisible:
+    id: "log-detail-delete-button"
+
+- tapOn:
+    id: "log-detail-edit-button"
+- extendedWaitUntil:
+    visible:
+      id: "screen-edit-log"
+    timeout: 10000
+- assertVisible: "E2E Shared Night"
+- assertVisible: "E2E Friend"
+- assertNotVisible:
+    id: "edit-log-add-person-button"
+- tapOn: "E2E Friend"
+- assertNotVisible: "Remove E2E Friend?"
+- scrollUntilVisible:
+    element:
+      id: "edit-log-add-moment-button"
+    direction: DOWN
+    timeout: 10000
+    visibilityPercentage: 60
+- assertVisible:
+    id: "edit-log-add-moment-button"
+- assertVisible:
+    id: "edit-log-publish-button"

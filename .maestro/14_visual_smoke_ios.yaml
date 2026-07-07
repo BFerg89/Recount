@@ -1,0 +1,82 @@
+appId: com.bferg89.recount
+name: "14 Visual smoke iOS"
+tags:
+  - ios
+  - visual
+  - smoke
+---
+- launchApp:
+    clearState: true
+    clearKeychain: true
+    stopApp: true
+- runFlow:
+    file: "helpers/open_dev_server.yaml"
+- extendedWaitUntil:
+    visible:
+      id: "screen-login"
+    timeout: 10000
+- tapOn:
+    id: "login-email-input"
+- inputText: "e2e.owner@recount.test"
+- tapOn:
+    id: "login-password-input"
+- inputText: "RecountE2E!2026"
+- tapOn:
+    id: "login-submit-button"
+- extendedWaitUntil:
+    visible:
+      id: "screen-logs-home"
+    timeout: 15000
+- takeScreenshot: "visual-home-portrait"
+
+- tapOn:
+    id: "tab-create-log"
+- extendedWaitUntil:
+    visible:
+      id: "screen-create-log"
+    timeout: 10000
+- takeScreenshot: "visual-create-portrait"
+- tapOn:
+    id: "create-add-person-button"
+- extendedWaitUntil:
+    visible:
+      id: "add-person-sheet"
+    timeout: 10000
+- takeScreenshot: "visual-add-person-sheet"
+- swipe:
+    from:
+      id: "add-person-sheet"
+    direction: DOWN
+    duration: 500
+
+- tapOn:
+    id: "tab-profile"
+- extendedWaitUntil:
+    visible:
+      id: "screen-profile"
+    timeout: 10000
+- takeScreenshot: "visual-profile-portrait"
+
+- tapOn:
+    id: "tab-logs"
+- extendedWaitUntil:
+    visible: "E2E Shared Night"
+    timeout: 10000
+- tapOn: "E2E Shared Night"
+- extendedWaitUntil:
+    visible:
+      id: "screen-log-detail"
+    timeout: 10000
+- takeScreenshot: "visual-detail-portrait"
+
+- setOrientation: LANDSCAPE_LEFT
+- waitForAnimationToEnd:
+    timeout: 2000
+- assertVisible:
+    id: "screen-log-detail"
+- takeScreenshot: "visual-detail-landscape"
+- setOrientation: PORTRAIT
+- waitForAnimationToEnd:
+    timeout: 2000
+- assertVisible:
+    id: "screen-log-detail"

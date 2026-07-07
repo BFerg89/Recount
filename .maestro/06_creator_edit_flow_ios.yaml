@@ -1,0 +1,264 @@
+appId: com.bferg89.recount
+name: "06 Creator edit flow iOS"
+tags:
+  - ios
+  - edit
+  - destructive
+---
+- evalScript: ${output.baseTitle = 'Maestro Edit Base ' + Date.now()}
+- evalScript: ${output.editedTitle = 'Maestro Edited ' + Date.now()}
+- launchApp:
+    clearState: true
+    clearKeychain: true
+    stopApp: true
+- runFlow:
+    file: "helpers/open_dev_server.yaml"
+- extendedWaitUntil:
+    visible:
+      id: "screen-login"
+    timeout: 10000
+- tapOn:
+    id: "login-email-input"
+- inputText: "e2e.owner@recount.test"
+- tapOn:
+    id: "login-password-input"
+- inputText: "RecountE2E!2026"
+- tapOn:
+    id: "login-submit-button"
+- extendedWaitUntil:
+    visible:
+      id: "screen-logs-home"
+    timeout: 15000
+- tapOn:
+    id: "tab-create-log"
+- extendedWaitUntil:
+    visible:
+      id: "screen-create-log"
+    timeout: 10000
+- tapOn:
+    id: "create-log-title-input"
+- inputText: ${output.baseTitle}
+- tapOn:
+    id: "create-log-location-input"
+- inputText: "Edit Base City"
+- tapOn:
+    id: "create-add-person-button"
+- extendedWaitUntil:
+    visible:
+      id: "add-person-sheet"
+    timeout: 10000
+- tapOn:
+    id: "add-person-name-input"
+- inputText: "Persisted Guest"
+- tapOn:
+    id: "add-person-submit-button"
+- extendedWaitUntil:
+    visible: "Persisted Guest"
+    timeout: 10000
+- tapOn:
+    id: "create-add-person-button"
+- extendedWaitUntil:
+    visible: "E2E Friend"
+    timeout: 15000
+- tapOn: "E2E Friend"
+- extendedWaitUntil:
+    visible: "E2E Friend"
+    timeout: 10000
+- tapOn:
+    id: "create-add-moment-button"
+- extendedWaitUntil:
+    visible:
+      id: "add-moment-sheet"
+    timeout: 10000
+- tapOn:
+    id: "add-moment-title-input"
+- inputText: "Original Moment"
+- tapOn:
+    id: "add-moment-time-input"
+- inputText: "8:00 PM"
+- tapOn:
+    id: "add-moment-submit-button"
+- extendedWaitUntil:
+    visible: "Original Moment"
+    timeout: 10000
+- scrollUntilVisible:
+    element:
+      id: "create-note-input-highlight"
+    direction: DOWN
+    timeout: 10000
+    visibilityPercentage: 50
+- tapOn:
+    id: "create-note-input-highlight"
+- inputText: "Original highlight"
+- hideKeyboard
+- tapOn:
+    id: "create-log-save-button"
+- extendedWaitUntil:
+    visible:
+      id: "screen-log-detail"
+    timeout: 20000
+- assertVisible: ${output.baseTitle}
+
+- scrollUntilVisible:
+    element:
+      id: "log-detail-edit-button"
+    direction: DOWN
+    timeout: 10000
+    visibilityPercentage: 60
+- tapOn:
+    id: "log-detail-edit-button"
+- extendedWaitUntil:
+    visible:
+      id: "screen-edit-log"
+    timeout: 10000
+- assertVisible: ${output.baseTitle}
+- assertVisible: "Edit Base City"
+- assertVisible: "Persisted Guest"
+- assertVisible: "E2E Friend"
+- assertVisible: "Original Moment"
+
+- tapOn:
+    id: "edit-log-title-input"
+- eraseText
+- inputText: "   "
+- assertVisible:
+    id: "edit-log-publish-button"
+    enabled: false
+- tapOn:
+    id: "edit-log-title-input"
+- eraseText
+- inputText: ${output.editedTitle}
+- tapOn:
+    id: "edit-log-location-input"
+- eraseText
+- inputText: "   Edited City   "
+
+- scrollUntilVisible:
+    element:
+      id: "edit-log-add-person-button"
+    direction: DOWN
+    timeout: 10000
+    visibilityPercentage: 60
+- tapOn:
+    id: "edit-log-add-person-button"
+- extendedWaitUntil:
+    visible:
+      id: "add-person-sheet"
+    timeout: 10000
+- tapOn:
+    id: "add-person-name-input"
+- inputText: "New Edit Guest"
+- tapOn:
+    id: "add-person-submit-button"
+- extendedWaitUntil:
+    visible: "New Edit Guest"
+    timeout: 10000
+- tapOn:
+    id: "edit-log-add-person-button"
+- extendedWaitUntil:
+    visible:
+      id: "add-person-sheet"
+    timeout: 10000
+- tapOn:
+    id: "add-person-name-input"
+- inputText: "Transient Guest"
+- tapOn:
+    id: "add-person-submit-button"
+- extendedWaitUntil:
+    visible: "Transient Guest"
+    timeout: 10000
+- tapOn: "Transient Guest"
+- assertVisible: "Remove Transient Guest?"
+- tapOn: "Delete Transient Guest"
+- assertNotVisible: "Transient Guest"
+- tapOn: "Persisted Guest"
+- assertVisible: "Remove Persisted Guest?"
+- tapOn: "Cancel"
+- assertVisible: "Persisted Guest"
+- tapOn: "Persisted Guest"
+- assertVisible: "Remove Persisted Guest?"
+- tapOn: "Delete Persisted Guest"
+- assertNotVisible: "Persisted Guest"
+
+- scrollUntilVisible:
+    element:
+      id: "edit-log-add-moment-button"
+    direction: DOWN
+    timeout: 10000
+    visibilityPercentage: 60
+- tapOn:
+    id: "edit-log-add-moment-button"
+- extendedWaitUntil:
+    visible:
+      id: "add-moment-sheet"
+    timeout: 10000
+- tapOn:
+    id: "add-moment-title-input"
+- inputText: "Temporary Moment"
+- tapOn:
+    id: "add-moment-submit-button"
+- extendedWaitUntil:
+    visible: "Temporary Moment"
+    timeout: 10000
+- tapOn: "Temporary Moment"
+- extendedWaitUntil:
+    visible:
+      id: "edit-moment-sheet"
+    timeout: 10000
+- tapOn:
+    id: "edit-moment-delete-button"
+- assertVisible: "Delete moment?"
+- tapOn: "Cancel"
+- assertVisible: "Temporary Moment"
+- tapOn:
+    id: "edit-moment-delete-button"
+- assertVisible: "Delete moment?"
+- tapOn: "Delete moment"
+- assertNotVisible: "Temporary Moment"
+
+- tapOn: "Original Moment"
+- extendedWaitUntil:
+    visible:
+      id: "edit-moment-sheet"
+    timeout: 10000
+- tapOn:
+    id: "edit-moment-title-input"
+- eraseText
+- inputText: "Updated Moment"
+- tapOn:
+    id: "edit-moment-time-input"
+- eraseText
+- inputText: "9:30 PM"
+- tapOn:
+    id: "edit-moment-update-button"
+- extendedWaitUntil:
+    visible: "Updated Moment"
+    timeout: 10000
+
+- scrollUntilVisible:
+    element:
+      id: "edit-log-note-input-highlight"
+    direction: DOWN
+    timeout: 10000
+    visibilityPercentage: 50
+- tapOn:
+    id: "edit-log-note-input-highlight"
+- eraseText
+- inputText: "Updated highlight"
+- hideKeyboard
+- tapOn:
+    id: "edit-log-publish-button"
+- extendedWaitUntil:
+    visible:
+      id: "screen-log-detail"
+    timeout: 20000
+- assertVisible: ${output.editedTitle}
+- assertVisible: "Edited City"
+- assertVisible: "New Edit Guest"
+- assertNotVisible: "Persisted Guest"
+- assertVisible: "Updated Moment"
+- scrollUntilVisible:
+    element: "Updated highlight"
+    direction: DOWN
+    timeout: 10000
+    visibilityPercentage: 40

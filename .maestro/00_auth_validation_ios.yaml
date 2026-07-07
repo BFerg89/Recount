@@ -1,0 +1,125 @@
+appId: com.bferg89.recount
+name: "00 Auth validation iOS"
+tags:
+  - ios
+  - auth
+  - smoke
+---
+- launchApp:
+    clearState: true
+    clearKeychain: true
+    stopApp: true
+- runFlow:
+    file: "helpers/open_dev_server.yaml"
+- extendedWaitUntil:
+    visible:
+      id: "screen-login"
+    timeout: 10000
+- assertVisible:
+    id: "login-submit-button"
+    enabled: false
+
+- tapOn:
+    id: "login-email-input"
+- inputText: "   "
+- assertVisible:
+    id: "login-submit-button"
+    enabled: false
+
+- tapOn:
+    id: "login-email-input"
+- eraseText
+- inputText: "e2e.owner@recount.test"
+- tapOn:
+    id: "login-password-input"
+- inputText: "WrongPassword123!"
+- tapOn:
+    id: "login-submit-button"
+    repeat: 2
+    delay: 100
+- extendedWaitUntil:
+    visible:
+      id: "login-error-text"
+    timeout: 15000
+- assertVisible: "Could not log in. Check your details and try again."
+
+- tapOn:
+    text: "SIGN UP"
+- extendedWaitUntil:
+    visible:
+      id: "screen-sign-up"
+    timeout: 10000
+- assertVisible:
+    id: "sign-up-submit-button"
+    enabled: false
+
+- tapOn:
+    id: "sign-up-email-input"
+- inputText: "invalid-email"
+- tapOn:
+    id: "sign-up-password-input"
+- inputText: "ValidPass123!"
+- tapOn:
+    id: "sign-up-confirm-password-input"
+- inputText: "ValidPass123!"
+- tapOn:
+    id: "sign-up-submit-button"
+- extendedWaitUntil:
+    visible:
+      id: "sign-up-error-text"
+    timeout: 15000
+
+- tapOn:
+    id: "sign-up-email-input"
+- eraseText
+- inputText: "new.validation@recount.test"
+- tapOn:
+    id: "sign-up-password-input"
+- eraseText
+- inputText: "ValidPass123!"
+- tapOn:
+    id: "sign-up-confirm-password-input"
+- eraseText
+- inputText: "Mismatch123!"
+- assertVisible: "Passwords do not match."
+- assertVisible:
+    id: "sign-up-submit-button"
+    enabled: false
+
+- tapOn:
+    id: "sign-up-password-input"
+- eraseText
+- inputText: "123"
+- tapOn:
+    id: "sign-up-confirm-password-input"
+- eraseText
+- inputText: "123"
+- tapOn:
+    id: "sign-up-submit-button"
+- assertVisible: "Password must be at least 6 characters."
+
+- tapOn:
+    id: "sign-up-email-input"
+- eraseText
+- inputText: "e2e.owner@recount.test"
+- tapOn:
+    id: "sign-up-password-input"
+- eraseText
+- inputText: "RecountE2E!2026"
+- tapOn:
+    id: "sign-up-confirm-password-input"
+- eraseText
+- inputText: "RecountE2E!2026"
+- tapOn:
+    id: "sign-up-submit-button"
+- extendedWaitUntil:
+    visible:
+      id: "sign-up-error-text"
+    timeout: 15000
+
+- tapOn:
+    text: "LOGIN"
+- extendedWaitUntil:
+    visible:
+      id: "screen-login"
+    timeout: 10000
