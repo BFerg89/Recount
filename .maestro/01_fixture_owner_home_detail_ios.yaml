@@ -23,29 +23,37 @@ tags:
 - inputText: "RecountE2E!2026"
 - tapOn:
     id: "login-submit-button"
+- runFlow:
+    file: "helpers/dismiss_system_prompts.yaml"
 - extendedWaitUntil:
-    visible: "E2E Shared Night"
+    visible: ".*E2E Shared.*"
     timeout: 15000
 - assertVisible:
     id: "screen-logs-home"
-- assertVisible: "E2E Shared Night"
-- assertVisible: "E2E Owner Private Log"
+- assertVisible: ".*E2E Shared.*"
+- assertVisible: ".*E2E Owner.*"
 - scrollUntilVisible:
-    element: "E2E Minimal Log"
+    element: ".*E2E Minimal.*"
     direction: DOWN
     timeout: 10000
     visibilityPercentage: 60
-- assertVisible: "E2E Minimal Log"
-- assertNotVisible: "E2E Friend Untagged Log"
+- assertVisible: ".*E2E Minimal.*"
+- assertNotVisible: ".*E2E Friend Untagged.*"
 
-- tapOn: "E2E Minimal Log"
+- tapOn: ".*E2E Minimal.*"
 - extendedWaitUntil:
     visible:
       id: "screen-log-detail"
     timeout: 10000
-- assertVisible: "E2E Minimal Log"
+- assertVisible: ".*E2E Minimal.*"
 - assertVisible: "Victoria"
 - assertVisible: "0 added"
+- scrollUntilVisible:
+    element:
+      id: "log-detail-edit-button"
+    direction: DOWN
+    timeout: 10000
+    visibilityPercentage: 60
 - assertVisible:
     id: "log-detail-edit-button"
 - assertVisible:
@@ -59,14 +67,14 @@ tags:
       id: "screen-logs-home"
     timeout: 10000
 
-- tapOn: "E2E Shared Night"
+- tapOn: ".*E2E Shared.*"
 - extendedWaitUntil:
     visible:
       id: "screen-log-detail"
     timeout: 10000
-- assertVisible: "E2E Shared Night"
+- assertVisible: ".*E2E Shared.*"
 - assertVisible: "Vancouver"
-- assertVisible: "E2E Owner"
+- assertVisible: ".*E2E Owner.*"
 - assertVisible: "E2E Friend"
 - assertVisible: "Manual Guest"
 - assertVisible: "Pre-game at the apartment"
@@ -78,6 +86,12 @@ tags:
     timeout: 10000
     visibilityPercentage: 40
 - assertVisible: "We are calling this a strategy, not a detour."
+- scrollUntilVisible:
+    element:
+      id: "log-detail-edit-button"
+    direction: DOWN
+    timeout: 10000
+    visibilityPercentage: 60
 - assertVisible:
     id: "log-detail-edit-button"
 - assertVisible:

@@ -33,6 +33,8 @@ tags:
 - inputText: "RecountE2E!2026"
 - tapOn:
     id: "login-submit-button"
+- runFlow:
+    file: "helpers/dismiss_system_prompts.yaml"
 - extendedWaitUntil:
     visible:
       id: "screen-logs-home"

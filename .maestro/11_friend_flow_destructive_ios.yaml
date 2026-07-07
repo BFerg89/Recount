@@ -23,6 +23,8 @@ tags:
 - inputText: "RecountE2E!2026"
 - tapOn:
     id: "login-submit-button"
+- runFlow:
+    file: "helpers/dismiss_system_prompts.yaml"
 - extendedWaitUntil:
     visible:
       id: "screen-logs-home"
@@ -51,7 +53,7 @@ tags:
     timeout: 10000
 - tapOn:
     id: "add-friend-username-input"
-- eraseText
+- eraseText: 100
 - inputText: "missing_recount_user"
 - tapOn:
     id: "add-friend-submit-button"
@@ -60,7 +62,7 @@ tags:
     timeout: 10000
 - tapOn:
     id: "add-friend-username-input"
-- eraseText
+- eraseText: 100
 - inputText: "e2e_owner"
 - tapOn:
     id: "add-friend-submit-button"
@@ -69,7 +71,7 @@ tags:
     timeout: 10000
 - tapOn:
     id: "add-friend-username-input"
-- eraseText
+- eraseText: 100
 - inputText: "e2e_friend"
 - tapOn:
     id: "add-friend-submit-button"
@@ -79,7 +81,7 @@ tags:
 
 - tapOn:
     id: "add-friend-username-input"
-- eraseText
+- eraseText: 100
 - inputText: "e2e_stranger"
 - tapOn:
     id: "add-friend-submit-button"
@@ -111,6 +113,8 @@ tags:
 - inputText: "RecountE2E!2026"
 - tapOn:
     id: "login-submit-button"
+- runFlow:
+    file: "helpers/dismiss_system_prompts.yaml"
 - extendedWaitUntil:
     visible:
       id: "screen-logs-home"
@@ -121,22 +125,22 @@ tags:
     visible:
       id: "screen-profile"
     timeout: 10000
-- assertVisible: "E2E Owner"
+- assertVisible: ".*E2E Owner.*"
 - assertVisible: "Accept"
 - tapOn: "Accept"
 - extendedWaitUntil:
-    visible: "E2E Owner"
+    visible: ".*E2E Owner.*"
     timeout: 15000
 - assertVisible: "@e2e_owner"
 - tapOn:
-    text: "E2E Owner"
-- assertVisible: "E2E Owner"
+    text: ".*E2E Owner.*"
+- assertVisible: ".*E2E Owner.*"
 - tapOn:
     text: "Delete E2E Owner"
     optional: true
 - runFlow:
     when:
-      visible: "E2E Owner"
+      visible: ".*E2E Owner.*"
     commands:
       - tapOn:
           id: "profile-friend-row-.*-delete-button"

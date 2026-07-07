@@ -24,19 +24,21 @@ tags:
 - inputText: "RecountE2E!2026"
 - tapOn:
     id: "login-submit-button"
+- runFlow:
+    file: "helpers/dismiss_system_prompts.yaml"
 - extendedWaitUntil:
-    visible: "E2E Shared Night"
+    visible: ".*E2E Shared.*"
     timeout: 15000
-- assertVisible: "E2E Shared Night"
-- assertVisible: "E2E Friend Untagged Log"
-- assertNotVisible: "E2E Owner Private Log"
+- assertVisible: ".*E2E Shared.*"
+- assertVisible: ".*E2E Friend Untagged.*"
+- assertNotVisible: ".*E2E Owner.*"
 
-- tapOn: "E2E Shared Night"
+- tapOn: ".*E2E Shared.*"
 - extendedWaitUntil:
     visible:
       id: "screen-log-detail"
     timeout: 10000
-- assertVisible: "E2E Shared Night"
+- assertVisible: ".*E2E Shared.*"
 - assertVisible: "E2E Friend"
 - assertVisible: "Manual Guest"
 - scrollUntilVisible:
@@ -58,7 +60,7 @@ tags:
     visible:
       id: "screen-edit-log"
     timeout: 10000
-- assertVisible: "E2E Shared Night"
+- assertVisible: ".*E2E Shared.*"
 - assertVisible: "E2E Friend"
 - assertNotVisible:
     id: "edit-log-add-person-button"

@@ -25,6 +25,8 @@ tags:
 - inputText: "RecountE2E!2026"
 - tapOn:
     id: "login-submit-button"
+- runFlow:
+    file: "helpers/dismiss_system_prompts.yaml"
 - extendedWaitUntil:
     visible:
       id: "screen-logs-home"
@@ -51,12 +53,12 @@ tags:
       id: "add-person-sheet"
     timeout: 10000
 - tapOn:
-    id: "add-person-name-input"
+    point: "50%,74%"
 - inputText: "Very Long Person Name 12345 EXTRA"
 - tapOn:
     id: "add-person-submit-button"
 - extendedWaitUntil:
-    visible: "Very Long Person"
+    visible: ".*Very Long Person.*"
     timeout: 10000
 
 - tapOn:
@@ -66,15 +68,15 @@ tags:
       id: "add-moment-sheet"
     timeout: 10000
 - tapOn:
-    id: "add-moment-title-input"
+    point: "50%,64%"
 - inputText: "Long moment title 1234567890123456789012345678901234567890 EXTRA"
 - tapOn:
-    id: "add-moment-time-input"
+    point: "50%,45%"
 - inputText: "12:34 PM EXTRA"
 - tapOn:
     id: "add-moment-submit-button"
 - extendedWaitUntil:
-    visible: "Long moment title"
+    visible: ".*Long moment title.*"
     timeout: 10000
 
 - scrollUntilVisible:
@@ -87,7 +89,8 @@ tags:
     id: "create-note-input-highlight"
 - inputText: "This note intentionally runs past the prompted note cap so the field, save path, and detail display can prove that maximum length text stays usable on device without overlapping the surrounding controls or failing persistence in the generated Maestro layout pass."
 - inputText: " EXTRA_TEXT_PAST_CAP"
-- hideKeyboard
+- tapOn:
+    point: "50%,10%"
 - takeScreenshot: "create-input-caps-before-save"
 - tapOn:
     id: "create-log-save-button"
@@ -95,8 +98,8 @@ tags:
     visible:
       id: "screen-log-detail"
     timeout: 20000
-- assertVisible: "Caps Title"
-- assertVisible: "Caps Location"
-- assertVisible: "Very Long Person"
-- assertVisible: "Long moment title"
+- assertVisible: ".*Caps Title.*"
+- assertVisible: ".*Caps Location.*"
+- assertVisible: ".*Very Long Person.*"
+- assertVisible: ".*Long moment title.*"
 - takeScreenshot: "create-input-caps-detail"

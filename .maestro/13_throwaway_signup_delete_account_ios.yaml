@@ -23,7 +23,9 @@ tags:
       id: "screen-login"
     timeout: 10000
 - tapOn:
-    text: "SIGN UP"
+    point: "50%,94%"
+- runFlow:
+    file: "helpers/dismiss_system_prompts.yaml"
 - extendedWaitUntil:
     visible:
       id: "screen-sign-up"
@@ -74,11 +76,11 @@ tags:
           timeout: 10000
       - tapOn:
           id: "create-profile-username-input"
-      - eraseText
+      - eraseText: 100
       - inputText: ${output.throwawayUsername}
       - tapOn:
           id: "create-profile-nickname-input"
-      - eraseText
+      - eraseText: 100
       - inputText: ${output.throwawayNickname}
       - tapOn:
           id: "create-profile-submit-button"
@@ -144,6 +146,8 @@ tags:
       - inputText: "RecountE2E!2026"
       - tapOn:
           id: "login-submit-button"
+      - runFlow:
+          file: "helpers/dismiss_system_prompts.yaml"
       - extendedWaitUntil:
           visible:
             id: "login-error-text"

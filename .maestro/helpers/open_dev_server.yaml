@@ -7,7 +7,20 @@ tags:
     when:
       visible: "Development Servers"
     commands:
-      - tapOn: "Recount"
-      - extendedWaitUntil:
-          notVisible: "Development Servers"
-          timeout: 30000
+      - tapOn: "Recount, http://.*:8081"
+      - waitForAnimationToEnd:
+          timeout: 5000
+- runFlow:
+    when:
+      visible: "Continue"
+    commands:
+      - tapOn: "Continue"
+      - waitForAnimationToEnd:
+          timeout: 5000
+- runFlow:
+    when:
+      visible: "Reload"
+    commands:
+      - tapOn: "Close"
+      - waitForAnimationToEnd:
+          timeout: 5000

@@ -1,0 +1,12 @@
+appId: com.bferg89.recount
+name: "Dismiss iOS system prompts"
+tags:
+  - helper
+---
+- runFlow:
+    when:
+      visible: "Save Password?"
+    commands:
+      - tapOn: "Not Now"
+      - waitForAnimationToEnd:
+          timeout: 3000

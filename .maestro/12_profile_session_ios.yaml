@@ -24,6 +24,8 @@ tags:
 - inputText: "RecountE2E!2026"
 - tapOn:
     id: "login-submit-button"
+- runFlow:
+    file: "helpers/dismiss_system_prompts.yaml"
 - extendedWaitUntil:
     visible:
       id: "screen-logs-home"
@@ -47,7 +49,7 @@ tags:
     timeout: 10000
 - assertVisible:
     id: "profile-user-card"
-- assertVisible: "E2E Owner"
+- assertVisible: ".*E2E Owner.*"
 - assertVisible: "@e2e_owner"
 - assertVisible: "e2e.owner@recount.test"
 - assertVisible:

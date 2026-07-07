@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react';
-import { Pressable, StyleSheet, Text, type TextInput } from 'react-native';
+import { Keyboard, Pressable, StyleSheet, Text, type TextInput } from 'react-native';
 import { router } from 'expo-router';
 import { AuthFormScreen } from '@/components/auth/AuthFormScreen';
 import { AuthTextInput } from '@/components/auth/AuthTextInput';
@@ -28,6 +28,7 @@ export default function LoginScreen() {
       return;
     }
 
+    Keyboard.dismiss();
     setAuthError(null);
     setIsSubmitting(true);
 
@@ -47,7 +48,10 @@ export default function LoginScreen() {
         <Pressable
           testID="login-sign-up-link"
           style={styles.signUpButton}
-          onPress={() => router.replace('/sign-up')}
+          onPress={() => {
+            Keyboard.dismiss();
+            router.replace('/sign-up');
+          }}
         >
           {({ pressed }) => (
             <>

@@ -26,6 +26,8 @@ tags:
 - inputText: "RecountE2E!2026"
 - tapOn:
     id: "login-submit-button"
+- runFlow:
+    file: "helpers/dismiss_system_prompts.yaml"
 - extendedWaitUntil:
     visible:
       id: "screen-logs-home"
@@ -45,11 +47,13 @@ tags:
 - tapOn:
     id: "create-add-person-button"
 - extendedWaitUntil:
-    visible: "E2E Friend"
+    visible:
+      id: "add-person-friend-option-00000000-0000-4000-8000-000000000102"
     timeout: 15000
-- tapOn: "E2E Friend"
+- tapOn:
+    id: "add-person-friend-option-00000000-0000-4000-8000-000000000102"
 - extendedWaitUntil:
-    visible: "E2E Friend"
+    visible: ".*E2E Friend.*"
     timeout: 10000
 - tapOn:
     id: "create-add-moment-button"
@@ -58,7 +62,7 @@ tags:
       id: "add-moment-sheet"
     timeout: 10000
 - tapOn:
-    id: "add-moment-title-input"
+    point: "50%,64%"
 - inputText: "Shared Original Moment"
 - tapOn:
     id: "add-moment-submit-button"
@@ -101,6 +105,8 @@ tags:
 - inputText: "RecountE2E!2026"
 - tapOn:
     id: "login-submit-button"
+- runFlow:
+    file: "helpers/dismiss_system_prompts.yaml"
 - extendedWaitUntil:
     visible: ${output.sharedTitle}
     timeout: 20000
@@ -129,11 +135,11 @@ tags:
     id: "edit-log-add-person-button"
 - tapOn:
     id: "edit-log-title-input"
-- eraseText
+- eraseText: 100
 - inputText: ${output.sharedEditedTitle}
 - tapOn:
     id: "edit-log-location-input"
-- eraseText
+- eraseText: 100
 - inputText: "Friend Edited City"
 - scrollUntilVisible:
     element:
@@ -148,7 +154,7 @@ tags:
       id: "add-moment-sheet"
     timeout: 10000
 - tapOn:
-    id: "add-moment-title-input"
+    point: "50%,64%"
 - inputText: "Friend Added Moment"
 - tapOn:
     id: "add-moment-submit-button"
@@ -164,7 +170,8 @@ tags:
 - tapOn:
     id: "edit-log-note-input-highlight"
 - inputText: "Friend added this note."
-- hideKeyboard
+- tapOn:
+    point: "50%,10%"
 - tapOn:
     id: "edit-log-publish-button"
 - extendedWaitUntil:
@@ -208,6 +215,8 @@ tags:
 - inputText: "RecountE2E!2026"
 - tapOn:
     id: "login-submit-button"
+- runFlow:
+    file: "helpers/dismiss_system_prompts.yaml"
 - extendedWaitUntil:
     visible: ${output.sharedEditedTitle}
     timeout: 20000

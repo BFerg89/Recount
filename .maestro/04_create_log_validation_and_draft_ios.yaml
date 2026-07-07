@@ -24,6 +24,8 @@ tags:
 - inputText: "RecountE2E!2026"
 - tapOn:
     id: "login-submit-button"
+- runFlow:
+    file: "helpers/dismiss_system_prompts.yaml"
 - extendedWaitUntil:
     visible:
       id: "screen-logs-home"
@@ -49,12 +51,12 @@ tags:
     enabled: false
 - tapOn:
     id: "create-log-title-input"
-- eraseText
+- eraseText: 100
 - inputText: "   "
 - inputText: ${output.createTitle}
 - tapOn:
     id: "create-log-location-input"
-- eraseText
+- eraseText: 100
 - inputText: "   Vancouver   "
 
 - tapOn:
@@ -64,15 +66,15 @@ tags:
       id: "add-person-sheet"
     timeout: 10000
 - tapOn:
-    id: "add-person-name-input"
+    point: "50%,74%"
 - inputText: "   "
 - tapOn:
     id: "add-person-submit-button"
 - assertVisible:
     id: "add-person-sheet"
 - tapOn:
-    id: "add-person-name-input"
-- eraseText
+    point: "50%,74%"
+- eraseText: 100
 - inputText: "Sam Maestro"
 - tapOn:
     id: "add-person-submit-button"
@@ -95,7 +97,7 @@ tags:
       id: "add-person-sheet"
     timeout: 10000
 - tapOn:
-    id: "add-person-name-input"
+    point: "50%,74%"
 - inputText: "Sam Maestro"
 - tapOn:
     id: "add-person-submit-button"
@@ -105,11 +107,13 @@ tags:
 - tapOn:
     id: "create-add-person-button"
 - extendedWaitUntil:
-    visible: "E2E Friend"
+    visible:
+      id: "add-person-friend-option-00000000-0000-4000-8000-000000000102"
     timeout: 15000
-- tapOn: "E2E Friend"
+- tapOn:
+    id: "add-person-friend-option-00000000-0000-4000-8000-000000000102"
 - extendedWaitUntil:
-    visible: "E2E Friend"
+    visible: ".*E2E Friend.*"
     timeout: 10000
 - tapOn:
     id: "create-add-person-button"
@@ -117,7 +121,8 @@ tags:
     visible:
       id: "add-person-sheet"
     timeout: 10000
-- tapOn: "E2E Friend"
+- tapOn:
+    id: "add-person-friend-option-00000000-0000-4000-8000-000000000102"
 - assertVisible:
     id: "add-person-sheet"
 - swipe:
@@ -133,19 +138,17 @@ tags:
       id: "add-moment-sheet"
     timeout: 10000
 - tapOn:
-    id: "add-moment-title-input"
+    point: "50%,64%"
 - inputText: "   "
 - tapOn:
     id: "add-moment-submit-button"
 - assertVisible:
     id: "add-moment-sheet"
-- tapOn:
-    id: "add-moment-title-input"
-- eraseText
+- eraseText: 100
 - inputText: "Walk through Gastown"
 - tapOn:
-    id: "add-moment-time-input"
-- eraseText
+    point: "50%,45%"
+- eraseText: 100
 - tapOn:
     id: "add-moment-submit-button"
 - extendedWaitUntil:
@@ -161,7 +164,7 @@ tags:
       id: "add-moment-sheet"
     timeout: 10000
 - tapOn:
-    id: "add-moment-title-input"
+    point: "50%,64%"
 - inputText: "Discarded Moment"
 - swipe:
     from:
@@ -179,7 +182,8 @@ tags:
 - tapOn:
     id: "create-note-input-highlight"
 - inputText: "A generated Maestro highlight."
-- hideKeyboard
+- tapOn:
+    point: "50%,10%"
 - tapOn:
     id: "create-log-save-button"
 - extendedWaitUntil:

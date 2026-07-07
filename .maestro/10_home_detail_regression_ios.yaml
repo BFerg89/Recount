@@ -24,25 +24,27 @@ tags:
 - inputText: "RecountE2E!2026"
 - tapOn:
     id: "login-submit-button"
+- runFlow:
+    file: "helpers/dismiss_system_prompts.yaml"
 - extendedWaitUntil:
-    visible: "E2E Shared Night"
+    visible: ".*E2E Shared.*"
     timeout: 15000
 - assertVisible:
     id: "screen-logs-home"
 - assertVisible: "Logs"
 - assertVisible: "Jul 2026"
-- assertVisible: "E2E Shared Night"
+- assertVisible: ".*E2E Shared.*"
 - assertVisible: "Vancouver"
-- assertVisible: "E2E Owner Private Log"
+- assertVisible: ".*E2E Owner.*"
 - assertVisible: "Seattle"
 - takeScreenshot: "home-owner-fixtures"
 
-- tapOn: "E2E Shared Night"
+- tapOn: ".*E2E Shared.*"
 - extendedWaitUntil:
     visible:
       id: "screen-log-detail"
     timeout: 10000
-- assertVisible: "E2E Shared Night"
+- assertVisible: ".*E2E Shared.*"
 - assertVisible: "Vancouver"
 - assertVisible: "Pre-game at the apartment"
 - takeScreenshot: "detail-shared-night"
@@ -53,12 +55,12 @@ tags:
       id: "screen-logs-home"
     timeout: 10000
 
-- tapOn: "E2E Owner Private Log"
+- tapOn: ".*E2E Owner.*"
 - extendedWaitUntil:
     visible:
       id: "screen-log-detail"
     timeout: 10000
-- assertVisible: "E2E Owner Private Log"
+- assertVisible: ".*E2E Owner.*"
 - assertVisible: "Seattle"
 - tapOn:
     id: "log-detail-back-button"
@@ -68,17 +70,17 @@ tags:
     timeout: 10000
 
 - scrollUntilVisible:
-    element: "E2E Minimal Log"
+    element: ".*E2E Minimal.*"
     direction: DOWN
     timeout: 10000
     visibilityPercentage: 60
 - assertVisible: "Jun 2026"
-- tapOn: "E2E Minimal Log"
+- tapOn: ".*E2E Minimal.*"
 - extendedWaitUntil:
     visible:
       id: "screen-log-detail"
     timeout: 10000
-- assertVisible: "E2E Minimal Log"
+- assertVisible: ".*E2E Minimal.*"
 - assertVisible: "Victoria"
 - assertVisible: "0 added"
 - tapOn:

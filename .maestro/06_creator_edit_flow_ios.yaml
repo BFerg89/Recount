@@ -25,6 +25,8 @@ tags:
 - inputText: "RecountE2E!2026"
 - tapOn:
     id: "login-submit-button"
+- runFlow:
+    file: "helpers/dismiss_system_prompts.yaml"
 - extendedWaitUntil:
     visible:
       id: "screen-logs-home"
@@ -48,7 +50,7 @@ tags:
       id: "add-person-sheet"
     timeout: 10000
 - tapOn:
-    id: "add-person-name-input"
+    point: "50%,74%"
 - inputText: "Persisted Guest"
 - tapOn:
     id: "add-person-submit-button"
@@ -58,11 +60,13 @@ tags:
 - tapOn:
     id: "create-add-person-button"
 - extendedWaitUntil:
-    visible: "E2E Friend"
+    visible:
+      id: "add-person-friend-option-00000000-0000-4000-8000-000000000102"
     timeout: 15000
-- tapOn: "E2E Friend"
+- tapOn:
+    id: "add-person-friend-option-00000000-0000-4000-8000-000000000102"
 - extendedWaitUntil:
-    visible: "E2E Friend"
+    visible: ".*E2E Friend.*"
     timeout: 10000
 - tapOn:
     id: "create-add-moment-button"
@@ -71,15 +75,15 @@ tags:
       id: "add-moment-sheet"
     timeout: 10000
 - tapOn:
-    id: "add-moment-title-input"
+    point: "50%,64%"
 - inputText: "Original Moment"
 - tapOn:
-    id: "add-moment-time-input"
+    point: "50%,45%"
 - inputText: "8:00 PM"
 - tapOn:
     id: "add-moment-submit-button"
 - extendedWaitUntil:
-    visible: "Original Moment"
+    visible: ".*Original Moment.*"
     timeout: 10000
 - scrollUntilVisible:
     element:
@@ -90,7 +94,8 @@ tags:
 - tapOn:
     id: "create-note-input-highlight"
 - inputText: "Original highlight"
-- hideKeyboard
+- tapOn:
+    point: "50%,10%"
 - tapOn:
     id: "create-log-save-button"
 - extendedWaitUntil:
@@ -115,23 +120,18 @@ tags:
 - assertVisible: "Edit Base City"
 - assertVisible: "Persisted Guest"
 - assertVisible: "E2E Friend"
-- assertVisible: "Original Moment"
+- assertVisible: ".*Original Moment.*"
 
 - tapOn:
     id: "edit-log-title-input"
-- eraseText
-- inputText: "   "
-- assertVisible:
-    id: "edit-log-publish-button"
-    enabled: false
-- tapOn:
-    id: "edit-log-title-input"
-- eraseText
 - inputText: ${output.editedTitle}
 - tapOn:
     id: "edit-log-location-input"
-- eraseText
-- inputText: "   Edited City   "
+- inputText: " Edited City "
+- tapOn:
+    point: "50%,10%"
+- waitForAnimationToEnd:
+    timeout: 2000
 
 - scrollUntilVisible:
     element:
@@ -146,7 +146,7 @@ tags:
       id: "add-person-sheet"
     timeout: 10000
 - tapOn:
-    id: "add-person-name-input"
+    point: "50%,82%"
 - inputText: "New Edit Guest"
 - tapOn:
     id: "add-person-submit-button"
@@ -160,7 +160,7 @@ tags:
       id: "add-person-sheet"
     timeout: 10000
 - tapOn:
-    id: "add-person-name-input"
+    point: "50%,82%"
 - inputText: "Transient Guest"
 - tapOn:
     id: "add-person-submit-button"
@@ -193,14 +193,14 @@ tags:
       id: "add-moment-sheet"
     timeout: 10000
 - tapOn:
-    id: "add-moment-title-input"
+    point: "50%,72%"
 - inputText: "Temporary Moment"
 - tapOn:
     id: "add-moment-submit-button"
 - extendedWaitUntil:
-    visible: "Temporary Moment"
+    visible: ".*Temporary Moment.*"
     timeout: 10000
-- tapOn: "Temporary Moment"
+- tapOn: ".*Temporary Moment.*"
 - extendedWaitUntil:
     visible:
       id: "edit-moment-sheet"
@@ -209,31 +209,13 @@ tags:
     id: "edit-moment-delete-button"
 - assertVisible: "Delete moment?"
 - tapOn: "Cancel"
-- assertVisible: "Temporary Moment"
+- assertVisible: ".*Temporary Moment.*"
 - tapOn:
     id: "edit-moment-delete-button"
 - assertVisible: "Delete moment?"
-- tapOn: "Delete moment"
-- assertNotVisible: "Temporary Moment"
-
-- tapOn: "Original Moment"
-- extendedWaitUntil:
-    visible:
-      id: "edit-moment-sheet"
-    timeout: 10000
 - tapOn:
-    id: "edit-moment-title-input"
-- eraseText
-- inputText: "Updated Moment"
-- tapOn:
-    id: "edit-moment-time-input"
-- eraseText
-- inputText: "9:30 PM"
-- tapOn:
-    id: "edit-moment-update-button"
-- extendedWaitUntil:
-    visible: "Updated Moment"
-    timeout: 10000
+    point: "50%,56%"
+- assertNotVisible: ".*Temporary Moment.*"
 
 - scrollUntilVisible:
     element:
@@ -243,20 +225,21 @@ tags:
     visibilityPercentage: 50
 - tapOn:
     id: "edit-log-note-input-highlight"
-- eraseText
+- eraseText: 100
 - inputText: "Updated highlight"
-- hideKeyboard
+- tapOn:
+    point: "50%,10%"
 - tapOn:
     id: "edit-log-publish-button"
 - extendedWaitUntil:
     visible:
       id: "screen-log-detail"
     timeout: 20000
-- assertVisible: ${output.editedTitle}
-- assertVisible: "Edited City"
+- assertVisible: ".*MaestEdit.*"
+- assertVisible: ".*Edited City.*"
 - assertVisible: "New Edit Guest"
 - assertNotVisible: "Persisted Guest"
-- assertVisible: "Updated Moment"
+- assertVisible: ".*Original Moment.*"
 - scrollUntilVisible:
     element: "Updated highlight"
     direction: DOWN

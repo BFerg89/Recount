@@ -23,6 +23,8 @@ tags:
 - inputText: "RecountE2E!2026"
 - tapOn:
     id: "login-submit-button"
+- runFlow:
+    file: "helpers/dismiss_system_prompts.yaml"
 - extendedWaitUntil:
     visible:
       id: "screen-logs-home"
@@ -60,9 +62,9 @@ tags:
 - tapOn:
     id: "tab-logs"
 - extendedWaitUntil:
-    visible: "E2E Shared Night"
+    visible: ".*E2E Shared.*"
     timeout: 10000
-- tapOn: "E2E Shared Night"
+- tapOn: ".*E2E Shared.*"
 - extendedWaitUntil:
     visible:
       id: "screen-log-detail"

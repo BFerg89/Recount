@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react';
-import { StyleSheet, Text, type TextInput } from 'react-native';
+import { Keyboard, StyleSheet, Text, type TextInput } from 'react-native';
 
 import { router } from 'expo-router';
 import { useProfile } from '@/context/ProfileContext';
@@ -28,6 +28,8 @@ export default function CreateProfileScreen() {
   );
 
   const handleCreateProfile = async () => {
+    Keyboard.dismiss();
+
     if (!hasRequiredFields) {
       setFormError('Fill in each field to create your profile.');
       return;

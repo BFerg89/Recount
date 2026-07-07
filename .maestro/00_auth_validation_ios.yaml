@@ -28,7 +28,7 @@ tags:
 
 - tapOn:
     id: "login-email-input"
-- eraseText
+- eraseText: 100
 - inputText: "e2e.owner@recount.test"
 - tapOn:
     id: "login-password-input"
@@ -37,6 +37,8 @@ tags:
     id: "login-submit-button"
     repeat: 2
     delay: 100
+- runFlow:
+    file: "helpers/dismiss_system_prompts.yaml"
 - extendedWaitUntil:
     visible:
       id: "login-error-text"
@@ -44,7 +46,9 @@ tags:
 - assertVisible: "Could not log in. Check your details and try again."
 
 - tapOn:
-    text: "SIGN UP"
+    point: "50%,94%"
+- runFlow:
+    file: "helpers/dismiss_system_prompts.yaml"
 - extendedWaitUntil:
     visible:
       id: "screen-sign-up"
@@ -71,15 +75,15 @@ tags:
 
 - tapOn:
     id: "sign-up-email-input"
-- eraseText
+- eraseText: 100
 - inputText: "new.validation@recount.test"
 - tapOn:
     id: "sign-up-password-input"
-- eraseText
+- eraseText: 100
 - inputText: "ValidPass123!"
 - tapOn:
     id: "sign-up-confirm-password-input"
-- eraseText
+- eraseText: 100
 - inputText: "Mismatch123!"
 - assertVisible: "Passwords do not match."
 - assertVisible:
@@ -88,11 +92,11 @@ tags:
 
 - tapOn:
     id: "sign-up-password-input"
-- eraseText
+- eraseText: 100
 - inputText: "123"
 - tapOn:
     id: "sign-up-confirm-password-input"
-- eraseText
+- eraseText: 100
 - inputText: "123"
 - tapOn:
     id: "sign-up-submit-button"
@@ -100,15 +104,15 @@ tags:
 
 - tapOn:
     id: "sign-up-email-input"
-- eraseText
+- eraseText: 100
 - inputText: "e2e.owner@recount.test"
 - tapOn:
     id: "sign-up-password-input"
-- eraseText
+- eraseText: 100
 - inputText: "RecountE2E!2026"
 - tapOn:
     id: "sign-up-confirm-password-input"
-- eraseText
+- eraseText: 100
 - inputText: "RecountE2E!2026"
 - tapOn:
     id: "sign-up-submit-button"
@@ -118,7 +122,9 @@ tags:
     timeout: 15000
 
 - tapOn:
-    text: "LOGIN"
+    point: "50%,95%"
+- runFlow:
+    file: "helpers/dismiss_system_prompts.yaml"
 - extendedWaitUntil:
     visible:
       id: "screen-login"

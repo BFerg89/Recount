@@ -24,6 +24,8 @@ tags:
 - inputText: "RecountE2E!2026"
 - tapOn:
     id: "login-submit-button"
+- runFlow:
+    file: "helpers/dismiss_system_prompts.yaml"
 - extendedWaitUntil:
     visible:
       id: "screen-logs-home"
@@ -43,11 +45,13 @@ tags:
 - tapOn:
     id: "create-add-person-button"
 - extendedWaitUntil:
-    visible: "E2E Friend"
+    visible:
+      id: "add-person-friend-option-00000000-0000-4000-8000-000000000102"
     timeout: 15000
-- tapOn: "E2E Friend"
+- tapOn:
+    id: "add-person-friend-option-00000000-0000-4000-8000-000000000102"
 - extendedWaitUntil:
-    visible: "E2E Friend"
+    visible: ".*E2E Friend.*"
     timeout: 10000
 - tapOn:
     id: "create-log-save-button"
@@ -85,6 +89,8 @@ tags:
 - inputText: "RecountE2E!2026"
 - tapOn:
     id: "login-submit-button"
+- runFlow:
+    file: "helpers/dismiss_system_prompts.yaml"
 - extendedWaitUntil:
     visible: ${output.revokeTitle}
     timeout: 20000
@@ -134,6 +140,8 @@ tags:
 - inputText: "RecountE2E!2026"
 - tapOn:
     id: "login-submit-button"
+- runFlow:
+    file: "helpers/dismiss_system_prompts.yaml"
 - extendedWaitUntil:
     visible: ${output.revokeTitle}
     timeout: 20000
@@ -194,6 +202,8 @@ tags:
 - inputText: "RecountE2E!2026"
 - tapOn:
     id: "login-submit-button"
+- runFlow:
+    file: "helpers/dismiss_system_prompts.yaml"
 - extendedWaitUntil:
     visible:
       id: "screen-logs-home"
@@ -222,6 +232,8 @@ tags:
 - inputText: "RecountE2E!2026"
 - tapOn:
     id: "login-submit-button"
+- runFlow:
+    file: "helpers/dismiss_system_prompts.yaml"
 - extendedWaitUntil:
     visible: ${output.revokeTitle}
     timeout: 20000

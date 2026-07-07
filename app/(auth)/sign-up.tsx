@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { router } from 'expo-router';
-import { Pressable, StyleSheet, Text } from 'react-native';
+import { Keyboard, Pressable, StyleSheet, Text } from 'react-native';
 import { isAuthError, isAuthWeakPasswordError } from '@supabase/supabase-js';
 
 import { AuthFormScreen } from '@/components/auth/AuthFormScreen';
@@ -11,6 +11,8 @@ import { useAuth } from '@/context/AuthContext';
 
 const { colors, fonts, type } = recountTheme;
 const minimumPasswordLength = 6;
+const signUpPasswordTextContentType = __DEV__ ? 'oneTimeCode' : 'newPassword';
+const signUpPasswordAutoComplete = __DEV__ ? 'off' : 'new-password';
 
 const getSignUpErrorMessage = (error: unknown) => {
   if (isAuthWeakPasswordError(error)) {
@@ -81,6 +83,8 @@ export default function SignUpScreen() {
   };
 
   const handleSignUp = async () => {
+    Keyboard.dismiss();
+
     if (!hasRequiredFields) {
       setFormError('Fill in each field to create your account.');
       return;
@@ -123,7 +127,10 @@ export default function SignUpScreen() {
       footer={(
         <Pressable
           testID="sign-up-login-link"
-          onPress={() => router.replace('/login')}
+          onPress={() => {
+            Keyboard.dismiss();
+            router.replace('/login');
+          }}
           style={styles.loginButton}
         >
           {({ pressed }) => (
@@ -157,8 +164,8 @@ export default function SignUpScreen() {
         secureTextEntry
         autoCapitalize='none'
         autoCorrect={false}
-        autoComplete='new-password'
-        textContentType='newPassword'
+        autoComplete={signUpPasswordAutoComplete}
+        textContentType={signUpPasswordTextContentType}
         placeholder='Password...'
         returnKeyType='next'
       />
@@ -169,8 +176,8 @@ export default function SignUpScreen() {
         secureTextEntry
         autoCapitalize='none'
         autoCorrect={false}
-        autoComplete='new-password'
-        textContentType='newPassword'
+        autoComplete={signUpPasswordAutoComplete}
+        textContentType={signUpPasswordTextContentType}
         placeholder='Confirm password...'
         returnKeyType='done'
         onSubmitEditing={handleSignUp}
