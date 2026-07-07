@@ -1,4 +1,4 @@
-import { Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 
 import { recountTheme } from '@/constants/RecountTheme';
@@ -23,6 +23,18 @@ const formatLogDate = (date: Date) => {
   };
 };
 
+type FormattedLogSummary = LogSummary & ReturnType<typeof formatLogDate>;
+
+const splitIntoColumns = (logs: FormattedLogSummary[]) => {
+  return logs.reduce<[FormattedLogSummary[], FormattedLogSummary[]]>(
+    (columns, log, index) => {
+      columns[index % 2].push(log);
+      return columns;
+    },
+    [[], []],
+  );
+};
+
 const getCardRotation = (title: string) => {
   const rotations = ['-2deg', '-1deg', '-0.5deg', '0.5deg', '1deg', '2deg'];
   const charTotal = title.split('').reduce((total, char) => total + char.charCodeAt(0), 0);
@@ -32,9 +44,7 @@ const getCardRotation = (title: string) => {
 
 export default function TabOneScreen() {
   const { logSummaries } = useLogs();
-  const { width } = useWindowDimensions();
   const hasLogs = logSummaries.length > 0;
-  const logCardWidth = (width - contentPadding * 2 - gridGap) / 2;
   const monthSections = hasLogs ? Object.values(
     [...logSummaries]
     .sort((a, b) => parseStoredDate(b.date).getTime() - parseStoredDate(a.date).getTime())
@@ -84,26 +94,29 @@ export default function TabOneScreen() {
           <View key={month.id} style={styles.monthSection}>
             <Text style={styles.monthTitle}>{month.title}</Text>
             <View style={styles.logGrid}>
-              {month.logs.map((log) => (
-                <Pressable 
-                  key={log.id}
-                  testID={`home-log-card-${log.id}`}
-                  onPress={() => router.push(`/logs/${log.id}`)}
-                  style={({ pressed }) => [
-                    styles.logCard,
-                    pressed && styles.logCardPressed,
-                    { width: logCardWidth },
-                    { transform: [{ rotate: getCardRotation(log.title) }] }
-                  ]}>
-                  <View style={styles.cardDate}>
-                    <Text style={styles.cardDay}>{log.day}</Text>
-                    <Text style={styles.cardWeekday}>{log.weekday}</Text>
-                  </View>
-                  <View style={styles.cardDetails}>
-                    <Text style={styles.cardTitle}>{log.title}</Text>
-                    <Text style={styles.cardLocation}>{log.generalLocation}</Text>
-                  </View>
-                </Pressable>
+              {splitIntoColumns(month.logs).map((columnLogs, columnIndex) => (
+                <View key={`${month.id}-column-${columnIndex}`} style={styles.logColumn}>
+                  {columnLogs.map((log) => (
+                    <Pressable
+                      key={log.id}
+                      testID={`home-log-card-${log.id}`}
+                      onPress={() => router.push(`/logs/${log.id}`)}
+                      style={({ pressed }) => [
+                        styles.logCard,
+                        pressed && styles.logCardPressed,
+                        { transform: [{ rotate: getCardRotation(log.title) }] }
+                      ]}>
+                      <View style={styles.cardDate}>
+                        <Text style={styles.cardDay}>{log.day}</Text>
+                        <Text style={styles.cardWeekday}>{log.weekday}</Text>
+                      </View>
+                      <View style={styles.cardDetails}>
+                        <Text style={styles.cardTitle}>{log.title}</Text>
+                        <Text style={styles.cardLocation}>{log.generalLocation}</Text>
+                      </View>
+                    </Pressable>
+                  ))}
+                </View>
               ))}
             </View>
           </View>
@@ -155,9 +168,13 @@ const styles = StyleSheet.create({
   },
   logGrid: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
     gap: gridGap,
     backgroundColor: 'transparent',
+  },
+  logColumn: {
+    flex: 1,
+    minWidth: 0,
+    gap: gridGap,
   },
   emptyState: {
     width: '100%',
@@ -181,8 +198,10 @@ const styles = StyleSheet.create({
     color: colors.inkMid,
   },
   logCard: {
-    aspectRatio: 0.85,
+    width: '100%',
+    minHeight: 200,
     justifyContent: 'space-between',
+    gap: spacing.s6,
     borderRadius: radius.l,
     borderWidth: 1,
     borderColor: colors.paperEdge,
