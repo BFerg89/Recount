@@ -37,10 +37,10 @@ export function ProfileProvider({ children }: PropsWithChildren) {
     }
 
     setIsLoading(true);
-    setError(null);
 
     try {
       const fetchedProfile = await fetchCurrentProfile();
+      setError(null);
       setProfile(fetchedProfile);
       return fetchedProfile;
     } catch (caughtError) {
@@ -48,7 +48,6 @@ export function ProfileProvider({ children }: PropsWithChildren) {
         ? caughtError.message
         : 'Unable to load profile.';
       setError(message);
-      setProfile(null);
       return null;
     } finally {
       setIsLoading(false);

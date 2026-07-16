@@ -15,6 +15,7 @@ import 'react-native-reanimated';
 import { LogsProvider } from '@/context/LogsContext';
 import { AuthProvider, useAuth } from '@/context/AuthContext';
 import { ProfileProvider, useProfile } from '@/context/ProfileContext';
+import ProfileLoadRecoveryScreen from '@/components/profile/ProfileLoadRecoveryScreen';
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -84,13 +85,27 @@ function AuthenticatedApp() {
 
 function RootStack() {
   const { session, isLoading } = useAuth();
-  const { profile, isLoading: isProfileLoading } = useProfile();
+  const {
+    profile,
+    isLoading: isProfileLoading,
+    error: profileError,
+  } = useProfile();
 
-  if (isLoading || (!!session && isProfileLoading)) {
+  if (isLoading) {
     return null;
   }
 
-  const needsProfile = !!session && !profile;
+  const profileLoadFailed = !!session && !profile && !!profileError;
+
+  if (profileLoadFailed) {
+    return <ProfileLoadRecoveryScreen />;
+  }
+
+  if (!!session && isProfileLoading) {
+    return null;
+  }
+
+  const needsProfile = !!session && !profile && !profileError;
   const hasProfile = !!session && !!profile;
 
   return (
